@@ -37,10 +37,11 @@
     "globals": "^16.5.0",
     "postcss": "^8.5.8",
     "tailwindcss": "^4.2.2",
-    "vite": "^7.2.4"
-    },
+    "vite": "^7.2.4",
+    "vite-plugin-static-copy": "^4.0.1"
+  },
   "optionalDependencies": {
-    "lightningcss-win32-x64-msvc": "1.32.0",
-    "lightningcss-win32-arm64-msvc": "1.32.0"
-    }
+    "lightningcss-win32-arm64-msvc": "1.32.0",
+    "lightningcss-win32-x64-msvc": "1.32.0"
+  }
 }

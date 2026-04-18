@@ -352,7 +352,7 @@
 //   );
 // }
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   useNavigate,
   useSearchParams,
@@ -432,30 +432,34 @@ export default function EmailConfirmation() {
   const [touched, setTouched] = useState(false);
   const [toast, setToast] = useState({ message: "", type: "" });
 
-  const showToast = (message, type) => {
-    setToast({ message, type });
-  };
+  const isSubmittingRef = useRef(isSubmitting);
+  isSubmittingRef.current = isSubmitting;
+  const handleSubmitRef = useRef(handleSubmit);
 
-  const hideToast = () => {
+  const showToast = useCallback((message, type) => {
+    setToast({ message, type });
+  }, []);
+
+  const hideToast = useCallback(() => {
     setToast({ message: "", type: "" });
-  };
+  }, []);
 
   // Auto-submit when code is complete
   useEffect(() => {
-    if (verificationCode.length === 6 && !isSubmitting) {
+    if (verificationCode.length === 6 && !isSubmittingRef.current) {
       setTouched(true);
       const validationError = validateCode(verificationCode);
       if (!validationError) {
-        handleSubmit(new Event("submit"));
+        handleSubmitRef.current(new Event("submit"));
       }
     }
-  }, [verificationCode]);
+  }, [verificationCode, validateCode]);
 
-  const validateCode = (code) => {
+  const validateCode = useCallback((code) => {
     if (!code) return "رمز التحقق مطلوب";
     if (!/^\d{6}$/.test(code)) return "يرجى إدخال رمز التحقق المكون من 6 أرقام";
     return "";
-  };
+  }, []);
 
   //   const handleBack = () => {
   //     if (type === "signup") {
@@ -465,7 +469,7 @@ export default function EmailConfirmation() {
   //     }
   //   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = useCallback(async (e) => {
     if (e) e.preventDefault();
 
     const validationError = validateCode(verificationCode);
@@ -518,7 +522,11 @@ export default function EmailConfirmation() {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [verificationCode, emailFromState, type, navigate, validateCode, showToast]);
+
+  useEffect(() => {
+    handleSubmitRef.current = handleSubmit;
+  }, [handleSubmit]);
 
   const handleResendCode = async () => {
     if (isSubmitting) return;
