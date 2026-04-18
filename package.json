@@ -1,8 +1,9 @@
 {
-  "name": "pakage.json",
+  "name": "shareek",
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "$schema": "https://json.schemastore.org/package.json",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -37,5 +38,9 @@
     "postcss": "^8.5.8",
     "tailwindcss": "^4.2.2",
     "vite": "^7.2.4"
-  }
+    },
+  "optionalDependencies": {
+    "lightningcss-win32-x64-msvc": "1.32.0",
+    "lightningcss-win32-arm64-msvc": "1.32.0"
+    }
 }
