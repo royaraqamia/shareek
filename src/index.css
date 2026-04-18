@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@theme {
+    --font-arabic: 'IBM Plex Sans Arabic', sans-serif;
+}
+
+* {
+    font-family: var(--font-arabic);
+}
+
+html {
+    direction: rtl;
+}
+
+body {
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+    font-size: 16px;
+    direction: rtl;
+}
+
+input,
+button,
+select,
+textarea {
+    font-size: 16px !important;
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+}
