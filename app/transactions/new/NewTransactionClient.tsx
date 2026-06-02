@@ -222,7 +222,7 @@ export function NewTransactionClient({ contacts, products }: NewTransactionClien
       contactId: contactId!,
       type: type,
       referenceNumber: referenceNumber,
-      taxRate: 0.15, // standard Saudi rate
+      taxRate: 0.15 as const, // standard Saudi rate
       paymentStatus: paymentStatus,
       idempotencyKey: idempotencyKey,
       items: items.map(item => ({
