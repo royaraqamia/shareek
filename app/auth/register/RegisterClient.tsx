@@ -14,71 +14,48 @@ import Link from "next/link";
 
 const translations = {
   title: {
-    en: "Create a Shareek Workspace",
-    ar: "إنشاء مساحة عمل شريك جديدة"
-  },
-  desc: {
-    en: "Set up multi-tenant organization tenancy and initiate resource billing registries.",
-    ar: "تعديل إعدادات بنية الحوسبة السحابية متعددة المستأجرين وبدء تكوين دفاتر الفواتير."
+    ar: "إنشاء حساب جديد"
   },
   fullName: {
-    en: "Full Manager Name",
-    ar: "اسم المدير الكامل"
+    ar: "اسمك الكامل"
   },
   organizationName: {
-    en: "Company / Organization Name",
-    ar: "اسم المؤسسة / الشركة"
+    ar: "اسم المشروع / الشَّركة"
   },
   email: {
-    en: "Email Address",
     ar: "البريد الإلكتروني"
   },
   password: {
-    en: "Secure Password",
-    ar: "كلمة المرور الآمنة"
+    ar: "كلمة المرور"
   },
   submit: {
-    en: "Initialize Organization",
-    ar: "بدء تهيئة المنشأة"
+    ar: "إنشاء الحساب"
   },
   submitting: {
-    en: "Bootstrapping Tenant...",
-    ar: "جاري ربط حساب المنشأة..."
+    ar: "جاري إنشاء الحساب..."
   },
   hasAccount: {
-    en: "Already have a company configured?",
-    ar: "هل تم تكوين الشركة بالفعل؟"
+    ar: "هل لديك حساب بالفعل؟"
   },
   loginLink: {
-    en: "Sign in instead",
-    ar: "تسجيل الدخول بدلاً من ذلك"
-  },
-  demoTitle: {
-    en: "Sandbox Direct Evaluation",
-    ar: "خيارات الفحص والتقييم السريع"
-  },
-  demoDesc: {
-    en: "Gain instant sandbox access to review features without Supabase credentials.",
-    ar: "تخطي التسجيل والوصول المباشر للمراجعة دون الحاجة لتهيئة الهوية والعمليات الحقيقية."
-  },
-  demoBtn: {
-    en: "Instant Sandbox Access (Review Mode)",
-    ar: "الدخول الفوري المباشر (وضع المراجعة)"
+    ar: "تسجيل الدُّخول"
   },
   successMsg: {
-    en: "Your multi-tenant workspace was created successfully!",
-    ar: "تم إنشاء منشأتك ومساحة عملك التجريبية بنجاح!"
+    ar: "تمَّ إنشاء حسابك بنجاح!"
   },
   errorMsg: {
-    en: "Failed to configure tenant. Please verify details.",
-    ar: "تعذر إكمال ربط المنشأة. يرجى تأكيد البيانات المكتوبة."
+    ar: "تعذَّر إكمال إنشاء الحساب. يُرجَى تأكيد البيانات المكتوبة."
   }
 };
 
 export function RegisterClient() {
   const language = useAppStore(state => state.language);
   const router = useRouter();
-  const t = (key: keyof typeof translations) => translations[key][language];
+  const t = (key: keyof typeof translations) => {
+    const item = translations[key];
+    if (!item) return "";
+    return item[language] || item['ar'] || "";
+  };
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -109,26 +86,20 @@ export function RegisterClient() {
     }
   };
 
-  const handleDemoBypass = () => {
-    toast.success(language === 'ar' ? "تم منح الوصول الفوري للمراجعة الإرشادية!" : "Instant reviewer sandbox access granted!");
-    router.push("/dashboard");
-  };
-
   return (
     <div className="w-full max-w-md space-y-6" id="register-container">
       <div className="text-center flex flex-col items-center">
-        <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shrink-0 mb-4 shadow-md">
-          <span className="text-white font-black text-2xl leading-none pt-1">S</span>
+        <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shrink-0 mb-4 shadow-md border border-blue-500/10">
+          <span className="text-white font-black text-2xl leading-none pt-1">ش</span>
         </div>
         <h1 className="text-2xl font-bold text-slate-900 tracking-tight">{t("title")}</h1>
-        <p className="mt-1.5 text-sm text-slate-500 max-w-sm">{t("desc")}</p>
       </div>
 
       <Card className="border-slate-200/80 shadow-lg" id="register-card">
         <form onSubmit={handleSubmit}>
           <CardHeader className="pb-4">
-            <CardDescription className="text-slate-500">
-              {language === 'ar' ? "أدخل كافة الحقول التالية لتهيئة بيئة البرمجيات الخاصة بك" : "Fill out all fields below to compile and start your cloud service instance"}
+            <CardDescription className="text-slate-500 text-right">
+              أدخل كافَّة الحقول التَّالية لإنشاء حسابك
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -206,26 +177,6 @@ export function RegisterClient() {
             </p>
           </CardFooter>
         </form>
-      </Card>
-
-      <Card className="border-amber-200 bg-amber-50/50" id="register-demo-panel">
-        <CardContent className="pt-6 space-y-3">
-          <div className="flex gap-2.5 text-amber-800 text-sm">
-            <Sparkles className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-            <div>
-              <p className="font-bold text-amber-950 mb-0.5">{t("demoTitle")}</p>
-              <p className="text-amber-800/90 leading-normal">{t("demoDesc")}</p>
-            </div>
-          </div>
-          <Button 
-            variant="outline" 
-            onClick={handleDemoBypass}
-            className="w-full border-amber-300 hover:bg-amber-100 text-amber-950 font-semibold"
-            id="register-demo-bypass-btn"
-          >
-            {t("demoBtn")}
-          </Button>
-        </CardContent>
       </Card>
     </div>
   );

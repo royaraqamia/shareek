@@ -22,7 +22,7 @@ const MENU_ITEMS = [
   { href: '/dashboard', icon: LayoutDashboard, labelAr: 'لوحة القيادة' },
   { href: '/inventory', icon: Package, labelAr: 'المخزون' },
   { href: '/transactions', icon: Receipt, labelAr: 'المعاملات' },
-  { href: '/contacts', icon: Users, labelAr: 'جهات الاتصال' },
+  { href: '/contacts', icon: Users, labelAr: 'العلاقات' },
   { href: '/settings', icon: SettingsIcon, labelAr: 'الإعدادات' },
 ];
 
@@ -50,14 +50,14 @@ export function Navigation() {
     try {
       const res = await signOutAction();
       if (res.success) {
-        toast.success('تم تسجيل الخروج بنجاح');
+        toast.success('تمَّ تسجيل الخروج بنجاح');
         setProfile(null);
         router.push('/auth/login');
       } else {
         toast.error('حدث خطأ أثناء تسجيل الخروج');
       }
     } catch {
-      toast.error('حدث خطأ غير متوقع');
+      toast.error('حدث خطأ غير مُتوقَّع');
     }
   };
 
@@ -74,7 +74,7 @@ export function Navigation() {
                 <span className="text-white font-black text-xl leading-none">ش</span>
               </div>
               <span className="font-extrabold text-lg text-slate-900 tracking-tight block">
-                شريك <span className="text-blue-600 font-normal">ERP</span>
+                شَريك <span className="text-blue-600 font-normal"></span>
               </span>
             </Link>
 
@@ -141,7 +141,7 @@ export function Navigation() {
             ) : (
               <Link href="/auth/login">
                 <Button className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 h-8 rounded-lg cursor-pointer border-none shadow-sm">
-                  تسجيل الدخول
+                  تسجيل الدُّخول
                 </Button>
               </Link>
             )}

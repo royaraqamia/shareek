@@ -14,63 +14,43 @@ import Link from "next/link";
 
 const translations = {
   title: {
-    en: "Sign in to Shareek ERP",
-    ar: "تسجيل الدخول إلى نظام شريك"
-  },
-  desc: {
-    en: "Manage products, inventory, transactions and contacts seamlessly",
-    ar: "إدارة المنتجات والمخزون والمعاملات وجهات الاتصال بكل سلاسة"
+    ar: "تسجيل الدُّخول إلى شَريك"
   },
   email: {
-    en: "Email Address",
     ar: "البريد الإلكتروني"
   },
   password: {
-    en: "Password",
     ar: "كلمة المرور"
   },
   submit: {
-    en: "Sign In",
-    ar: "تسجيل الدخول"
+    ar: "تسجيل الدُّخول"
   },
   submitting: {
-    en: "Signing in...",
-    ar: "جاري الدخول..."
+    ar: "جاري الدُّخول..."
   },
   noAccount: {
-    en: "Don't have an workspace yet?",
-    ar: "ليس لديك مساحة عمل بعد؟"
+    ar: "ليس لديك حساب بعد؟"
   },
   registerLink: {
-    en: "Create an organization",
-    ar: "إنشاء حساب جديد للمنشأة"
-  },
-  demoTitle: {
-    en: "Evaluation & Testing Option",
-    ar: "خيارات الفحص والتقييم السريع"
-  },
-  demoDesc: {
-    en: "Gain instant sandbox access to review features without Supabase credentials.",
-    ar: "تخطي تسجيل الدخول والوصول المباشر للمراجعة دون الحاجة لتهيئة الهوية."
-  },
-  demoBtn: {
-    en: "Instant Sandbox Access (Review Mode)",
-    ar: "الدخول الفوري المباشر (وضع المراجعة)"
+    ar: "إنشاء حساب جديد"
   },
   authSuccess: {
-    en: "Successfully signed in!",
-    ar: "تم تسجيل الدخول بنجاح!"
+    ar: "تمَّ تسجيل الدُّخول بنجاح!"
   },
   authFailed: {
-    en: "Authentication failed. Please verify credentials.",
-    ar: "فشل التحقق. يرجى التأكد من صحة البيانات."
+    ar: "فشل التَّحقُّق. يُرجَى التَّأكُّد من صحَّة البيانات."
   }
 };
 
 export function LoginClient() {
   const language = useAppStore(state => state.language);
   const router = useRouter();
-  const t = (key: keyof typeof translations) => translations[key][language];
+  
+  const t = (key: keyof typeof translations) => {
+    const item = translations[key];
+    if (!item) return "";
+    return item[language] || item['ar'] || "";
+  };
 
   const [formData, setFormData] = useState({
     email: "",
@@ -99,26 +79,20 @@ export function LoginClient() {
     }
   };
 
-  const handleDemoBypass = () => {
-    toast.success(language === 'ar' ? "تم منح الوصول الفوري للمراجعة الإرشادية!" : "Instant reviewer sandbox access granted!");
-    router.push("/dashboard");
-  };
-
   return (
     <div className="w-full max-w-md space-y-6" id="login-container">
       <div className="text-center flex flex-col items-center">
-        <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shrink-0 mb-4 shadow-md">
-          <span className="text-white font-black text-2xl leading-none pt-1">S</span>
+        <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shrink-0 mb-4 shadow-md border border-blue-500/10">
+          <span className="text-white font-black text-2xl leading-none pt-1">ش</span>
         </div>
         <h1 className="text-2xl font-bold text-slate-900 tracking-tight">{t("title")}</h1>
-        <p className="mt-1.5 text-sm text-slate-500 max-w-sm">{t("desc")}</p>
       </div>
 
       <Card className="border-slate-200/80 shadow-lg" id="login-card">
         <form onSubmit={handleSubmit}>
           <CardHeader className="pb-4">
-            <CardDescription className="text-slate-500">
-              {language === 'ar' ? "أدخل بريدك الإلكتروني وكلمة المرور للمتابعة" : "Enter your workspace details to securely connect"}
+            <CardDescription className="text-slate-500 text-right">
+              أدخل بريدك الإلكتروني وكلمة المرور للمتابعة
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -166,26 +140,6 @@ export function LoginClient() {
             </p>
           </CardFooter>
         </form>
-      </Card>
-
-      <Card className="border-amber-200 bg-amber-50/50" id="login-demo-panel">
-        <CardContent className="pt-6 space-y-3">
-          <div className="flex gap-2.5 text-amber-800 text-sm">
-            <Sparkles className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-            <div>
-              <p className="font-bold text-amber-950 mb-0.5">{t("demoTitle")}</p>
-              <p className="text-amber-800/90 leading-normal">{t("demoDesc")}</p>
-            </div>
-          </div>
-          <Button 
-            variant="outline" 
-            onClick={handleDemoBypass}
-            className="w-full border-amber-300 hover:bg-amber-100 text-amber-950 font-semibold"
-            id="login-demo-bypass-btn"
-          >
-            {t("demoBtn")}
-          </Button>
-        </CardContent>
       </Card>
     </div>
   );

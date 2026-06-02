@@ -10,28 +10,28 @@ export default function HomePage() {
   const language = useAppStore(state => state.language);
 
   const t = {
-    welcome: { ar: 'مرحباً بك في شريك ERP', en: 'Welcome to Shareek ERP' },
-    subtitle: { ar: 'نظام إدارة شامل متكامل لمؤسستك ومخزونك ومعاملاتك.', en: 'Comprehensive management system integrated for your organization, inventory, and transactions.' },
-    getStarted: { ar: 'ابدأ الآن', en: 'Get Started' },
-    stats: { ar: 'نظرة عامة على الوحدات الكبرى', en: 'Core Module Overview' },
+    welcome: { ar: 'مرحبًا بك في شَريك' },
+    subtitle: { ar: 'نظام إدارة شامل متكامل لمشروعك أو شركتك.' },
+    getStarted: { ar: 'ابدأ الآن' },
+    stats: { ar: 'نظرة عامَّة' },
   };
 
   const moduleTranslations = {
     dashboard: {
-      title: { ar: 'لوحة القيادة', en: 'Dashboard' },
-      desc: { ar: 'مراقبة المؤشرات المالية العامة وحالة المبيعات والمشتريات.', en: 'Monitor financial indicators, sales, and purchase metrics.' }
+      title: { ar: 'لوحة القيادة' },
+      desc: { ar: 'مراقبة المؤشِّرات الماليَّة العامَّة وحالة المبيعات والمشتريات.' }
     },
     inventory: {
-      title: { ar: 'المخزون والمنتجات', en: 'Inventory & Products' },
-      desc: { ar: 'إدارة المنتجات والخدمات والمستوى الفعلي اللحظي للمخزون.', en: 'Manage products, services, and live stock count.' }
+      title: { ar: 'المنتجات والخدمات' },
+      desc: { ar: 'إدارة المنتجات والخدمات والمستوى الفعلي اللحظي للمخزون.' }
     },
     transactions: {
-      title: { ar: 'المبيعات والمشتريات', en: 'Transactions' },
-      desc: { ar: 'إنشاء الفواتير، إدارة الخصومات، والالتزام بالقواعد المالية والضريبية.', en: 'Create invoices, handle taxation, client & supplier actions.' }
+      title: { ar: 'المبيعات والمشتريات' },
+      desc: { ar: 'إنشاء الفواتير، إدارة الخصومات، والالتزام بالقواعد الماليَّة والضَّريبيَّة.' }
     },
     contacts: {
-      title: { ar: 'جهات الاتصال', en: 'Contacts' },
-      desc: { ar: 'متابعة تفاصيل العملاء والموردين وربطهم بالمعاملات المالية.', en: 'Track customers and suppliers, linking them to core metrics.' }
+      title: { ar: 'العلاقات' },
+      desc: { ar: 'متابعة تفاصيل الزَّبائن والمورِّدين وربطهم بالمعاملات الماليَّة.' }
     }
   };
 
