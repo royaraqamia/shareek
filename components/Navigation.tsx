@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { LanguageToggler } from './LanguageToggler';
 import { LayoutDashboard, Users, Receipt, Package, Settings as SettingsIcon } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 
@@ -48,7 +47,6 @@ export function Navigation() {
             </nav>
           </div>
           <div className="flex items-center gap-4">
-            <LanguageToggler />
           </div>
         </div>
       </div>

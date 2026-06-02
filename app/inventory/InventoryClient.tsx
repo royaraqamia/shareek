@@ -2,13 +2,38 @@
 
 import { useState } from 'react';
 import { useAppStore, type Language } from '@/store/useAppStore';
-import { PackageOpen, Plus } from 'lucide-react';
+import { PackageOpen, Plus, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { createProduct } from '@/features/inventory/actions';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 export function InventoryClient({ initialProducts }: { initialProducts: any[] }) {
-  const [products] = useState(initialProducts);
+  const [products, setProducts] = useState(initialProducts);
   const language = useAppStore(state => state.language) as Language;
+  const router = useRouter();
+
+  // Create Product Form States
+  const [isOpen, setIsOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [name, setName] = useState('');
+  const [sku, setSku] = useState('');
+  const [salePrice, setSalePrice] = useState('');
+  const [purchasePrice, setPurchasePrice] = useState('');
+  const [currentStock, setCurrentStock] = useState('0');
+  const [isService, setIsService] = useState(false);
   
   const translations = {
     title: { ar: 'المخزون', en: 'Inventory' },
@@ -27,14 +52,167 @@ export function InventoryClient({ initialProducts }: { initialProducts: any[] })
   const t = (key: keyof typeof translations) => translations[key][language];
   const tCol = (key: keyof typeof columnTranslations) => columnTranslations[key][language];
 
+  const handleCreateProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name) {
+      toast.error('يرجى إدخال اسم البند');
+      return;
+    }
+    if (!salePrice || Number(salePrice) < 0) {
+      toast.error('يرجى إدخال سعر بيع صحيح');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await createProduct({
+        name,
+        sku: sku || undefined,
+        salePrice: Number(salePrice),
+        purchasePrice: purchasePrice ? Number(purchasePrice) : undefined,
+        currentStock: isService ? 0 : Number(currentStock),
+        isService,
+      }) as any;
+
+      if (response.success && response.data) {
+        toast.success('تمت إضافة المنتج بنجاح!');
+        setProducts(prev => [response.data, ...prev]);
+        setIsOpen(false);
+        // Clear fields
+        setName('');
+        setSku('');
+        setSalePrice('');
+        setPurchasePrice('');
+        setCurrentStock('0');
+        setIsService(false);
+        router.refresh();
+      } else {
+        toast.error(response.message || 'حدث خطأ أثناء رصد البند الجديد');
+      }
+    } catch (err: any) {
+      toast.error('فشلت العملية، يرجى التحقق من المدخلات.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="flex flex-col h-full space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
-        <Button className="gap-2">
-          <Plus className="w-4 h-4" />
-          {t('add')}
-        </Button>
+        
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <DialogTrigger asChild>
+            <Button className="gap-2 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-medium">
+              <Plus className="w-4 h-4 text-white" />
+              {t('add')}
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle className="text-right">إضافة منتج أو خدمة جديدة</DialogTitle>
+              <DialogDescription className="text-right">
+                أدخل تفاصيل البند الجديد لحفظه في الكتالوج والمستودع.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleCreateProduct} className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="prod-name" className="text-right block">اسم البند <span className="text-red-500">*</span></Label>
+                <Input
+                  id="prod-name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="مثال: ترخيص برمجيات، حاسوب لوحي..."
+                  required
+                  className="text-right"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="prod-sku" className="text-right block">رمز المنتج (SKU)</Label>
+                  <Input
+                    id="prod-sku"
+                    value={sku}
+                    onChange={(e) => setSku(e.target.value)}
+                    placeholder="SKU-2026"
+                    className="text-right"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-right block">نوع البند</Label>
+                  <div className="flex gap-4 h-10 items-center justify-end">
+                    <label className="flex items-center gap-2 cursor-pointer text-sm">
+                      <span>خدمة</span>
+                      <input
+                        type="checkbox"
+                        checked={isService}
+                        onChange={(e) => setIsService(e.target.checked)}
+                        className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                      />
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="prod-sale-price" className="text-right block">سعر البيع (SAR) <span className="text-red-500">*</span></Label>
+                  <Input
+                    id="prod-sale-price"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={salePrice}
+                    onChange={(e) => setSalePrice(e.target.value)}
+                    required
+                    className="text-right"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="prod-purchase-price" className="text-right block">سعر الشراء (اختياري)</Label>
+                  <Input
+                    id="prod-purchase-price"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={purchasePrice}
+                    onChange={(e) => setPurchasePrice(e.target.value)}
+                    className="text-right"
+                  />
+                </div>
+              </div>
+
+              {!isService && (
+                <div className="space-y-2 animate-fadeIn">
+                  <Label htmlFor="prod-stock" className="text-right block">الكمية المتوفرة حالياً بالمنشأة</Label>
+                  <Input
+                    id="prod-stock"
+                    type="number"
+                    min="0"
+                    value={currentStock}
+                    onChange={(e) => setCurrentStock(e.target.value)}
+                    className="text-right"
+                  />
+                </div>
+              )}
+
+              <DialogFooter className="flex sm:justify-start pt-4 gap-2">
+                <Button type="submit" disabled={isSubmitting} className="bg-blue-600 text-white font-semibold hover:bg-blue-700 cursor-pointer px-6">
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin mr-1" />
+                      جاري الحفظ...
+                    </>
+                  ) : 'حفظ وإضافة'}
+                </Button>
+                <Button type="button" variant="outline" onClick={() => setIsOpen(false)} className="cursor-pointer">
+                  إلغاء
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="rounded-md border bg-card flex-1 overflow-hidden">
@@ -52,19 +230,23 @@ export function InventoryClient({ initialProducts }: { initialProducts: any[] })
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{tCol('name')}</TableHead>
-                <TableHead>{tCol('sku')}</TableHead>
-                <TableHead className="text-end">{tCol('stock')}</TableHead>
-                <TableHead className="text-end">{tCol('price')}</TableHead>
+                <TableHead className="text-right">{tCol('name')}</TableHead>
+                <TableHead className="text-right">{tCol('sku')}</TableHead>
+                <TableHead className="text-left">{tCol('stock')}</TableHead>
+                <TableHead className="text-left">{tCol('price')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {products.map((product) => (
                 <TableRow key={product.id}>
-                  <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell>{product.sku || '-'}</TableCell>
-                  <TableCell className="text-end">{product.current_stock}</TableCell>
-                  <TableCell className="text-end">{product.sale_price}</TableCell>
+                  <TableCell className="font-medium text-right">{product.name}</TableCell>
+                  <TableCell className="text-right">{product.sku || '-'}</TableCell>
+                  <TableCell className="text-left">
+                    {product.is_service ? <span className="text-slate-400">خدمة لا تتبع</span> : product.current_stock}
+                  </TableCell>
+                  <TableCell className="text-left font-mono">
+                    {Number(product.sale_price).toFixed(2)} SAR
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

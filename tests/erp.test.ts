@@ -59,7 +59,7 @@ describe('Shareek ERP Core Business Rules and Store Computations', () => {
       });
 
       const errors = useInvoiceStore.getState().getValidationErrors();
-      expect(errors).toContain('Insufficient stock for Item A. Available: 10, Requested: 12.');
+      expect(errors).toContain('المخزون غير كافٍ للبند "Item A". المتاح: 10، المطلوب: 12.');
     });
 
     it('should pass validation for services with quantities exceeding simulated stock boundaries', () => {
@@ -87,19 +87,17 @@ describe('Shareek ERP Core Business Rules and Store Computations', () => {
   });
 
   describe('2. Direct Locale Direction & App Store (User Story 1)', () => {
-    it('should initialize language dynamically and respond to language toggles', () => {
+    it('should initialize language as Arabic and enforce RTL direction', () => {
       const store = useAppStore.getState();
       
       // Default to Arabic
       expect(store.language).toBe('ar');
+      expect(store.dir()).toBe('rtl');
 
-      // Toggle to English
-      store.setLanguage('en');
-      expect(useAppStore.getState().language).toBe('en');
-
-      // Toggle back to Arabic
+      // Attempt to set/force Arabic resetting
       store.setLanguage('ar');
       expect(useAppStore.getState().language).toBe('ar');
+      expect(useAppStore.getState().dir()).toBe('rtl');
     });
   });
 

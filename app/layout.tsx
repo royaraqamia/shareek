@@ -1,13 +1,17 @@
 import type {Metadata} from 'next';
 import './globals.css';
-import { Inter, Tajawal } from "next/font/google";
+import { Inter, IBM_Plex_Sans_Arabic } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { AppInitializer } from '@/components/AppInitializer';
 import { Toaster } from "@/components/ui/sonner";
 import { Navigation } from "@/components/Navigation";
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
-const tajawal = Tajawal({ subsets: ['arabic'], weight: ['300', '400', '500', '700'], variable: '--font-tajawal' });
+const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({ 
+  subsets: ['arabic'], 
+  weight: ['300', '400', '500', '600', '700'], 
+  variable: '--font-ibm-plex-sans-arabic' 
+});
 
 export const metadata: Metadata = {
   title: 'Shareek ERP',
@@ -16,7 +20,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
-    <html lang="ar" dir="rtl" className={`${inter.variable} ${tajawal.variable}`}>
+    <html lang="ar" dir="rtl" className={`${inter.variable} ${ibmPlexSansArabic.variable}`}>
       <body suppressHydrationWarning>
         <AppInitializer>
           <Navigation />

@@ -99,21 +99,21 @@ export const useInvoiceStore = create<InvoiceState>((set, get) => ({
     const errors: string[] = [];
 
     if (items.length === 0) {
-      errors.push('Invoice must contain at least one item.');
+      errors.push('يجب أن تحتوي الفاتورة على بند واحد على الأقل.');
     }
 
     if (!contactId) {
-      errors.push('Please select a contact (client or supplier).');
+      errors.push('يرجى اختيار جهة الاتصال (العميل أو المورد).');
     }
 
     if (!referenceNumber.trim()) {
-      errors.push('Reference number is required.');
+      errors.push('رقم المرجع / الفاتورة مطلوب.');
     }
 
     if (type === 'SALE') {
       items.forEach(item => {
         if (!item.isService && item.quantity > item.currentStock) {
-          errors.push(`Insufficient stock for ${item.name}. Available: ${item.currentStock}, Requested: ${item.quantity}.`);
+          errors.push(`المخزون غير كافٍ للبند "${item.name}". المتاح: ${item.currentStock}، المطلوب: ${item.quantity}.`);
         }
       });
     }

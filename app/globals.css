@@ -3,10 +3,10 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-heading: var(--font-inter);
-  --font-sans: var(--font-inter);
-  --font-arabic: var(--font-tajawal);
-  --font-english: var(--font-inter);
+  --font-heading: var(--font-ibm-plex-sans-arabic);
+  --font-sans: var(--font-ibm-plex-sans-arabic);
+  --font-arabic: var(--font-ibm-plex-sans-arabic);
+  --font-english: var(--font-ibm-plex-sans-arabic);
 
   --color-border: var(--border);
   --color-input: var(--input);
@@ -97,9 +97,9 @@
 }
 
 @utility font-arabic {
-  font-family: var(--font-tajawal), sans-serif;
+  font-family: var(--font-ibm-plex-sans-arabic), sans-serif;
 }
 
 @utility font-english {
-  font-family: var(--font-inter), sans-serif;
+  font-family: var(--font-ibm-plex-sans-arabic), sans-serif;
 }
