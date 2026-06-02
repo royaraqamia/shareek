@@ -27,9 +27,9 @@ export async function createProduct(input: CreateProductInput) {
     .insert([{
       organization_id: user.organizationId,
       name: validation.data.name,
-      sku: validation.data.sku,
+      sku: validation.data.sku || null,
       sale_price: validation.data.salePrice,
-      purchase_price: validation.data.purchasePrice,
+      purchase_price: validation.data.purchasePrice || null,
       current_stock: validation.data.currentStock,
       is_service: validation.data.isService,
     }])

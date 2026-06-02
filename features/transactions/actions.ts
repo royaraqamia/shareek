@@ -30,6 +30,7 @@ export async function createTransaction(input: CreateTransactionInput) {
     p_reference_number: validation.data.referenceNumber,
     p_tax_rate: validation.data.taxRate,
     p_idempotency_key: validation.data.idempotencyKey,
+    p_payment_status: validation.data.paymentStatus,
     p_items: validation.data.items.map(item => ({
       product_id: item.productId,
       quantity: item.quantity,
@@ -72,6 +73,26 @@ export async function getTransactions() {
     .from('transactions')
     .select('*, contacts(name)')
     .order('transaction_date', { ascending: false });
+
+  if (error) {
+    return { success: false, code: "DATABASE_ERROR", message: error.message };
+  }
+
+  return { success: true, data };
+}
+
+export async function getTransactionById(id: string) {
+  const user = await getUser();
+  if (!user.success) return user;
+
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  const { data, error } = await supabase
+    .from('transactions')
+    .select('*, contacts(*), transaction_items(*, product:products_or_services(*))')
+    .eq('id', id)
+    .single();
 
   if (error) {
     return { success: false, code: "DATABASE_ERROR", message: error.message };

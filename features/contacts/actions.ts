@@ -29,7 +29,7 @@ export async function createContact(input: CreateContactInput) {
       type: validation.data.type,
       name: validation.data.name,
       phone: validation.data.phone,
-      email: validation.data.email,
+      email: validation.data.email || null,
     }])
     .select()
     .single();

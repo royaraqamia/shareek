@@ -2,8 +2,8 @@ import { z } from 'zod';
 
 export const CreateContactSchema = z.object({
   type: z.enum(['CLIENT', 'SUPPLIER']),
-  name: z.string().min(2).max(255),
-  phone: z.string().max(50).optional(),
+  name: z.string().min(1, "Name is required"),
+  phone: z.string().optional(),
   email: z.string().email().optional().or(z.literal('')),
 });
 

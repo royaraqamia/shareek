@@ -12,7 +12,7 @@ export type InvoiceItem = {
 
 interface InvoiceState {
   items: InvoiceItem[];
-  taxRate: 0.15;
+  taxRate: number;
   contactId: string | null;
   type: 'SALE' | 'PURCHASE';
   referenceNumber: string;
@@ -27,7 +27,7 @@ interface InvoiceState {
   setReferenceNumber: (referenceNumber: string) => void;
   clear: () => void;
 
-  // Computed state getters (can be accessed securely via store operations)
+  // Computed state getters
   getSubtotal: () => number;
   getTaxAmount: () => number;
   getTotalAmount: () => number;

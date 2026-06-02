@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { LanguageToggler } from './LanguageToggler';
-import { LayoutDashboard, Users, UserSquare2, Receipt, Search, Package } from 'lucide-react';
+import { LayoutDashboard, Users, Receipt, Package, Settings as SettingsIcon } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 
 const MENU_ITEMS = [
@@ -12,6 +12,7 @@ const MENU_ITEMS = [
   { href: '/inventory', icon: Package, labelEn: 'Inventory', labelAr: 'المخزون' },
   { href: '/transactions', icon: Receipt, labelEn: 'Transactions', labelAr: 'المعاملات' },
   { href: '/contacts', icon: Users, labelEn: 'Contacts', labelAr: 'جهات الاتصال' },
+  { href: '/settings', icon: SettingsIcon, labelEn: 'Settings', labelAr: 'الإعدادات' },
 ];
 
 export function Navigation() {
@@ -23,7 +24,7 @@ export function Navigation() {
       <div className="container flex h-14 max-w-screen-2xl items-center px-4 mx-auto md:px-8">
         <div className="flex flex-1 items-center justify-between">
           <div className="flex items-center gap-6 md:gap-10">
-            <Link href="/" className="hidden items-center space-x-2 md:flex">
+            <Link href="/" className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shrink-0">
                 <span className="text-white font-bold text-lg leading-none mt-1">S</span>
               </div>

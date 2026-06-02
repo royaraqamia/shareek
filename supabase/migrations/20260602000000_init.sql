@@ -1,15 +1,14 @@
--- Core Setup: Enforce UUID-OSSP capabilities
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- PostgreSQL Migration: 20260602000000_init.sql
+-- Create custom types and schemas aligned with docs/prd.md
 
--- Define Roles Type Enum
 CREATE TYPE profile_role AS ENUM ('ADMIN', 'EMPLOYEE');
 CREATE TYPE contact_type AS ENUM ('CLIENT', 'SUPPLIER');
 CREATE TYPE transaction_type AS ENUM ('SALE', 'PURCHASE');
 CREATE TYPE payment_status_type AS ENUM ('PAID', 'PARTIAL', 'UNPAID');
 
 -- 1. Organizations Table
-CREATE TABLE organizations (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE TABLE IF NOT EXISTS organizations (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(255) NOT NULL,
     tax_number VARCHAR(100) NULL,
     currency VARCHAR(10) DEFAULT 'SAR',
@@ -18,19 +17,19 @@ CREATE TABLE organizations (
 );
 
 -- 2. Profiles Table (Linked to Supabase Auth)
-CREATE TABLE profiles (
+CREATE TABLE IF NOT EXISTS profiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
-    email VARCHAR(255) NOT NULL UNIQUE,
+    email VARCHAR(255) NOT NULL,
     role profile_role DEFAULT 'EMPLOYEE',
-    full_name VARCHAR(255) NOT NULL,
+    full_name VARCHAR(255) NOT NULL DEFAULT '',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 3. Contacts Table
-CREATE TABLE contacts (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE TABLE IF NOT EXISTS contacts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     type contact_type NOT NULL,
     name VARCHAR(255) NOT NULL,
@@ -40,9 +39,9 @@ CREATE TABLE contacts (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 4. Products Table
-CREATE TABLE products_or_services (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+-- 4. Products/Services Table
+CREATE TABLE IF NOT EXISTS products_or_services (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
     sku VARCHAR(100) NULL,
@@ -57,8 +56,8 @@ CREATE TABLE products_or_services (
 );
 
 -- 5. Transactions Table
-CREATE TABLE transactions (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE TABLE IF NOT EXISTS transactions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     contact_id UUID NOT NULL REFERENCES contacts(id) ON DELETE RESTRICT,
     type transaction_type NOT NULL,
@@ -75,8 +74,8 @@ CREATE TABLE transactions (
 );
 
 -- 6. Transaction Items Table
-CREATE TABLE transaction_items (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE TABLE IF NOT EXISTS transaction_items (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     transaction_id UUID NOT NULL REFERENCES transactions(id) ON DELETE CASCADE,
     product_id UUID NOT NULL REFERENCES products_or_services(id) ON DELETE RESTRICT,
     quantity INTEGER NOT NULL CHECK (quantity > 0),

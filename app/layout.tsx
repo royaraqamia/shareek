@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
-    <html lang="ar" dir="rtl" className={cn(inter.variable, tajawal.variable)}>
+    <html lang="ar" dir="rtl" className={`${inter.variable} ${tajawal.variable}`}>
       <body suppressHydrationWarning>
         <AppInitializer>
           <Navigation />

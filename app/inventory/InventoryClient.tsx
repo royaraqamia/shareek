@@ -1,30 +1,31 @@
 'use client';
 
 import { useState } from 'react';
-import { useAppStore } from '@/store/useAppStore';
+import { useAppStore, type Language } from '@/store/useAppStore';
 import { PackageOpen, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 
 export function InventoryClient({ initialProducts }: { initialProducts: any[] }) {
   const [products] = useState(initialProducts);
-  const language = useAppStore(state => state.language);
+  const language = useAppStore(state => state.language) as Language;
   
   const translations = {
     title: { ar: 'المخزون', en: 'Inventory' },
     add: { ar: 'إضافة منتج', en: 'Add Product' },
     emptyTitle: { ar: 'لا توجد منتجات', en: 'No products found' },
     emptyDesc: { ar: 'قم بإضافة منتج جديد للبدء', en: 'Add a new product to get started' },
-    columns: {
-      name: { ar: 'الاسم', en: 'Name' },
-      sku: { ar: 'رمز المنتج', en: 'SKU' },
-      stock: { ar: 'المخزون', en: 'Stock' },
-      price: { ar: 'سعر البيع', en: 'Sale Price' },
-    }
+  };
+
+  const columnTranslations = {
+    name: { ar: 'الاسم', en: 'Name' },
+    sku: { ar: 'رمز المنتج', en: 'SKU' },
+    stock: { ar: 'المخزون', en: 'Stock' },
+    price: { ar: 'سعر البيع', en: 'Sale Price' },
   };
 
   const t = (key: keyof typeof translations) => translations[key][language];
-  const tCol = (key: keyof typeof translations.columns) => translations.columns[key][language];
+  const tCol = (key: keyof typeof columnTranslations) => columnTranslations[key][language];
 
   return (
     <div className="flex flex-col h-full space-y-6">

@@ -6,6 +6,7 @@ CREATE OR REPLACE FUNCTION create_transaction_with_items(
   p_reference_number VARCHAR,
   p_tax_rate NUMERIC,
   p_idempotency_key UUID,
+  p_payment_status payment_status_type,
   p_items JSONB -- Array of { "product_id": uuid, "quantity": int, "unit_price": numeric, "version": int }
 ) RETURNS UUID AS $$
 DECLARE
@@ -38,10 +39,10 @@ BEGIN
 
   -- 3. Create Transaction
   INSERT INTO transactions (
-    organization_id, contact_id, type, reference_number, subtotal, tax_rate, total_amount, idempotency_key
+    organization_id, contact_id, type, reference_number, subtotal, tax_rate, total_amount, payment_status, idempotency_key
   )
   VALUES (
-    p_organization_id, p_contact_id, p_type, p_reference_number, v_subtotal, p_tax_rate, v_total_amount, p_idempotency_key
+    p_organization_id, p_contact_id, p_type, p_reference_number, v_subtotal, p_tax_rate, v_total_amount, p_payment_status, p_idempotency_key
   )
   RETURNING id INTO v_transaction_id;
 
