@@ -1,0 +1,6 @@
+{
+  "name": "Developer Documentation Template",
+  "description": "A high-fidelity developer template with Next.js, Tailwind v4, and Gemini AI integration, featuring a comprehensive README and SECURITY guide.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
