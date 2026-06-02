@@ -1,19 +1,29 @@
 import type {Metadata} from 'next';
 import './globals.css';
-import { Geist } from "next/font/google";
+import { Inter, Tajawal } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { AppInitializer } from '@/components/AppInitializer';
+import { Toaster } from "@/components/ui/sonner";
+import { Navigation } from "@/components/Navigation";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const tajawal = Tajawal({ subsets: ['arabic'], weight: ['300', '400', '500', '700'], variable: '--font-tajawal' });
 
 export const metadata: Metadata = {
-  title: 'My Google AI Studio App',
-  description: 'My Google AI Studio App',
+  title: 'Shareek ERP',
+  description: 'Business Management ERP',
 };
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
-    <html lang="en" className={cn("font-sans", geist.variable)}>
-      <body suppressHydrationWarning>{children}</body>
+    <html lang="ar" dir="rtl" className={cn(inter.variable, tajawal.variable)}>
+      <body suppressHydrationWarning>
+        <AppInitializer>
+          <Navigation />
+          {children}
+        </AppInitializer>
+        <Toaster position="top-right" />
+      </body>
     </html>
   );
 }
