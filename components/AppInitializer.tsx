@@ -19,7 +19,9 @@ export function AppInitializer({ children }: { children: React.ReactNode }) {
 
   return (
     <div className={`font-sans antialiased bg-slate-50 relative ${language === 'ar' ? 'font-arabic' : 'font-english'}`}>
-      {children}
+      <main className="min-h-screen pb-20 md:pb-0">
+        {children}
+      </main>
     </div>
   );
 }
