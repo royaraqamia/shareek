@@ -120,9 +120,10 @@ export async function signUpAction(input: SignUpInput) {
   try {
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
+    const adminSupabase = createAdminClient(cookieStore);
 
     // 1. Check if username is already taken
-    const { data: existingUser } = await supabase
+    const { data: existingUser } = await adminSupabase
       .from('profiles')
       .select('username')
       .eq('username', validation.data.username)
@@ -208,7 +209,8 @@ export async function signInAction(input: SignInInput) {
 
     // If identifier doesn't look like an email (no '@'), treat as username
     if (!email.includes('@')) {
-      const { data: profile, error: profileError } = await supabase
+      const adminSupabase = createAdminClient(cookieStore);
+      const { data: profile, error: profileError } = await adminSupabase
         .from('profiles')
         .select('email')
         .eq('username', email.toLowerCase())
@@ -252,8 +254,8 @@ export async function checkUsernameAction(username: string) {
 
   try {
     const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
-    const { data, error } = await supabase
+    const adminSupabase = createAdminClient(cookieStore);
+    const { data, error } = await adminSupabase
       .from('profiles')
       .select('username')
       .eq('username', cleanUsername)
