@@ -7,9 +7,18 @@ import { SignUpSchema, SignInSchema, SignUpInput, SignInInput } from './schemas'
 
 // Creates an administrative client using the service role key to bypass RLS policies for platform-level profile management
 function createAdminClient(cookieStore: any) {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!url || !serviceRoleKey) {
+    throw new Error(
+      "لم يتم العثور على مفتاح الخدمة الإشرافية الإدارية لـ Supabase (SUPABASE_SERVICE_ROLE_KEY) أو رابط الخدمة. يرجى التأكد من تكوينهم في إعدادات البيئة لـ AI Studio.\n\nSupabase URL or SUPABASE_SERVICE_ROLE_KEY not found in environment variables. Please configure them in AI Studio's project settings."
+    );
+  }
+
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    url,
+    serviceRoleKey,
     {
       cookies: {
         getAll() {
