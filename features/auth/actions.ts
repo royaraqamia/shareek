@@ -2,7 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server';
 import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { SignUpSchema, SignInSchema, SignUpInput, SignInInput } from './schemas';
 
 // Creates an administrative client using the service role key to bypass RLS policies for platform-level profile management
@@ -134,9 +134,18 @@ export async function signUpAction(input: SignUpInput) {
     }
 
     // 2. Log in / Sign up via supabase.auth
+    const headerList = await headers();
+    const host = headerList.get('host');
+    const proto = headerList.get('x-forwarded-proto') || 'https';
+    const origin = host ? `${proto}://${host}` : 'https://shareek.royaraqamia.com';
+    const redirectTo = `${origin}/dashboard`;
+
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: validation.data.email,
       password: validation.data.password,
+      options: {
+        emailRedirectTo: redirectTo,
+      },
     });
 
     if (authError) {
@@ -149,7 +158,7 @@ export async function signUpAction(input: SignUpInput) {
     }
 
     // 3. Create organization in database
-    const { data: orgData, error: orgError } = await supabase
+    const { data: orgData, error: orgError } = await adminSupabase
       .from('organizations')
       .insert([{
         name: validation.data.organizationName,
@@ -163,7 +172,7 @@ export async function signUpAction(input: SignUpInput) {
     }
 
     // 4. Create profile linked to organization
-    const { error: profileError } = await supabase
+    const { error: profileError } = await adminSupabase
       .from('profiles')
       .insert([{
         id: userId,
