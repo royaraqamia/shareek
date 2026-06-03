@@ -99,42 +99,51 @@ export function SettingsClient({ initialOrganization }: SettingsClientProps) {
   };
 
   return (
-    <div className="space-y-6" id="settings-container">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900" id="settings-title">
-          {t("title")}
-        </h1>
-        <p className="text-sm text-slate-500" id="settings-subtitle">
-          {t("subtitle")}
-        </p>
+    <div className="space-y-8 container max-w-[90rem] mx-auto px-4 md:px-8 py-8" id="settings-container">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-black tracking-tight text-slate-900 flex items-center gap-3" id="settings-title">
+            <div className="p-2.5 bg-primary/10 text-primary rounded-xl shadow-sm border border-primary/10">
+              <Settings className="w-7 h-7" />
+            </div>
+            {t("title")}
+          </h1>
+          <p className="text-slate-500 text-sm md:text-base font-medium" id="settings-subtitle">
+            {t("subtitle")}
+          </p>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6" id="settings-form">
-        <Card id="settings-panel-card">
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-blue-600" />
+      <form onSubmit={handleSubmit} className="space-y-8" id="settings-form">
+        <Card id="settings-panel-card" className="border-slate-200/50 bg-white/70 backdrop-blur-sm shadow-lg shadow-slate-200/40 rounded-2xl overflow-hidden">
+          <CardHeader className="bg-slate-50/50 border-b border-slate-100 px-8 py-6">
+            <CardTitle className="text-xl font-bold flex items-center gap-3">
+              <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                <Building2 className="w-5 h-5" />
+              </div>
               {language === 'ar' ? "بيانات المنشأة" : "Organization Details"}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-base font-medium mt-1">
               {language === 'ar' ? "تعديل البيانات الأساسية لمؤسستك التجارية" : "Update base identification parameters of your legal entity"}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="settings-org-name">{t("orgName")}</Label>
+          <CardContent className="p-8 space-y-6">
+            <div className="space-y-2.5">
+              <Label htmlFor="settings-org-name" className="font-bold text-slate-700">{t("orgName")}</Label>
               <Input
                 id="settings-org-name"
+                className="h-12 bg-slate-50 border-slate-200 focus:bg-white transition-colors rounded-xl font-medium"
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                 required
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="settings-tax-number">{t("taxNumber")}</Label>
+            <div className="space-y-2.5">
+              <Label htmlFor="settings-tax-number" className="font-bold text-slate-700">{t("taxNumber")}</Label>
               <Input
                 id="settings-tax-number"
+                className="h-12 bg-slate-50 border-slate-200 focus:bg-white transition-colors rounded-xl font-mono"
                 value={formData.taxNumber || ""}
                 onChange={(e) => setFormData(prev => ({ ...prev, taxNumber: e.target.value }))}
                 placeholder="e.g. 300xxxxxxxxxxxx"
@@ -143,28 +152,30 @@ export function SettingsClient({ initialOrganization }: SettingsClientProps) {
           </CardContent>
         </Card>
 
-        <Card id="settings-regional-card">
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Landmark className="w-5 h-5 text-indigo-600" />
+        <Card id="settings-regional-card" className="border-slate-200/50 bg-white/70 backdrop-blur-sm shadow-lg shadow-slate-200/40 rounded-2xl overflow-hidden">
+          <CardHeader className="bg-slate-50/50 border-b border-slate-100 px-8 py-6">
+            <CardTitle className="text-xl font-bold flex items-center gap-3">
+              <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg">
+                <Landmark className="w-5 h-5" />
+              </div>
               {language === 'ar' ? "العملة والضرائب" : "Currency & Taxes"}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-base font-medium mt-1">
               {language === 'ar' ? "الأنظمة المالية الافتراضية المطبقة في المعاملات" : "Standard compliance and regional structures applied to billing transactions"}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="settings-currency-select">{t("currency")}</Label>
+          <CardContent className="p-8 space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-2.5">
+                <Label htmlFor="settings-currency-select" className="font-bold text-slate-700">{t("currency")}</Label>
                 <Select
                   value={formData.currency}
                   onValueChange={(val) => setFormData(prev => ({ ...prev, currency: val }))}
                 >
-                  <SelectTrigger id="settings-currency-select">
+                  <SelectTrigger id="settings-currency-select" className="h-12 bg-slate-50 border-slate-200 rounded-xl font-medium">
                     <SelectValue placeholder="Select Currency" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="rounded-xl">
                     <SelectItem value="SAR">SAR - الريال السعودي</SelectItem>
                     <SelectItem value="AED">AED - الدرهم الإماراتي</SelectItem>
                     <SelectItem value="BHD">BHD - الدينار البحريني</SelectItem>
@@ -173,28 +184,28 @@ export function SettingsClient({ initialOrganization }: SettingsClientProps) {
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label>{t("vatRate")}</Label>
-                <div className="flex items-center h-10 px-3 w-full rounded-md border border-input bg-slate-50 text-slate-700 font-mono text-sm">
+              <div className="space-y-2.5">
+                <Label className="font-bold text-slate-700">{t("vatRate")}</Label>
+                <div className="flex items-center h-12 px-4 w-full rounded-xl border border-slate-200/80 bg-slate-50 text-slate-600 font-mono text-[15px] font-bold shadow-sm">
                   15.00% (VAT)
                 </div>
               </div>
             </div>
 
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg flex gap-3 text-sm text-blue-800 leading-relaxed">
-              <CheckCircle2 className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
-              <div>
-                <p className="font-semibold text-blue-950 mb-0.5">
+            <div className="p-6 bg-blue-50/80 backdrop-blur-sm border border-blue-100 rounded-xl flex gap-4 text-sm text-blue-800 leading-relaxed shadow-sm shadow-blue-100/50">
+              <CheckCircle2 className="w-6 h-6 text-blue-600 mt-0.5 shrink-0" />
+              <div className="space-y-1">
+                <p className="font-black text-blue-950 text-base">
                   {t("vatRate")}
                 </p>
-                <p>{t("vatRateDesc")}</p>
+                <p className="font-medium text-blue-900/80">{t("vatRateDesc")}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <div className="flex justify-end gap-3" id="settings-actions">
-          <Button type="submit" disabled={loading} id="settings-submit-btn" className="px-6 bg-blue-600 hover:bg-blue-700 text-white font-medium">
+        <div className="flex justify-end gap-3 pt-4" id="settings-actions">
+          <Button type="submit" size="lg" disabled={loading} id="settings-submit-btn" className="px-8 h-12 bg-primary hover:bg-primary/95 shadow-lg shadow-primary/20 text-white font-bold rounded-xl transition-all hover:scale-105 active:scale-95 text-base">
             {loading ? t("saving") : t("save")}
           </Button>
         </div>

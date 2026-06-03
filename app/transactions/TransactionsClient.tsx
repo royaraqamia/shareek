@@ -53,85 +53,91 @@ export function TransactionsClient({ initialTransactions, contacts, products }: 
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-black tracking-tight text-slate-900 flex items-center gap-2">
+    <div className="space-y-8 container max-w-[90rem] mx-auto px-4 md:px-8 py-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-black tracking-tight text-slate-900 flex items-center gap-3">
+            <div className="p-2.5 bg-primary/10 text-primary rounded-xl shadow-sm border border-primary/10">
+              <Receipt className="w-7 h-7" />
+            </div>
             {t.title[language]}
             {isOfflineMode && <WifiOff className="w-5 h-5 text-amber-500 animate-pulse ml-2" />}
           </h1>
-          <p className="text-slate-500 text-sm">
+          <p className="text-slate-500 text-sm md:text-base font-medium">
             {t.subtitle[language]}
-            {isOfflineMode && <span className="text-amber-500 font-bold mr-1">(وضع عدم الاتصال)</span>}
+            {isOfflineMode && <span className="text-amber-500 font-bold mr-2 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100 text-xs">(وضع عدم الاتصال)</span>}
           </p>
         </div>
-        <Button className="gap-2 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-medium" onClick={() => router.push('/transactions/new')}>
-          <Plus className="w-4 h-4 text-white" />
+        <Button size="lg" className="gap-2 cursor-pointer bg-primary shadow-lg shadow-primary/25 hover:scale-105 active:scale-95 text-white font-bold rounded-xl transition-all h-12 px-6 w-full sm:w-auto" onClick={() => router.push('/transactions/new')}>
+          <Plus className="w-5 h-5 text-white" />
           {t.addTransaction[language]}
         </Button>
       </div>
 
-      <div className="rounded-md border bg-card overflow-hidden">
+      <div className="rounded-2xl border border-slate-200/60 bg-white/60 backdrop-blur-xl overflow-hidden shadow-sm">
         {transactions.length === 0 ? (
-          <div className="py-20 flex flex-col items-center justify-center text-center space-y-4">
-            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center text-slate-400">
-              <Receipt className="w-8 h-8" />
+          <div className="py-24 flex flex-col items-center justify-center text-center space-y-6">
+            <div className="w-20 h-20 bg-slate-50 border border-slate-100 shadow-sm rounded-full flex items-center justify-center text-slate-400">
+              <Receipt className="w-10 h-10" />
             </div>
-            <div className="space-y-1">
-              <h3 className="font-bold text-slate-800">{t.emptyTitle[language]}</h3>
-              <p className="text-sm text-slate-400">{t.emptyDesc[language]}</p>
+            <div className="space-y-2">
+              <h3 className="text-xl font-bold text-slate-800 tracking-tight">{t.emptyTitle[language]}</h3>
+              <p className="text-base text-slate-500 font-medium max-w-sm">{t.emptyDesc[language]}</p>
             </div>
           </div>
         ) : (
           <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t.headers.ref[language]}</TableHead>
-                <TableHead>{t.headers.type[language]}</TableHead>
-                <TableHead>{t.headers.contact[language]}</TableHead>
-                <TableHead className="text-end">{t.headers.subtotal[language]}</TableHead>
-                <TableHead className="text-end">{t.headers.total[language]}</TableHead>
-                <TableHead className="text-end">{t.headers.date[language]}</TableHead>
-                <TableHead className="w-[100px] text-end"></TableHead>
+            <TableHeader className="bg-slate-50/80">
+              <TableRow className="border-b border-slate-200">
+                <TableHead className="font-bold text-slate-600 h-12 px-6">{t.headers.ref[language]}</TableHead>
+                <TableHead className="font-bold text-slate-600 px-6">{t.headers.type[language]}</TableHead>
+                <TableHead className="font-bold text-slate-600 px-6">{t.headers.contact[language]}</TableHead>
+                <TableHead className="text-end font-bold text-slate-600 px-6">{t.headers.subtotal[language]}</TableHead>
+                <TableHead className="text-end font-bold text-slate-600 px-6">{t.headers.total[language]}</TableHead>
+                <TableHead className="text-end font-bold text-slate-600 px-6">{t.headers.date[language]}</TableHead>
+                <TableHead className="w-[100px] text-end px-6"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {transactions.map((tx) => (
                 <TableRow 
                   key={tx.id}
-                  className="cursor-pointer hover:bg-slate-50/75 transition-colors group"
+                  className="cursor-pointer border-b border-slate-100 hover:bg-blue-50/40 transition-colors group h-16"
                   onClick={() => router.push(`/transactions/${tx.id}`)}
                 >
-                  <TableCell className="font-bold text-slate-900">
-                    <span className="flex items-center gap-2">
-                      {tx.type === 'SALE' ? (
-                        <TrendingUp className="w-4 h-4 text-emerald-500 shrink-0" />
-                      ) : (
-                        <TrendingDown className="w-4 h-4 text-blue-500 shrink-0" />
-                      )}
-                      <span>{tx.reference_number}</span>
+                  <TableCell className="font-bold text-slate-900 px-6">
+                    <span className="flex items-center gap-3">
+                      <div className={`p-1.5 rounded-md ${tx.type === 'SALE' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'}`}>
+                        {tx.type === 'SALE' ? (
+                          <TrendingUp className="w-4 h-4 shrink-0" />
+                        ) : (
+                          <TrendingDown className="w-4 h-4 shrink-0" />
+                        )}
+                      </div>
+                      <span className="font-mono text-[15px]">{tx.reference_number}</span>
                     </span>
                   </TableCell>
-                  <TableCell>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                      tx.type === 'SALE' ? 'bg-emerald-50 text-emerald-700' : 'bg-blue-50 text-blue-700'
+                  <TableCell className="px-6">
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-[13px] font-bold border ${
+                      tx.type === 'SALE' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60' : 'bg-blue-50 text-blue-700 border-blue-200/60'
                     }`}>
+                      <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ml-1.5 ${tx.type === 'SALE' ? 'bg-emerald-500' : 'bg-blue-500'}`} />
                       {t.types[tx.type as 'SALE' | 'PURCHASE'][language]}
                     </span>
                   </TableCell>
-                  <TableCell className="text-slate-600">{tx.contacts?.name || '-'}</TableCell>
-                  <TableCell className="text-end text-slate-500 font-mono text-sm">
+                  <TableCell className="text-slate-700 font-medium px-6">{tx.contacts?.name || '-'}</TableCell>
+                  <TableCell className="text-end text-slate-500 font-mono text-[15px] font-semibold px-6">
                     {Number(tx.subtotal).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </TableCell>
-                  <TableCell className="text-end font-bold text-slate-900 font-mono text-sm">
+                  <TableCell className="text-end font-black text-slate-900 font-mono text-[15px] px-6">
                     {Number(tx.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </TableCell>
-                  <TableCell className="text-end text-slate-400 text-xs font-mono">
+                  <TableCell className="text-end text-slate-400 text-sm font-mono font-medium px-6">
                     {new Date(tx.transaction_date).toLocaleDateString()}
                   </TableCell>
-                  <TableCell className="text-end">
-                    <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-900">
+                  <TableCell className="text-end px-6">
+                    <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity translate-x-2 group-hover:translate-x-0">
+                      <Button variant="outline" size="icon" className="h-9 w-9 rounded-full bg-white shadow-sm border-slate-200 text-primary hover:bg-primary hover:text-white hover:scale-110 transition-all duration-300">
                         <Eye className="w-4 h-4" />
                       </Button>
                     </div>

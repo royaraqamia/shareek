@@ -80,17 +80,17 @@ export function Navigation() {
   return (
     <>
       {/* Top Header - Unified for Desktop & Mobile */}
-      <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-        <div className="container max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
+      <header className="sticky top-0 z-40 w-full border-b border-white/20 bg-white/70 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 shadow-sm transition-all duration-300">
+        <div className="container max-w-[90rem] mx-auto px-4 md:px-8 h-[4.5rem] flex items-center justify-between">
           
           {/* Logo Brand Block */}
           <div className="flex items-center gap-6 lg:gap-10">
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center shrink-0 shadow-sm cursor-pointer border border-blue-500/10">
-                <span className="text-white font-black text-xl leading-none">ش</span>
+              <div className="w-10 h-10 bg-primary bg-gradient-to-br from-primary to-blue-700 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-primary/30 cursor-pointer border border-white/10 transition-transform hover:scale-105 active:scale-95 text-white">
+                <span className="font-black text-xl leading-none pt-1">ش</span>
               </div>
-              <span className="font-extrabold text-lg text-slate-900 tracking-tight block">
-                شَريك <span className="text-blue-600 font-normal"></span>
+              <span className="font-extrabold text-xl text-slate-900 tracking-tight block">
+                شَريك
               </span>
             </Link>
 
@@ -106,11 +106,11 @@ export function Navigation() {
                     className={cn(
                       "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition-all relative cursor-pointer",
                       isActive 
-                        ? "bg-slate-100 text-blue-600 font-bold" 
-                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                        ? "bg-slate-900/5 text-primary font-bold shadow-inner" 
+                        : "text-slate-500 hover:bg-slate-100/50 hover:text-slate-900"
                     )}
                   >
-                    <Icon className={cn("w-4 h-4", isActive ? "text-blue-600" : "text-slate-400")} />
+                    <Icon className={cn("w-4 h-4", isActive ? "text-primary" : "text-slate-400 opacity-70 group-hover:opacity-100")} />
                     <span>{item.labelAr}</span>
                     {isActive && (
                       <span className="absolute bottom-0 inset-x-3 h-0.5 bg-blue-600 rounded-full" />
@@ -130,17 +130,19 @@ export function Navigation() {
                 {/* Admin Dashboard Entry Shortcut for system owners */}
                 {profile.isPlatformAdmin && (
                   <Link href="/admin" className="ml-1 shrink-0">
-                    <Button variant="outline" size="sm" className="text-blue-600 bg-blue-50/50 hover:bg-blue-50 border-blue-100 hover:text-blue-700 text-xs font-bold px-3 h-8 cursor-pointer rounded-lg">
+                    <Button variant="outline" size="sm" className="text-primary bg-primary/5 hover:bg-primary/10 border-primary/20 hover:text-primary text-xs font-bold px-4 h-9 cursor-pointer rounded-xl transition-all shadow-sm">
                       إدارة النظام
                     </Button>
                   </Link>
                 )}
 
                 {/* Desktop Profile Status */}
-                <div className="hidden sm:flex items-center gap-3 bg-slate-50 border border-slate-100 py-1.5 px-3.5 rounded-full text-xs">
-                  <div className="flex items-center gap-1.5 text-slate-800 font-semibold">
-                    <Building2 className="w-3.5 h-3.5 text-slate-500" />
-                    <span className="font-bold">{profile.fullName}</span>
+                <div className="hidden sm:flex items-center gap-3 bg-white border border-slate-200/60 py-1.5 px-4 rounded-full text-xs shadow-sm hover:shadow-md transition-all duration-300">
+                  <div className="flex items-center gap-2 text-slate-800 font-semibold">
+                    <div className="bg-slate-100 p-1.5 rounded-full shrink-0">
+                      <Building2 className="w-3.5 h-3.5 text-slate-600" />
+                    </div>
+                    <span className="font-bold tracking-tight">{profile.fullName}</span>
                   </div>
 
                   {/* Status Badges */}
@@ -197,7 +199,7 @@ export function Navigation() {
             ) : (
               !(pathname?.startsWith('/auth/login') || pathname?.startsWith('/auth/register')) && (
                 <Link href="/auth/login">
-                  <Button className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 h-8 rounded-lg cursor-pointer border-none shadow-sm">
+                  <Button className="bg-primary hover:bg-primary/90 text-white text-sm font-bold px-5 py-2 h-10 rounded-xl cursor-pointer border-none shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5">
                     تسجيل الدُّخول
                   </Button>
                 </Link>

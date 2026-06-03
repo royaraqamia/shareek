@@ -21,6 +21,7 @@ import {
   ArrowRight,
   ShieldAlert as AlertIcon
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface AdminProfile {
   id: string;
@@ -94,9 +95,25 @@ export function AdminClient() {
 
   if (loading && isAdmin === null) {
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-4">
-        <div className="w-12 h-12 rounded-full border-4 border-blue-600/20 border-t-blue-600 animate-spin" />
-        <p className="text-sm font-semibold text-slate-500 font-arabic">جاري مراجعة صلاحيَّات المسؤول والتَّحقُّق من الأمان...</p>
+      <div className="space-y-8 container max-w-[90rem] mx-auto px-4 md:px-8 py-8 animate-in fade-in duration-500">
+        <div className="flex flex-col md:flex-row md:items-center justify-between pb-8 gap-6">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-32 rounded-full mb-2" />
+            <Skeleton className="h-12 w-80 rounded-xl" />
+            <Skeleton className="h-5 w-96 rounded-lg" />
+          </div>
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-24 w-40 rounded-2xl" />
+            <Skeleton className="h-24 w-40 rounded-2xl" />
+          </div>
+        </div>
+        
+        <div className="rounded-2xl border border-slate-200/60 bg-white/60 p-6 space-y-4">
+          <Skeleton className="h-12 w-full rounded-xl" />
+          {[...Array(5)].map((_, i) => (
+            <Skeleton key={i} className="h-16 w-full rounded-xl" />
+          ))}
+        </div>
       </div>
     );
   }
@@ -142,50 +159,53 @@ export function AdminClient() {
   const pendingCount = profiles.filter(p => !p.is_approved).length;
 
   return (
-    <div className="space-y-8 font-arabic antialiased" id="admin-dashboard">
+    <div className="space-y-8 container max-w-[90rem] mx-auto px-4 md:px-8 py-8 font-arabic antialiased" id="admin-dashboard">
       {/* Platform Title Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-slate-200 gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
+      <div className="flex flex-col md:flex-row md:items-center justify-between pb-8 gap-6">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 mb-2">
             <span className="w-2.5 h-2.5 bg-rose-500 rounded-full animate-ping" />
-            <span className="text-xs bg-rose-500/10 text-rose-700 py-0.5 px-2.5 rounded-full font-bold">بوابة الإدارة العامة</span>
+            <span className="text-xs bg-rose-50 border border-rose-100 text-rose-700 py-0.5 px-3 rounded-full font-bold shadow-sm">بوابة الإدارة العامة</span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+            <div className="p-2.5 bg-primary/10 text-primary rounded-xl shadow-sm border border-primary/10">
+              <ShieldAlert className="w-7 h-7" />
+            </div>
             لوحة إدارة مستخدمي شَريك
           </h1>
-          <p className="text-sm text-slate-500 leading-relaxed max-w-2xl">
+          <p className="text-slate-500 text-sm md:text-base font-medium leading-relaxed max-w-2xl">
             مراجعة الحسابات الجديدة المسجلة، التحقق من اسم المستخدم الفريد، قبول أو تجميد اشتراكات المنشآت.
           </p>
         </div>
 
         {/* Dashboard Cards Stats */}
         <div className="flex items-center gap-4">
-          <Card className="border-slate-200 shrink-0 px-5 py-3 shadow-sm bg-amber-50/30 border-amber-200/50">
-            <div className="text-[10px] text-slate-500 font-bold">الحسابات المعلقة</div>
-            <div className="text-xl font-extrabold text-amber-700">{pendingCount} مستخدم</div>
+          <Card className="border-amber-200/50 shrink-0 px-6 py-4 shadow-lg shadow-amber-500/10 bg-gradient-to-br from-amber-50/80 to-white backdrop-blur-sm rounded-2xl">
+            <div className="text-[11px] text-amber-700 font-bold mb-1">الحسابات المعلقة</div>
+            <div className="text-2xl font-black text-amber-900">{pendingCount} <span className="text-sm font-bold text-amber-700/80">مستخدم</span></div>
           </Card>
-          <Card className="border-slate-200 shrink-0 px-5 py-3 shadow-sm bg-emerald-50/30 border-emerald-200/50">
-            <div className="text-[10px] text-slate-500 font-bold">إجمالي المنشآت</div>
-            <div className="text-xl font-extrabold text-emerald-700">{profiles.length} منشأة</div>
+          <Card className="border-emerald-200/50 shrink-0 px-6 py-4 shadow-lg shadow-emerald-500/10 bg-gradient-to-br from-emerald-50/80 to-white backdrop-blur-sm rounded-2xl">
+            <div className="text-[11px] text-emerald-700 font-bold mb-1">إجمالي المنشآت</div>
+            <div className="text-2xl font-black text-emerald-900">{profiles.length} <span className="text-sm font-bold text-emerald-700/80">منشأة</span></div>
           </Card>
         </div>
       </div>
 
       {/* Filter and Table Container */}
-      <Card className="border-slate-200/80 shadow-md">
-        <CardHeader className="pb-4">
+      <Card className="border-slate-200/60 bg-white/60 backdrop-blur-xl shadow-lg shadow-slate-200/40 rounded-2xl overflow-hidden">
+        <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-5 px-6 pt-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <CardTitle className="text-lg font-bold text-slate-900">البحث وقائمة المشتركين</CardTitle>
-              <CardDescription className="text-slate-500">
+              <CardTitle className="text-xl font-bold text-slate-900">البحث وقائمة المشتركين</CardTitle>
+              <CardDescription className="text-base font-medium text-slate-500 mt-1">
                 استعرض تفاصيل وحالة المشتركين في جميع المؤسسات.
               </CardDescription>
             </div>
             <div className="relative w-full md:w-80">
-              <Search className="absolute right-3 top-2.5 h-4 w-4 text-slate-400" />
+              <Search className="absolute right-3.5 top-3 h-5 w-5 text-slate-400" />
               <Input
                 placeholder="ابحث بالاسم، البريد أو المنشأة..."
-                className="pr-9 h-9 border-slate-200 text-sm"
+                className="pr-11 h-11 border-slate-200 focus:bg-white text-[15px] font-medium rounded-xl transition-colors shadow-sm"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -194,30 +214,33 @@ export function AdminClient() {
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
-            <table className="w-full text-right text-sm">
-              <thead className="bg-slate-50/80 border-y border-slate-100 text-xs text-slate-500 uppercase tracking-wider font-bold">
+            <table className="w-full text-right text-[15px]">
+              <thead className="bg-slate-50/80 border-y border-slate-200 text-xs text-slate-600 uppercase tracking-wider font-bold">
                 <tr>
-                  <th className="px-6 py-3.5">اسم العضوية</th>
-                  <th className="px-6 py-3.5">اسم المنشأة / المشروع</th>
-                  <th className="px-6 py-3.5">الدور الرقمي</th>
-                  <th className="px-6 py-3.5">تاريخ الانضمام</th>
-                  <th className="px-6 py-3.5">الحالة الحالية</th>
-                  <th className="px-6 py-3.5 text-center">إجراءات الإدارة</th>
+                  <th className="px-8 py-4">اسم العضوية</th>
+                  <th className="px-6 py-4">اسم المنشأة / المشروع</th>
+                  <th className="px-6 py-4">الدور الرقمي</th>
+                  <th className="px-6 py-4">تاريخ الانضمام</th>
+                  <th className="px-6 py-4">الحالة الحالية</th>
+                  <th className="px-8 py-4 text-center">إجراءات الإدارة</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filteredProfiles.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
-                      لا توجد حسابات مطابقة لمعايير البحث في الوقت الحالي.
+                    <td colSpan={6} className="px-6 py-16 text-center">
+                      <div className="flex flex-col items-center justify-center space-y-3">
+                        <Search className="w-10 h-10 text-slate-300" />
+                        <span className="text-slate-500 font-bold">لا توجد حسابات مطابقة لمعايير البحث في الوقت الحالي.</span>
+                      </div>
                     </td>
                   </tr>
                 ) : (
                   filteredProfiles.map((p) => {
                     const isBusy = actionUserId === p.id;
                     return (
-                      <tr key={p.id} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="px-6 py-4">
+                      <tr key={p.id} className="hover:bg-blue-50/40 transition-colors group">
+                        <td className="px-8 py-5">
                           <div className="flex flex-col">
                             <span className="font-bold text-slate-900">{p.full_name}</span>
                             <div className="flex items-center gap-1.5 text-slate-400 text-xs font-mono mt-0.5">

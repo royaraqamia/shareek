@@ -126,23 +126,26 @@ export function ContactsClient({ initialContacts }: { initialContacts: any[] }) 
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-black tracking-tight text-slate-900 flex items-center gap-2">
+    <div className="space-y-8 container max-w-[90rem] mx-auto px-4 md:px-8 py-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-black tracking-tight text-slate-900 flex items-center gap-3">
+            <div className="p-2.5 bg-primary/10 text-primary rounded-xl shadow-sm border border-primary/10">
+              <Users className="w-7 h-7" />
+            </div>
             {t.title[language]}
             {isOfflineMode && <WifiOff className="w-5 h-5 text-amber-500 animate-pulse ml-2" />}
           </h1>
-          <p className="text-slate-500 text-sm">
+          <p className="text-slate-500 text-sm md:text-base font-medium">
             {t.subtitle[language]}
-            {isOfflineMode && <span className="text-amber-500 font-bold mr-1">(وضع عدم الاتصال)</span>}
+            {isOfflineMode && <span className="text-amber-500 font-bold mr-2 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100 text-xs">(وضع عدم الاتصال)</span>}
           </p>
         </div>
         
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-medium">
-              <Plus className="w-4 h-4 text-white" />
+            <Button size="lg" className="gap-2 cursor-pointer bg-primary shadow-lg shadow-primary/25 hover:scale-105 active:scale-95 text-white font-bold rounded-xl transition-all h-12 px-6 w-full sm:w-auto">
+              <Plus className="w-5 h-5 text-white" />
               {t.addContact[language]}
             </Button>
           </DialogTrigger>
@@ -229,40 +232,41 @@ export function ContactsClient({ initialContacts }: { initialContacts: any[] }) 
         </Dialog>
       </div>
 
-      <div className="rounded-md border bg-card overflow-hidden">
+      <div className="rounded-2xl border border-slate-200/60 bg-white/60 backdrop-blur-xl overflow-hidden shadow-sm">
         {contacts.length === 0 ? (
-          <div className="py-20 flex flex-col items-center justify-center text-center space-y-4">
-            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center text-slate-400">
-              <Users className="w-8 h-8" />
+          <div className="py-24 flex flex-col items-center justify-center text-center space-y-6">
+            <div className="w-20 h-20 bg-slate-50 border border-slate-100 shadow-sm rounded-full flex items-center justify-center text-slate-400">
+              <Users className="w-10 h-10" />
             </div>
-            <div className="space-y-1">
-              <h3 className="font-bold text-slate-800">{t.emptyTitle[language]}</h3>
-              <p className="text-sm text-slate-400">{t.emptyDesc[language]}</p>
+            <div className="space-y-2">
+              <h3 className="text-xl font-bold text-slate-800 tracking-tight">{t.emptyTitle[language]}</h3>
+              <p className="text-base text-slate-500 font-medium max-w-sm">{t.emptyDesc[language]}</p>
             </div>
           </div>
         ) : (
           <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-right">{t.headers.name[language]}</TableHead>
-                <TableHead className="text-right">{t.headers.type[language]}</TableHead>
-                <TableHead className="text-right">{t.headers.phone[language]}</TableHead>
-                <TableHead className="text-right">{t.headers.email[language]}</TableHead>
+            <TableHeader className="bg-slate-50/80">
+              <TableRow className="border-b border-slate-200">
+                <TableHead className="text-right font-bold text-slate-600 h-12 px-6">{t.headers.name[language]}</TableHead>
+                <TableHead className="text-right font-bold text-slate-600 px-6">{t.headers.type[language]}</TableHead>
+                <TableHead className="text-right font-bold text-slate-600 px-6">{t.headers.phone[language]}</TableHead>
+                <TableHead className="text-right font-bold text-slate-600 px-6">{t.headers.email[language]}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {contacts.map((contact) => (
-                <TableRow key={contact.id}>
-                  <TableCell className="font-semibold text-slate-900 text-right">{contact.name}</TableCell>
-                  <TableCell className="text-right">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                      contact.type === 'CLIENT' ? 'bg-emerald-50 text-emerald-700' : 'bg-blue-50 text-blue-700'
+                <TableRow key={contact.id} className="border-b border-slate-100 hover:bg-blue-50/40 transition-colors group h-16">
+                  <TableCell className="font-bold text-slate-900 text-right px-6 text-[15px]">{contact.name}</TableCell>
+                  <TableCell className="text-right px-6">
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-[13px] font-bold border ${
+                      contact.type === 'CLIENT' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60' : 'bg-blue-50 text-blue-700 border-blue-200/60'
                     }`}>
+                      <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ml-1.5 ${contact.type === 'CLIENT' ? 'bg-emerald-500' : 'bg-blue-500'}`} />
                       {t.types[contact.type as 'CLIENT' | 'SUPPLIER'][language]}
                     </span>
                   </TableCell>
-                  <TableCell className="text-slate-500 text-right font-mono">{contact.phone || '-'}</TableCell>
-                  <TableCell className="text-slate-500 text-right font-mono">{contact.email || '-'}</TableCell>
+                  <TableCell className="text-slate-600 font-medium text-right font-mono px-6 text-[15px]">{contact.phone || '-'}</TableCell>
+                  <TableCell className="text-slate-600 font-medium text-right font-mono px-6 text-[15px]">{contact.email || '-'}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

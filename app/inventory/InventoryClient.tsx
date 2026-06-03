@@ -140,17 +140,22 @@ export function InventoryClient({ initialProducts }: { initialProducts: any[] })
   };
 
   return (
-    <div className="flex flex-col h-full space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-          {t('title')}
-          {isOfflineMode && <WifiOff className="w-5 h-5 text-amber-500 animate-pulse ml-2" />}
-        </h1>
+    <div className="flex flex-col h-full space-y-8 container max-w-[90rem] mx-auto px-4 md:px-8 py-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-black tracking-tight text-slate-900 flex items-center gap-3">
+            <div className="p-2.5 bg-primary/10 text-primary rounded-xl shadow-sm border border-primary/10">
+              <PackageOpen className="w-7 h-7" />
+            </div>
+            {t('title')}
+            {isOfflineMode && <WifiOff className="w-5 h-5 text-amber-500 animate-pulse ml-2" />}
+          </h1>
+        </div>
         
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-medium">
-              <Plus className="w-4 h-4 text-white" />
+            <Button size="lg" className="gap-2 cursor-pointer bg-primary shadow-lg shadow-primary/25 hover:scale-105 active:scale-95 text-white font-bold rounded-xl transition-all h-12 px-6 w-full sm:w-auto">
+              <Plus className="w-5 h-5 text-white" />
               {t('add')}
             </Button>
           </DialogTrigger>
@@ -261,36 +266,36 @@ export function InventoryClient({ initialProducts }: { initialProducts: any[] })
         </Dialog>
       </div>
 
-      <div className="rounded-md border bg-card flex-1 overflow-hidden">
+      <div className="rounded-2xl border border-slate-200/60 bg-white/60 backdrop-blur-xl flex-1 overflow-hidden shadow-sm">
         {products.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center p-8 text-center space-y-4">
-            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center">
-              <PackageOpen className="w-8 h-8 text-muted-foreground" />
+          <div className="h-full flex flex-col items-center justify-center p-8 lg:p-24 text-center space-y-6">
+            <div className="w-20 h-20 bg-slate-50 border border-slate-100 shadow-sm rounded-full flex items-center justify-center text-slate-400">
+              <PackageOpen className="w-10 h-10 text-slate-400" />
             </div>
-            <div className="space-y-1">
-              <h3 className="text-lg font-medium">{t('emptyTitle')}</h3>
-              <p className="text-sm text-muted-foreground">{t('emptyDesc')}</p>
+            <div className="space-y-2">
+              <h3 className="text-xl font-bold tracking-tight text-slate-800">{t('emptyTitle')}</h3>
+              <p className="text-base text-slate-500 font-medium max-w-sm">{t('emptyDesc')}</p>
             </div>
           </div>
         ) : (
           <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-right">{tCol('name')}</TableHead>
-                <TableHead className="text-right">{tCol('sku')}</TableHead>
-                <TableHead className="text-left">{tCol('stock')}</TableHead>
-                <TableHead className="text-left">{tCol('price')}</TableHead>
+            <TableHeader className="bg-slate-50/80">
+              <TableRow className="border-b border-slate-200">
+                <TableHead className="text-right font-bold text-slate-600 h-12 px-6">{tCol('name')}</TableHead>
+                <TableHead className="text-right font-bold text-slate-600 px-6">{tCol('sku')}</TableHead>
+                <TableHead className="text-left font-bold text-slate-600 px-6">{tCol('stock')}</TableHead>
+                <TableHead className="text-left font-bold text-slate-600 px-6">{tCol('price')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {products.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell className="font-medium text-right">{product.name}</TableCell>
-                  <TableCell className="text-right">{product.sku || '-'}</TableCell>
-                  <TableCell className="text-left">
-                    {product.is_service ? <span className="text-slate-400">خدمة لا تتبع</span> : product.current_stock}
+                <TableRow key={product.id} className="border-b border-slate-100 hover:bg-blue-50/40 transition-colors group h-16">
+                  <TableCell className="font-bold text-slate-900 text-right px-6 text-[15px]">{product.name}</TableCell>
+                  <TableCell className="text-right font-mono text-[15px] text-slate-600 font-medium px-6">{product.sku || '-'}</TableCell>
+                  <TableCell className="text-left px-6">
+                    {product.is_service ? <span className="inline-flex items-center px-3 py-1 rounded-full text-[13px] font-bold border border-slate-200/60 bg-slate-50 text-slate-500">خدمة لا تتبع</span> : <span className="font-mono font-bold text-emerald-600 text-[15px]">{product.current_stock}</span>}
                   </TableCell>
-                  <TableCell className="text-left font-mono">
+                  <TableCell className="text-left font-mono font-black text-slate-900 text-[15px] px-6">
                     {Number(product.sale_price).toFixed(2)} SAR
                   </TableCell>
                 </TableRow>

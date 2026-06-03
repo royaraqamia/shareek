@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { KeyRound, Mail, User, Building, UserPlus, Sparkles, AtSign, CheckCircle2 } from "lucide-react";
+import { KeyRound, Mail, User, Building, UserPlus, Sparkles, AtSign, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 
 const translations = {
@@ -43,6 +43,12 @@ const translations = {
   loginLink: {
     ar: "تسجيل الدُّخول"
   },
+  confirmPassword: {
+    ar: "تأكيد كلمة المرور"
+  },
+  passwordMismatch: {
+    ar: "كلمتا المرور غير متطابقتين"
+  },
   successMsg: {
     ar: "تمَّ إنشاء حسابك بنجاح! وهو قيد المراجعة الآن."
   },
@@ -66,8 +72,11 @@ export function RegisterClient() {
     username: "",
     email: "",
     password: "",
+    confirmPassword: "",
   });
 
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [registerSuccessInfo, setRegisterSuccessInfo] = useState({
@@ -142,6 +151,11 @@ export function RegisterClient() {
     
     if (usernameStatus.available === false) {
       toast.error("يُرجَى تصحيح اسم المستخدم أو اختيار اسم مستخدم متاح قبل المتابعة.");
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.error(t("passwordMismatch"));
       return;
     }
 
@@ -245,27 +259,25 @@ export function RegisterClient() {
   }
 
   return (
-    <div className="w-full max-w-md space-y-6" id="register-container">
+    <div className="w-full max-w-md space-y-6 animate-in fade-in zoom-in-95 duration-500" id="register-container">
       <div className="text-center flex flex-col items-center">
-        <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shrink-0 mb-4 shadow-md border border-blue-500/10">
-          <span className="text-white font-black text-2xl leading-none pt-1">ش</span>
+        <div className="w-14 h-14 bg-gradient-to-br from-primary to-blue-700 rounded-2xl flex items-center justify-center shrink-0 mb-6 shadow-xl shadow-primary/20 border border-white/20 text-white">
+          <span className="font-black text-3xl leading-none pt-2">ش</span>
         </div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">{t("title")}</h1>
+        <h1 className="text-3xl font-black text-slate-900 tracking-tight">{t("title")}</h1>
       </div>
 
-      <Card className="border-slate-200/80 shadow-lg" id="register-card">
+      <Card className="border-slate-200/50 bg-white/80 backdrop-blur-xl shadow-2xl shadow-slate-200/50 rounded-3xl overflow-hidden" id="register-card">
         <form onSubmit={handleSubmit}>
-          <CardHeader className="pb-4">
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="register-fullname">{t("fullName")}</Label>
+          <CardContent className="space-y-5 px-8 pt-8">
+            <div className="space-y-1.5">
+              <Label htmlFor="register-fullname" className="font-bold text-slate-700">{t("fullName")}</Label>
               <div className="relative">
-                <User className="absolute left-3 top-2.5 h-5 w-5 text-slate-400" />
+                <User className="absolute left-3.5 top-3 h-5 w-5 text-slate-400" />
                 <Input
                   id="register-fullname"
                   type="text"
-                  className="pl-10"
+                  className="pl-11 h-12 bg-slate-50/50 border-slate-200 focus:bg-white transition-all rounded-xl shadow-sm font-medium"
                   value={formData.fullName}
                   onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
                   required
@@ -273,14 +285,14 @@ export function RegisterClient() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="register-username">{t("username")}</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="register-username" className="font-bold text-slate-700">{t("username")}</Label>
               <div className="relative">
-                <AtSign className="absolute left-3 top-2.5 h-5 w-5 text-slate-400" />
+                <AtSign className="absolute left-3.5 top-3 h-5 w-5 text-slate-400" />
                 <Input
                   id="register-username"
                   type="text"
-                  className="pl-10 text-left font-mono"
+                  className="pl-11 h-12 bg-slate-50/50 border-slate-200 focus:bg-white transition-all rounded-xl shadow-sm text-left font-mono"
                   placeholder="username_example"
                   value={formData.username}
                   onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value.toLowerCase().trim() }))}
@@ -301,14 +313,14 @@ export function RegisterClient() {
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="register-orgname">{t("organizationName")}</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="register-orgname" className="font-bold text-slate-700">{t("organizationName")}</Label>
               <div className="relative">
-                <Building className="absolute left-3 top-2.5 h-5 w-5 text-slate-400" />
+                <Building className="absolute left-3.5 top-3 h-5 w-5 text-slate-400" />
                 <Input
                   id="register-orgname"
                   type="text"
-                  className="pl-10"
+                  className="pl-11 h-12 bg-slate-50/50 border-slate-200 focus:bg-white transition-all rounded-xl shadow-sm font-medium"
                   value={formData.organizationName}
                   onChange={(e) => setFormData(prev => ({ ...prev, organizationName: e.target.value }))}
                   required
@@ -316,14 +328,14 @@ export function RegisterClient() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="register-email">{t("email")}</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="register-email" className="font-bold text-slate-700">{t("email")}</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-2.5 h-5 w-5 text-slate-400" />
+                <Mail className="absolute left-3.5 top-3 h-5 w-5 text-slate-400" />
                 <Input
                   id="register-email"
                   type="email"
-                  className="pl-10"
+                  className="pl-11 h-12 bg-slate-50/50 border-slate-200 focus:bg-white transition-all rounded-xl shadow-sm font-medium"
                   value={formData.email}
                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                   required
@@ -331,24 +343,53 @@ export function RegisterClient() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="register-password">{t("password")}</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="register-password" className="font-bold text-slate-700">{t("password")}</Label>
               <div className="relative">
-                <KeyRound className="absolute left-3 top-2.5 h-5 w-5 text-slate-400" />
+                <KeyRound className="absolute left-3.5 top-3 h-5 w-5 text-slate-400" />
                 <Input
                   id="register-password"
-                  type="password"
-                  className="pl-10"
+                  type={showPassword ? "text" : "password"}
+                  className="pl-11 pr-11 h-12 bg-slate-50/50 border-slate-200 focus:bg-white transition-all rounded-xl shadow-sm"
                   value={formData.password}
                   onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-3 h-5 w-5 text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="register-confirm-password" className="font-bold text-slate-700">{t("confirmPassword")}</Label>
+              <div className="relative">
+                <KeyRound className="absolute left-3.5 top-3 h-5 w-5 text-slate-400" />
+                <Input
+                  id="register-confirm-password"
+                  type={showConfirmPassword ? "text" : "password"}
+                  className="pl-11 pr-11 h-12 bg-slate-50/50 border-slate-200 focus:bg-white transition-all rounded-xl shadow-sm"
+                  value={formData.confirmPassword}
+                  onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3.5 top-3 h-5 w-5 text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
               </div>
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col gap-4">
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium" disabled={loading} id="register-submit-btn">
-              <UserPlus className="w-4 h-4 mr-2 shrink-0" />
+          <CardFooter className="flex flex-col gap-4 px-8 pb-8 pt-4">
+            <Button type="submit" className="w-full bg-primary hover:bg-primary/95 text-white font-bold h-12 rounded-xl shadow-lg shadow-primary/25 transition-all hover:scale-[1.02] active:scale-[0.98]" disabled={loading} id="register-submit-btn">
+              <UserPlus className="w-5 h-5 mr-2 shrink-0" />
               {loading ? t("submitting") : t("submit")}
             </Button>
 
