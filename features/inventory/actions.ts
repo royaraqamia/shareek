@@ -3,10 +3,10 @@
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
 import { CreateProductSchema, CreateProductInput } from './schemas';
-import { getUser } from '../auth/actions';
+import { getApprovedUser } from '../auth/actions';
 
 export async function createProduct(input: CreateProductInput) {
-  const user = await getUser();
+  const user = await getApprovedUser();
   if (!user.success) return user;
 
   const validation = CreateProductSchema.safeParse(input);
@@ -47,7 +47,7 @@ export async function createProduct(input: CreateProductInput) {
 }
 
 export async function getProducts() {
-  const user = await getUser();
+  const user = await getApprovedUser();
   if (!user.success) return user;
 
   const cookieStore = await cookies();

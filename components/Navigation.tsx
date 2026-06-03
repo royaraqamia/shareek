@@ -30,7 +30,7 @@ export function Navigation() {
   const pathname = usePathname();
   const router = useRouter();
   const language = useAppStore(state => state.language);
-  const [profile, setProfile] = useState<{ fullName?: string; email?: string; role?: string } | null>(null);
+  const [profile, setProfile] = useState<{ fullName?: string; email?: string; role?: string; isPlatformAdmin?: boolean } | null>(null);
 
   useEffect(() => {
     async function loadUser() {
@@ -40,6 +40,7 @@ export function Navigation() {
           fullName: res.fullName,
           email: res.email,
           role: res.role,
+          isPlatformAdmin: !!res.isPlatformAdmin,
         });
       }
     }
@@ -105,10 +106,19 @@ export function Navigation() {
             </nav>
           </div>
 
-          {/* Profile & End Actions */}
+           {/* Profile & End Actions */}
           <div className="flex items-center gap-2.5">
             {profile ? (
               <>
+                {/* Admin Dashboard Entry Shortcut for system owners */}
+                {profile.isPlatformAdmin && (
+                  <Link href="/admin" className="ml-1 shrink-0">
+                    <Button variant="outline" size="sm" className="text-blue-600 bg-blue-50/50 hover:bg-blue-50 border-blue-100 hover:text-blue-700 text-xs font-bold px-3 h-8 cursor-pointer rounded-lg">
+                      إدارة النظام
+                    </Button>
+                  </Link>
+                )}
+
                 {/* Desktop Profile Status */}
                 <div className="hidden sm:flex items-center gap-3 bg-slate-50 border border-slate-100 py-1.5 px-3.5 rounded-full text-xs">
                   <div className="flex items-center gap-1.5 text-slate-800 font-semibold">

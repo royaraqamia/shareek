@@ -3,10 +3,10 @@
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
 import { CreateContactSchema, CreateContactInput } from './schemas';
-import { getUser } from '../auth/actions';
+import { getApprovedUser } from '../auth/actions';
 
 export async function createContact(input: CreateContactInput) {
-  const user = await getUser();
+  const user = await getApprovedUser();
   if (!user.success) return user;
 
   const validation = CreateContactSchema.safeParse(input);
@@ -42,7 +42,7 @@ export async function createContact(input: CreateContactInput) {
 }
 
 export async function getContacts() {
-  const user = await getUser();
+  const user = await getApprovedUser();
   if (!user.success) return user;
 
   const cookieStore = await cookies();

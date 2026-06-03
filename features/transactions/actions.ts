@@ -3,10 +3,10 @@
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
 import { CreateTransactionSchema, CreateTransactionInput } from './schemas';
-import { getUser } from '../auth/actions';
+import { getApprovedUser } from '../auth/actions';
 
 export async function createTransaction(input: CreateTransactionInput) {
-  const user = await getUser();
+  const user = await getApprovedUser();
   if (!user.success) return user;
 
   const validation = CreateTransactionSchema.safeParse(input);
@@ -63,7 +63,7 @@ export async function createTransaction(input: CreateTransactionInput) {
 }
 
 export async function getTransactions() {
-  const user = await getUser();
+  const user = await getApprovedUser();
   if (!user.success) return user;
 
   const cookieStore = await cookies();
@@ -82,7 +82,7 @@ export async function getTransactions() {
 }
 
 export async function getTransactionById(id: string) {
-  const user = await getUser();
+  const user = await getApprovedUser();
   if (!user.success) return user;
 
   const cookieStore = await cookies();

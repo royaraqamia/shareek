@@ -1,15 +1,15 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAppStore } from "@/store/useAppStore";
-import { signUpAction } from "@/features/auth/actions";
+import { signUpAction, checkUsernameAction } from "@/features/auth/actions";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { KeyRound, Mail, User, Building, UserPlus, Sparkles } from "lucide-react";
+import { KeyRound, Mail, User, Building, UserPlus, Sparkles, AtSign } from "lucide-react";
 import Link from "next/link";
 
 const translations = {
@@ -18,6 +18,9 @@ const translations = {
   },
   fullName: {
     ar: "اسمك الكامل"
+  },
+  username: {
+    ar: "اسم المستخدم (فريد بالإنجليزية)"
   },
   organizationName: {
     ar: "اسم المشروع / الشَّركة"
@@ -41,7 +44,7 @@ const translations = {
     ar: "تسجيل الدُّخول"
   },
   successMsg: {
-    ar: "تمَّ إنشاء حسابك بنجاح!"
+    ar: "تمَّ إنشاء حسابك بنجاح! وهو قيد المراجعة الآن."
   },
   errorMsg: {
     ar: "تعذَّر إكمال إنشاء الحساب. يُرجَى تأكيد البيانات المكتوبة."
@@ -60,14 +63,81 @@ export function RegisterClient() {
   const [formData, setFormData] = useState({
     fullName: "",
     organizationName: "",
+    username: "",
     email: "",
     password: "",
   });
 
   const [loading, setLoading] = useState(false);
+  
+  const [usernameStatus, setUsernameStatus] = useState<{
+    loading: boolean;
+    available: boolean | null;
+    message: string;
+  }>({
+    loading: false,
+    available: null,
+    message: "",
+  });
+
+  const [debouncedUsername, setDebouncedUsername] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedUsername(formData.username);
+    }, 450);
+    return () => clearTimeout(timer);
+  }, [formData.username]);
+
+  useEffect(() => {
+    if (!debouncedUsername) {
+      setUsernameStatus({ loading: false, available: null, message: "" });
+      return;
+    }
+
+    if (debouncedUsername.length < 3) {
+      setUsernameStatus({ 
+        loading: false, 
+        available: false, 
+        message: "يجب أن يكون اسم المستخدم 3 أحرف على الأقل." 
+      });
+      return;
+    }
+
+    const regex = /^[a-z0-9_]+$/;
+    if (!regex.test(debouncedUsername)) {
+      setUsernameStatus({ 
+        loading: false, 
+        available: false, 
+        message: "أحرف إنجليزية صغيرة، أرقام، أو شرطة سفلية (_) فقط." 
+      });
+      return;
+    }
+
+    async function verify() {
+      setUsernameStatus(prev => ({ ...prev, loading: true }));
+      try {
+        const res = await checkUsernameAction(debouncedUsername);
+        if (res.success) {
+          setUsernameStatus({ loading: false, available: true, message: "اسم المستخدم هذا متاح ومطابق للشروط! ✅" });
+        } else {
+          setUsernameStatus({ loading: false, available: false, message: res.message || "غير متاح." });
+        }
+      } catch {
+        setUsernameStatus({ loading: false, available: false, message: "فشل التحقق." });
+      }
+    }
+    verify();
+  }, [debouncedUsername]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (usernameStatus.available === false) {
+      toast.error("يُرجى تصحيح اسم المستخدم أو اختيار اسم مستخدم متاح قبل المتابعة.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -116,6 +186,34 @@ export function RegisterClient() {
                   required
                 />
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="register-username">{t("username")}</Label>
+              <div className="relative">
+                <AtSign className="absolute left-3 top-2.5 h-5 w-5 text-slate-400" />
+                <Input
+                  id="register-username"
+                  type="text"
+                  className="pl-10 text-left font-mono"
+                  placeholder="username_example"
+                  value={formData.username}
+                  onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value.toLowerCase().trim() }))}
+                  required
+                />
+              </div>
+              <p className="text-[11px] text-slate-400 text-right">أحرف إنجليزية صغيرة، أرقام، أو شرطة سفلية _</p>
+              {usernameStatus.message && (
+                <div className={`mt-1.5 text-xs text-right p-1.5 rounded-lg border font-medium ${
+                  usernameStatus.loading 
+                    ? "bg-slate-50 border-slate-100 text-slate-500 animate-pulse" 
+                    : usernameStatus.available 
+                      ? "bg-emerald-50 border-emerald-100 text-emerald-700" 
+                      : "bg-rose-50 border-rose-100 text-rose-700"
+                }`}>
+                  {usernameStatus.loading ? "جاري التحقق من التوفر..." : usernameStatus.message}
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">

@@ -17,7 +17,7 @@ const translations = {
     ar: "تسجيل الدُّخول إلى شَريك"
   },
   email: {
-    ar: "البريد الإلكتروني"
+    ar: "البريد الإلكتروني أو اسم المستخدم"
   },
   password: {
     ar: "كلمة المرور"
@@ -67,7 +67,11 @@ export function LoginClient() {
       const result = await signInAction(formData);
       if (result.success) {
         toast.success(t("authSuccess"));
-        router.push("/dashboard");
+        if ((result as any).isPlatformAdmin) {
+          router.push("/admin");
+        } else {
+          router.push("/dashboard");
+        }
         router.refresh();
       } else {
         toast.error((result as any).message || t("authFailed"));
@@ -92,7 +96,7 @@ export function LoginClient() {
         <form onSubmit={handleSubmit}>
           <CardHeader className="pb-4">
             <CardDescription className="text-slate-500 text-right">
-              أدخل بريدك الإلكتروني وكلمة المرور للمتابعة
+              أدخل بريدك الإلكتروني أو اسم المستخدم وكلمة المرور للمتابعة
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -102,7 +106,8 @@ export function LoginClient() {
                 <Mail className="absolute left-3 top-2.5 h-5 w-5 text-slate-400" />
                 <Input
                   id="login-email"
-                  type="email"
+                  type="text"
+                  placeholder="البريد الإلكتروني أو @اسم_المستخدم"
                   className="pl-10"
                   value={formData.email}
                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}

@@ -3,10 +3,10 @@
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
 import { UpdateSettingsSchema, UpdateSettingsInput } from './schemas';
-import { getUser } from '../auth/actions';
+import { getApprovedUser } from '../auth/actions';
 
 export async function getOrganization() {
-  const user = await getUser();
+  const user = await getApprovedUser();
   if (!user.success) return user;
 
   const cookieStore = await cookies();
@@ -26,7 +26,7 @@ export async function getOrganization() {
 }
 
 export async function updateOrganization(input: UpdateSettingsInput) {
-  const user = await getUser();
+  const user = await getApprovedUser();
   if (!user.success) return user;
 
   const validation = UpdateSettingsSchema.safeParse(input);
