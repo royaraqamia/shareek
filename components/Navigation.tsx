@@ -85,9 +85,13 @@ export function Navigation() {
           
           {/* Logo Brand Block */}
           <div className="flex items-center gap-6 lg:gap-10">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-primary bg-gradient-to-br from-primary to-blue-700 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-primary/30 cursor-pointer border border-white/10 transition-transform hover:scale-105 active:scale-95 text-white">
-                <span className="font-black text-xl leading-none pt-1">ش</span>
+            <Link href="/" className="flex items-center gap-3 group">
+              <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-primary/20 transition-transform group-hover:scale-105 group-active:scale-95 border border-slate-100 flex items-center justify-center bg-white relative">
+                <img
+                  src="/shareek_logo.png"
+                  alt="Shareek ERP Logo"
+                  className="w-full h-full object-contain p-1"
+                />
               </div>
               <span className="font-extrabold text-xl text-slate-900 tracking-tight block">
                 شَريك

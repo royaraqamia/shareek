@@ -3,7 +3,7 @@ const DATA_CACHE_NAME = 'shareek-data-cache-v1';
 
 const STATIC_ASSETS = [
   '/',
-  '/icon.svg',
+  '/shareek_logo.png',
 ];
 
 self.addEventListener('install', (event) => {

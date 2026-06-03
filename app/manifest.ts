@@ -12,15 +12,15 @@ export default function manifest(): MetadataRoute.Manifest {
     orientation: 'portrait-primary',
     icons: [
       {
-        src: '/icon.svg',
+        src: '/shareek_logo.png',
         sizes: 'any',
-        type: 'image/svg+xml',
+        type: 'image/png',
         purpose: 'maskable',
       },
       {
-        src: '/icon.svg',
+        src: '/shareek_logo.png',
         sizes: '192x192 512x512',
-        type: 'image/svg+xml',
+        type: 'image/png',
         purpose: 'any',
       },
     ],
