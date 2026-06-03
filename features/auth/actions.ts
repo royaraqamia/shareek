@@ -1,12 +1,12 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server';
-import { createServerClient } from '@supabase/ssr';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { cookies, headers } from 'next/headers';
 import { SignUpSchema, SignInSchema, SignUpInput, SignInInput } from './schemas';
 
 // Creates an administrative client using the service role key to bypass RLS policies for platform-level profile management
-function createAdminClient(cookieStore: any) {
+function createAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -16,34 +16,19 @@ function createAdminClient(cookieStore: any) {
     );
   }
 
-  return createServerClient(
-    url,
-    serviceRoleKey,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet: any) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }: any) =>
-              cookieStore.set(name, value, options)
-            )
-          } catch {
-            // Handled in server components safely
-          }
-        },
-      },
+  return createSupabaseClient(url, serviceRoleKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
     }
-  )
+  });
 }
 
 // Checks if a specific user UUID is registered as a platform administrator in the profiles table
 export async function isPlatformAdmin(userId: string): Promise<boolean> {
   if (!userId) return false;
   try {
-    const cookieStore = await cookies();
-    const adminSupabase = createAdminClient(cookieStore);
+    const adminSupabase = createAdminClient();
     const { data: profile } = await adminSupabase
       .from('profiles')
       .select('is_platform_admin')
@@ -65,7 +50,7 @@ export async function getUser() {
       return { success: false as const, code: "UNAUTHORIZED", message: "User not authenticated." };
     }
     
-    const adminSupabase = createAdminClient(cookieStore);
+    const adminSupabase = createAdminClient();
     const { data: profile } = await adminSupabase
       .from('profiles')
       .select('organization_id, role, full_name, email, username, is_approved, is_platform_admin')
@@ -122,7 +107,7 @@ export async function signUpAction(input: SignUpInput) {
   try {
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
-    const adminSupabase = createAdminClient(cookieStore);
+    const adminSupabase = createAdminClient();
 
     // 1. Check if username is already taken
     const { data: existingUser } = await adminSupabase
@@ -247,7 +232,7 @@ export async function signInAction(input: SignInInput) {
 
     // If identifier doesn't look like an email (no '@'), treat as username
     if (!email.includes('@')) {
-      const adminSupabase = createAdminClient(cookieStore);
+      const adminSupabase = createAdminClient();
       const { data: profile, error: profileError } = await adminSupabase
         .from('profiles')
         .select('email')
@@ -295,8 +280,7 @@ export async function checkUsernameAction(username: string) {
   }
 
   try {
-    const cookieStore = await cookies();
-    const adminSupabase = createAdminClient(cookieStore);
+    const adminSupabase = createAdminClient();
     const { data, error } = await adminSupabase
       .from('profiles')
       .select('username')
@@ -339,8 +323,7 @@ export async function getAdminUsers() {
   }
   
   try {
-    const cookieStore = await cookies();
-    const supabase = createAdminClient(cookieStore);
+    const supabase = createAdminClient();
     
     // We get all profiles together with their organizations
     const { data, error } = await supabase
@@ -366,8 +349,7 @@ export async function toggleUserApprovalAction(targetUserId: string, approved: b
   }
   
   try {
-    const cookieStore = await cookies();
-    const supabase = createAdminClient(cookieStore);
+    const supabase = createAdminClient();
     
     const { error } = await supabase
       .from('profiles')
