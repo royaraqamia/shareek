@@ -20,7 +20,7 @@ const translations = {
     ar: "اسمك الكامل"
   },
   username: {
-    ar: "اسم المستخدم (فريد بالإنجليزية)"
+    ar: "اسم المستخدم (بالإنجليزيَّة)"
   },
   organizationName: {
     ar: "اسم المشروع / الشَّركة"
@@ -116,7 +116,7 @@ export function RegisterClient() {
       setUsernameStatus({ 
         loading: false, 
         available: false, 
-        message: "أحرف إنجليزية صغيرة، أرقام، أو شرطة سفلية (_) فقط." 
+        message: "أحرف إنجليزيَّة صغيرة، أرقام، أو شرطة سُفليَّة (_) فقط." 
       });
       return;
     }
@@ -126,12 +126,12 @@ export function RegisterClient() {
       try {
         const res = await checkUsernameAction(debouncedUsername);
         if (res.success) {
-          setUsernameStatus({ loading: false, available: true, message: "اسم المستخدم هذا متاح ومطابق للشروط! ✅" });
+          setUsernameStatus({ loading: false, available: true, message: "متاح! ✅" });
         } else {
-          setUsernameStatus({ loading: false, available: false, message: res.message || "غير متاح." });
+          setUsernameStatus({ loading: false, available: false, message: res.message || "غير متاح!" });
         }
       } catch {
-        setUsernameStatus({ loading: false, available: false, message: "فشل التحقق." });
+        setUsernameStatus({ loading: false, available: false, message: "فشل التَّحقُّق." });
       }
     }
     verify();
@@ -141,7 +141,7 @@ export function RegisterClient() {
     e.preventDefault();
     
     if (usernameStatus.available === false) {
-      toast.error("يُرجى تصحيح اسم المستخدم أو اختيار اسم مستخدم متاح قبل المتابعة.");
+      toast.error("يُرجَى تصحيح اسم المستخدم أو اختيار اسم مستخدم متاح قبل المتابعة.");
       return;
     }
 
@@ -157,7 +157,7 @@ export function RegisterClient() {
           username: formData.username
         });
         setIsSuccess(true);
-        toast.success("تمَّ إنشاء حسابك بنجاح! بانتظار تفعيل البريد الإلكتروني.");
+        toast.success("تمَّ إنشاء حسابك بنجاح! بانتظار التَّحقُّق من البريد الإلكتروني.");
       } else {
         toast.error((result as any).message || t("errorMsg"));
       }
@@ -175,7 +175,7 @@ export function RegisterClient() {
           <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shrink-0 mb-4 shadow-md border border-blue-500/10">
             <span className="text-white font-black text-2xl leading-none pt-1">ش</span>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">شريك لتطوير الأعمال</h1>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">شَريك</h1>
         </div>
 
         <Card className="border-slate-200/80 shadow-2xl overflow-hidden" id="register-success-card">
@@ -184,18 +184,18 @@ export function RegisterClient() {
               <CheckCircle2 className="w-10 h-10" />
             </div>
             <h2 className="text-xl font-bold text-emerald-900">تمَّ إنشاء حسابك بنجاح! 🎉</h2>
-            <p className="text-sm text-emerald-700/90 mt-1">المؤسسة والحساب جاهزة وقيد التنشيط مسبقاً</p>
+            <p className="text-sm text-emerald-700/90 mt-1">الحساب جاهز وقيد التَّنشيط مسبقًا</p>
           </div>
 
           <CardContent className="p-8 space-y-6">
             <div className="space-y-4 text-right">
               <p className="text-sm text-slate-600 leading-relaxed">
-                أهلاً بك يا <strong>{registerSuccessInfo.fullName}</strong> في منصة شريك لإدارة وتطوير الأعمال. 
+                أهلًا بك يا <strong>{registerSuccessInfo.fullName}</strong> في منصَّة شَريك. 
               </p>
 
               <div className="border border-blue-100 bg-blue-50/50 p-5 rounded-xl space-y-3 text-sm">
                 <div className="flex justify-between items-center border-b border-white pb-2 text-xs">
-                  <span className="font-semibold text-blue-900">بيانات حسابك المسجل:</span>
+                  <span className="font-semibold text-blue-900">بيانات حسابك المُسجَّل:</span>
                 </div>
                 <div className="flex justify-between items-center text-slate-700">
                   <span className="text-xs text-slate-500">البريد الإلكتروني:</span>
@@ -206,7 +206,7 @@ export function RegisterClient() {
                   <span className="font-semibold font-mono text-xs">@{registerSuccessInfo.username}</span>
                 </div>
                 <div className="flex justify-between items-center text-slate-700">
-                  <span className="text-xs text-slate-500">اسم المنشأة/الشركة:</span>
+                  <span className="text-xs text-slate-500">اسم المشروع/الشركة:</span>
                   <span className="font-semibold text-xs">{registerSuccessInfo.orgName}</span>
                 </div>
               </div>
@@ -215,15 +215,15 @@ export function RegisterClient() {
                 <div className="font-bold text-slate-800 text-center text-xs">📌 ما هي الخطوة القادمة؟</div>
                 <div className="flex gap-2 items-start text-xs">
                   <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-[10px]">١</span>
-                  <p>تفقد بريدك الإلكتروني الآن، ستجد رسالة من <strong>Shareek ERP</strong> تحتوى على رابط تأكيد البريد.</p>
+                  <p>تفقَّد بريدك الإلكتروني الآن، ستجد رسالة من <strong>شَريك | رؤية رقمية</strong> تحتوى على رابط تأكيد البريد.</p>
                 </div>
                 <div className="flex gap-2 items-start text-xs">
                   <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-[10px]">٢</span>
-                  <p>اضغط على رابط تأكيد البريد الإلكتروني وسيتم تحويلك تلقائياً إلى لوحة القيادة لتفعيل الشركة.</p>
+                  <p>اضغط على رابط تأكيد البريد الإلكتروني وسيتمُّ تحويلك تلقائيًّا إلى لوحة القيادة لتفعيل الحساب.</p>
                 </div>
                 <div className="flex gap-2 items-start text-xs">
                   <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-[10px]">٣</span>
-                  <p>يقوم المشرفون العامون بمطابقة وتفعيل حسابك ماليًا وتجاريًا مسبقاً لبدء العمل.</p>
+                  <p>يقوم المشرفون بمراجعة حسابك.</p>
                 </div>
               </div>
             </div>
@@ -232,11 +232,11 @@ export function RegisterClient() {
           <CardFooter className="bg-slate-50 border-t border-slate-100/60 p-6 flex flex-col gap-4">
             <Link href="/auth/login" className="w-full">
               <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium h-11 shadow-md">
-                الانتقال إلى صفحة تسجيل الدخول
+                الانتقال إلى صفحة تسجيل الدُّخول
               </Button>
             </Link>
             <p className="text-xs text-slate-400 text-center">
-              لم تصلك رسالة التأكيد؟ يرجى فحص ملف الرسائل المهملة (Spam) أو محاولة تسجيل الدخول لإعادة الإرسال.
+              لم تصلك رسالة التَّأكيد؟ يُرجَى فحص صندوق الرَّسائل المُهمَلَة (Spam) أو محاولة تسجيل الدُّخول لإعادة الإرسال.
             </p>
           </CardFooter>
         </Card>
@@ -256,9 +256,6 @@ export function RegisterClient() {
       <Card className="border-slate-200/80 shadow-lg" id="register-card">
         <form onSubmit={handleSubmit}>
           <CardHeader className="pb-4">
-            <CardDescription className="text-slate-500 text-right">
-              أدخل كافَّة الحقول التَّالية لإنشاء حسابك
-            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -290,7 +287,7 @@ export function RegisterClient() {
                   required
                 />
               </div>
-              <p className="text-[11px] text-slate-400 text-right">أحرف إنجليزية صغيرة، أرقام، أو شرطة سفلية _</p>
+              <p className="text-[11px] text-slate-400 text-right">أحرف إنجليزيَّة صغيرة، أرقام، أو شرطة سُفليَّة _</p>
               {usernameStatus.message && (
                 <div className={`mt-1.5 text-xs text-right p-1.5 rounded-lg border font-medium ${
                   usernameStatus.loading 
@@ -299,7 +296,7 @@ export function RegisterClient() {
                       ? "bg-emerald-50 border-emerald-100 text-emerald-700" 
                       : "bg-rose-50 border-rose-100 text-rose-700"
                 }`}>
-                  {usernameStatus.loading ? "جاري التحقق من التوفر..." : usernameStatus.message}
+                  {usernameStatus.loading ? "جاري التَّحقُّق من التَّوفُّر..." : usernameStatus.message}
                 </div>
               )}
             </div>

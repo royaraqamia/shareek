@@ -11,7 +11,8 @@ import {
   Package, 
   Settings as SettingsIcon, 
   Building2, 
-  LogOut 
+  LogOut,
+  ClipboardList
 } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { getUser, signOutAction } from '@/features/auth/actions';
@@ -23,7 +24,7 @@ const MENU_ITEMS = [
   { href: '/inventory', icon: Package, labelAr: 'المخزون' },
   { href: '/transactions', icon: Receipt, labelAr: 'المعاملات' },
   { href: '/contacts', icon: Users, labelAr: 'العلاقات' },
-  { href: '/settings', icon: SettingsIcon, labelAr: 'الإعدادات' },
+  { href: '/tasks', icon: ClipboardList, labelAr: 'المهام' },
 ];
 
 export function Navigation() {
@@ -191,11 +192,13 @@ export function Navigation() {
                 </div>
               </>
             ) : (
-              <Link href="/auth/login">
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 h-8 rounded-lg cursor-pointer border-none shadow-sm">
-                  تسجيل الدُّخول
-                </Button>
-              </Link>
+              !(pathname?.startsWith('/auth/login') || pathname?.startsWith('/auth/register')) && (
+                <Link href="/auth/login">
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 h-8 rounded-lg cursor-pointer border-none shadow-sm">
+                    تسجيل الدُّخول
+                  </Button>
+                </Link>
+              )
             )}
           </div>
         </div>

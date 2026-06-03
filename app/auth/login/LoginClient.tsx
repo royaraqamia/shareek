@@ -95,9 +95,6 @@ export function LoginClient() {
       <Card className="border-slate-200/80 shadow-lg" id="login-card">
         <form onSubmit={handleSubmit}>
           <CardHeader className="pb-4">
-            <CardDescription className="text-slate-500 text-right">
-              أدخل بريدك الإلكتروني أو اسم المستخدم وكلمة المرور للمتابعة
-            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">

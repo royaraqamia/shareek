@@ -115,7 +115,7 @@ export function AppInitializer({ children }: { children: React.ReactNode }) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center space-y-4">
         <div className="w-12 h-12 rounded-full border-4 border-blue-600/20 border-t-blue-600 animate-spin" />
-        <p className="text-sm font-semibold text-slate-500 font-arabic">جاري مراجعة صلاحيات الوصول والتحقق...</p>
+        <p className="text-sm font-semibold text-slate-500 font-arabic">جاري مراجعة صلاحيَّات الوصول...</p>
       </div>
     );
   }
@@ -138,7 +138,7 @@ export function AppInitializer({ children }: { children: React.ReactNode }) {
               
               <div className="flex items-center gap-2 border border-slate-100 bg-slate-50 py-1 px-3.5 rounded-full text-xs text-slate-600 mb-2 font-medium">
                 <User className="w-3.5 h-3.5 text-slate-400" />
-                <span>مرحبًا، {userState.fullName || "شريك جديد"} 👋</span>
+                <span>السَّلام عليكم، {userState.fullName || "شريك جديد"} 👋</span>
               </div>
               
               <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-tight">
@@ -148,16 +148,16 @@ export function AppInitializer({ children }: { children: React.ReactNode }) {
 
             {/* Description Block */}
             <div className="space-y-4 text-right bg-blue-50/40 border border-blue-100 p-5 rounded-xl text-slate-700 text-sm leading-relaxed" id="email-conf-msg">
-              <p className="font-bold text-blue-900 text-center">خطوة أخيرة لتفعيل حسابك على منصة شريك</p>
+              <p className="font-bold text-blue-900 text-center">خطوة أخيرة لتفعيل حسابك</p>
               <p>
                 لقد أرسلنا رسالة تأكيد إلى بريدك الإلكتروني: <strong className="font-mono text-blue-700">{userState.email}</strong>
               </p>
               <p>
-                يُرجى فحص صندوق الوارد (أو مجلد الرسائل غير المرغوب فيها Spam) والضغط على زر 
-                <strong className="text-blue-900"> تأكيد البريد الإلكتروني </strong> لتفعيل الدخول ومتابعة تفعيل المؤسسة.
+                يُرجَى فحص صندوق البريد الوارد (أو مجلَّد الرَّسائل غير المرغوب فيها Spam) والضَّغط على زر 
+                <strong className="text-blue-900"> تأكيد البريد الإلكتروني </strong> لتفعيل الدخول ومتابعة تفعيل الحساب.
               </p>
               <p className="text-[12px] text-slate-500 border-t border-slate-200/60 pt-3">
-                بمجرد تأكيد البريد الإلكتروني بنجاح، سيقوم المشرفون بمراجعة وتفعيل حسابك تلقائياً للبدء بالعمل.
+                بمجرَّد تأكيد البريد الإلكتروني بنجاح، سيقوم المشرفون بمراجعة وتفعيل حسابك إن شاء الله.
               </p>
             </div>
 
@@ -171,7 +171,7 @@ export function AppInitializer({ children }: { children: React.ReactNode }) {
                 }}
               >
                 <RefreshCw className="w-4 h-4 ml-2 animate-spin-slow" />
-                تحديث وحالة التفعيل
+                تحديث حالة التَّحقُّق
               </Button>
               
               <Button 
@@ -202,7 +202,7 @@ export function AppInitializer({ children }: { children: React.ReactNode }) {
               
               <div className="flex items-center gap-2 border border-slate-100 bg-slate-50 py-1 px-3.5 rounded-full text-xs text-slate-600 mb-2 font-medium">
                 <User className="w-3.5 h-3.5 text-slate-400" />
-                <span>مرحبًا، {userState.fullName || "شريك جديد"} 👋</span>
+                <span>السَّلام عليكم، {userState.fullName || "شريك جديد"} 👋</span>
                 {userState.username && (
                   <>
                     <span className="text-slate-300">|</span>
@@ -212,7 +212,7 @@ export function AppInitializer({ children }: { children: React.ReactNode }) {
               </div>
               
               <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-tight">
-                الحساب قيد المراجعة والموافقة ⏳
+                الحساب قيد المراجعة ⏳
               </h1>
             </div>
 
@@ -220,13 +220,13 @@ export function AppInitializer({ children }: { children: React.ReactNode }) {
             <div className="space-y-3.5 text-right bg-emerald-50/40 border border-emerald-100 p-5 rounded-xl text-slate-755 text-sm leading-relaxed" id="approval-msg">
               <p className="font-bold text-emerald-800 text-center">تمَّ تأكيد بريدك الإلكتروني بنجاح! 🎉</p>
               <p>
-                لقد قطعنا الجزء الأكبر! بريدك الإلكتروني مفعل الآن ومحقق بالكامل. 
+                لقد قطعنا الجزء الأكبر! تمَّ التَّحقُّق من بريدك الإلكتروني. 
               </p>
               <p>
-                لأسباب أمنية وتنظيمية، يتطلب تفعيل الحساب والشركات موافقة يدوية مسبقة من الإدارة العامة للمنصة. يقوم المشرفون الآن بمطابقة بيانات مؤسستك لفتح لوحة التحكم الخاصة بك.
+                لأسباب أمنيَّة وتنظيميَّة، يتطلَّب تفعيل الحساب موافقة يدويَّة من الإدارة العامَّة للمنصَّة. يُرجَى الانتظار ريثما يتمُّ الموافقة خلال بضعة ساعات أو أيَّام إن شاء الله.
               </p>
               <p className="text-[12px] text-slate-500 border-t border-emerald-100 pt-3">
-                ملاحظة: يمكنك التواصل مباشرة مع مسؤولي ومطوري النظام لسرعة التفعيل الفوري.
+                ملاحظة: يمكنك التَّواصل مباشرةً مع مسؤولي النِّظام لسرعة التَّفعيل الفوري.
               </p>
             </div>
 
@@ -240,7 +240,7 @@ export function AppInitializer({ children }: { children: React.ReactNode }) {
                 }}
               >
                 <RefreshCw className="w-4 h-4 ml-2 animate-spin-slow" />
-                تحديث وحالة الموافقة
+                تحديث حالة الموافقة
               </Button>
               
               <Button 
