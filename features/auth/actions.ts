@@ -12,7 +12,7 @@ function createAdminClient(cookieStore: any) {
 
   if (!url || !serviceRoleKey) {
     throw new Error(
-      "لم يتم العثور على مفتاح الخدمة الإشرافية الإدارية لـ Supabase (SUPABASE_SERVICE_ROLE_KEY) أو رابط الخدمة. يرجى التأكد من تكوينهم في إعدادات البيئة لـ AI Studio.\n\nSupabase URL or SUPABASE_SERVICE_ROLE_KEY not found in environment variables. Please configure them in AI Studio's project settings."
+      "لم يتم العثور على مفتاح الخدمة الإشرافية الإدارية لـ Supabase (SUPABASE_SERVICE_ROLE_KEY) أو رابط الخدمة. يرجى التأكد من تكوينهم في متغيرات البيئة الخاصة بمشروعك (سواء في إعدادات Vercel أو AI Studio) ثم إعادة بناء ونشر التطبيق.\n\nSupabase URL or SUPABASE_SERVICE_ROLE_KEY not found in environment variables. Please configure them in your Vercel or AI Studio project settings, then redeploy."
     );
   }
 
