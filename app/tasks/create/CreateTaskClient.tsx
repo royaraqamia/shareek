@@ -5,18 +5,20 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createTaskAction } from "@/features/tasks/actions";
 import { TaskStatus } from "@/features/tasks/schemas";
-import { toast } from "sonner";
+import { toast } from '@/utils/toast';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowRight, Save, Loader2 } from "lucide-react";
+import { ArrowRight, Save, Loader2, WifiOff } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useOfflineDataStore } from "@/store/useOfflineDataStore";
 
 export default function CreateTaskClient() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { enqueueMutation, tasks: offlineTasks, setTasks: setOfflineTasks } = useOfflineDataStore();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -32,9 +34,37 @@ export default function CreateTaskClient() {
 
     setIsSubmitting(true);
     try {
+      if (!navigator.onLine) {
+        // Offline Flow
+        enqueueMutation({
+          type: 'CREATE_TASK',
+          data: formData
+        });
+        
+        // Optimistic update
+        setOfflineTasks([{
+          id: crypto.randomUUID(), // Temp ID
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          title: formData.title,
+          description: formData.description,
+          status: formData.status,
+          organization_id: 'offline', // dummy
+          created_by: 'offline' // dummy
+        }, ...offlineTasks]);
+
+        toast.success("تم حفظ المهمة محلياً (وضع عدم الاتصال)");
+        router.push('/tasks');
+        return;
+      }
+
+      // Online Flow
       const res = await createTaskAction(formData);
       if (res.success) {
         toast.success("تمت إضافة المهمة بنجاح");
+        if (res.data) {
+          setOfflineTasks([res.data, ...offlineTasks]);
+        }
         router.push('/tasks');
         router.refresh();
       } else {
@@ -56,8 +86,14 @@ export default function CreateTaskClient() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">إضافة مهمة جديدة</h1>
-          <p className="text-slate-500 text-sm">أدخل تفاصيل المهمة لحفظها ومتابعتها</p>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+            إضافة مهمة جديدة
+            {!navigator.onLine && <WifiOff className="w-5 h-5 text-amber-500 animate-pulse" />}
+          </h1>
+          <p className="text-slate-500 text-sm">
+            أدخل تفاصيل المهمة لحفظها ومتابعتها 
+            {!navigator.onLine && <span className="text-amber-500 mr-1 font-bold">(حفظ محلي)</span>}
+          </p>
         </div>
       </div>
 

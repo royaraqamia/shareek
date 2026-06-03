@@ -5,31 +5,46 @@ import Link from "next/link";
 import { fetchTasksAction } from "@/features/tasks/actions";
 import { Task } from "@/features/tasks/schemas";
 import { useAppStore } from "@/store/useAppStore";
-import { toast } from "sonner";
+import { useOfflineDataStore } from "@/store/useOfflineDataStore";
+import { toast } from '@/utils/toast';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Plus, ClipboardList, Clock, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
+import { Plus, ClipboardList, Clock, ArrowRight, Loader2, CheckCircle2, WifiOff } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export default function TasksClient() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isOfflineMode, setIsOfflineMode] = useState(false);
   const language = useAppStore(state => state.language);
+  const { tasks: offlineTasks, setTasks: setOfflineTasks } = useOfflineDataStore();
 
   // We are polling on mount or when returning to this page.
   useEffect(() => {
     async function loadTasks() {
       setIsLoading(true);
+      if (!navigator.onLine) {
+        setIsOfflineMode(true);
+        setTasks(offlineTasks);
+        setIsLoading(false);
+        return;
+      }
+      
       const res = await fetchTasksAction();
       if (res.success && res.data) {
         setTasks(res.data);
+        setOfflineTasks(res.data); // Update offline cache
+        setIsOfflineMode(false);
       } else {
-        toast.error(res.error || "خطأ في جلب المهام");
+        // Fallback to offline cache
+        setIsOfflineMode(true);
+        setTasks(offlineTasks);
+        toast.error(res.error || "خطأ في جلب المهام - تم عرض البيانات المخزنة محلياً");
       }
       setIsLoading(false);
     }
     loadTasks();
-  }, []);
+  }, [offlineTasks, setOfflineTasks]);
 
   const getStatusBadge = (status: Task['status']) => {
     switch (status) {
@@ -53,8 +68,9 @@ export default function TasksClient() {
               <ClipboardList className="w-6 h-6" />
             </div>
             المهام
+            {isOfflineMode && <WifiOff className="w-5 h-5 text-amber-500 animate-pulse ml-2" />}
           </h1>
-          <p className="text-slate-500 text-sm font-medium">إدارة المهام ومتابعة الإنجاز يومياً</p>
+          <p className="text-slate-500 text-sm font-medium">إدارة المهام ومتابعة الإنجاز يومياً {isOfflineMode && <span className="text-amber-500 font-bold">(وضع عدم الاتصال)</span>}</p>
         </div>
         <Link href="/tasks/create">
           <Button className="hidden md:flex bg-blue-600 hover:bg-blue-700 text-white font-bold h-11 px-6 shadow-sm rounded-xl">

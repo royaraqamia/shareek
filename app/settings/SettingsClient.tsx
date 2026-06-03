@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { updateOrganization } from "@/features/settings/actions";
-import { toast } from "sonner";
+import { toast } from '@/utils/toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";

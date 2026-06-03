@@ -50,6 +50,19 @@ function Button({
   }) {
   const Comp = asChild ? Slot.Root : "button"
 
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    // Only apply haptic for physical interactions locally if available
+    try {
+      if (typeof window !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate(10); // Light haptic feedback
+      }
+    } catch(err) {
+      // Ignore vibration errors
+    }
+    
+    props.onClick?.(e);
+  };
+
   return (
     <Comp
       data-slot="button"
@@ -57,6 +70,7 @@ function Button({
       data-size={size}
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
+      onClick={handleClick}
     />
   )
 }

@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppStore, type Language } from '@/store/useAppStore';
-import { PackageOpen, Plus, Loader2 } from 'lucide-react';
+import { useOfflineDataStore } from '@/store/useOfflineDataStore';
+import { PackageOpen, Plus, Loader2, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import {
@@ -17,13 +18,27 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createProduct } from '@/features/inventory/actions';
-import { toast } from 'sonner';
+import { toast } from '@/utils/toast';
 import { useRouter } from 'next/navigation';
 
 export function InventoryClient({ initialProducts }: { initialProducts: any[] }) {
+  const { inventory: offlineProducts, setInventory: setOfflineProducts, enqueueMutation } = useOfflineDataStore();
   const [products, setProducts] = useState(initialProducts);
+  const [isOfflineMode, setIsOfflineMode] = useState(false);
   const language = useAppStore(state => state.language) as Language;
   const router = useRouter();
+
+  // Sync server data to offline store on mount if online
+  useEffect(() => {
+    if (navigator.onLine) {
+      setIsOfflineMode(false);
+      setOfflineProducts(initialProducts);
+      setProducts(initialProducts);
+    } else {
+      setIsOfflineMode(true);
+      setProducts(offlineProducts);
+    }
+  }, [initialProducts, navigator.onLine, setOfflineProducts]);
 
   // Create Product Form States
   const [isOpen, setIsOpen] = useState(false);
@@ -65,18 +80,46 @@ export function InventoryClient({ initialProducts }: { initialProducts: any[] })
 
     setIsSubmitting(true);
     try {
-      const response = await createProduct({
+      const productData = {
         name,
         sku: sku || undefined,
         salePrice: Number(salePrice),
         purchasePrice: purchasePrice ? Number(purchasePrice) : undefined,
         currentStock: isService ? 0 : Number(currentStock),
         isService,
-      }) as any;
+      };
+
+      if (!navigator.onLine) {
+        // Offline Flow
+        enqueueMutation({
+          type: 'CREATE_INVENTORY',
+          data: productData
+        });
+        
+        const tempProduct = {
+          id: crypto.randomUUID(),
+          ...productData,
+          created_at: new Date().toISOString()
+        };
+        
+        const newProducts = [tempProduct, ...products];
+        setOfflineProducts(newProducts);
+        setProducts(newProducts);
+        
+        toast.success("تم تسجيل المنتج محلياً (وضع عدم الاتصال)");
+        setIsOpen(false);
+        setName(''); setSku(''); setSalePrice(''); setPurchasePrice(''); setCurrentStock('0'); setIsService(false);
+        return;
+      }
+
+      // Online Flow
+      const response = await createProduct(productData) as any;
 
       if (response.success && response.data) {
         toast.success('تمت إضافة المنتج بنجاح!');
-        setProducts(prev => [response.data, ...prev]);
+        const newProducts = [response.data, ...products];
+        setProducts(newProducts);
+        setOfflineProducts(newProducts);
         setIsOpen(false);
         // Clear fields
         setName('');
@@ -99,7 +142,10 @@ export function InventoryClient({ initialProducts }: { initialProducts: any[] })
   return (
     <div className="flex flex-col h-full space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+          {t('title')}
+          {isOfflineMode && <WifiOff className="w-5 h-5 text-amber-500 animate-pulse ml-2" />}
+        </h1>
         
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>

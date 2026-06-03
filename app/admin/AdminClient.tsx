@@ -7,7 +7,7 @@ import { getUser, getAdminUsers, toggleUserApprovalAction } from "@/features/aut
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { toast } from '@/utils/toast';
 import { 
   ShieldAlert, 
   Search, 

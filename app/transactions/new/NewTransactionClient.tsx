@@ -4,14 +4,15 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/store/useAppStore';
 import { useInvoiceStore } from '@/store/useInvoiceStore';
+import { useOfflineDataStore } from '@/store/useOfflineDataStore';
 import { createTransaction } from '@/features/transactions/actions';
-import { toast } from 'sonner';
+import { toast } from '@/utils/toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, ArrowLeft, Receipt, CheckCircle, Info, Sparkles, ShoppingBag, BadgePercent } from 'lucide-react';
+import { Plus, Trash2, ArrowLeft, Receipt, CheckCircle, Info, Sparkles, ShoppingBag, BadgePercent, WifiOff } from 'lucide-react';
 
 interface NewTransactionClientProps {
   contacts: any[];
@@ -134,6 +135,9 @@ export function NewTransactionClient({ contacts, products }: NewTransactionClien
   const router = useRouter();
   const t = (key: keyof typeof translations) => translations[key][language];
 
+  const { transactions: offlineTransactions, setTransactions: setOfflineTransactions, enqueueMutation } = useOfflineDataStore();
+  const [isOfflineMode, setIsOfflineMode] = useState(false);
+
   // Load from store
   const items = useInvoiceStore(state => state.items);
   const type = useInvoiceStore(state => state.type);
@@ -165,6 +169,7 @@ export function NewTransactionClient({ contacts, products }: NewTransactionClien
   useEffect(() => {
     clearInvoice();
     generateRef();
+    setIsOfflineMode(!navigator.onLine);
   }, []);
 
   // Handle product select changes to auto-populate default price
@@ -234,9 +239,37 @@ export function NewTransactionClient({ contacts, products }: NewTransactionClien
     };
 
     try {
+      if (!navigator.onLine) {
+        // Offline Flow
+        enqueueMutation({
+          type: 'CREATE_TRANSACTION',
+          data: payload
+        });
+        
+        // Optimistic update
+        const tempTx = {
+          id: crypto.randomUUID(),
+          ...payload,
+          contacts: contacts.find(c => c.id === payload.contactId),
+          subtotal: getSubtotal(),
+          total_amount: getTotalAmount(),
+          transaction_date: new Date().toISOString()
+        };
+        
+        setOfflineTransactions([tempTx, ...offlineTransactions]);
+        
+        toast.success("تم تأمين وحفظ المعاملة محلياً (وضع عدم الاتصال)");
+        clearInvoice();
+        router.push("/transactions");
+        return;
+      }
+
       const response = await createTransaction(payload);
       if (response.success) {
         toast.success(t("successMsg"));
+        if (response.data) {
+          setOfflineTransactions([response.data, ...offlineTransactions]);
+        }
         clearInvoice();
         router.push("/transactions");
         router.refresh();
@@ -245,9 +278,7 @@ export function NewTransactionClient({ contacts, products }: NewTransactionClien
       }
     } catch (err: any) {
       // Offline / Developer sandbox simulation block
-      toast.success(t("successMsg") + " (Local Simulation)");
-      clearInvoice();
-      router.push("/transactions");
+      toast.error("خطأ أثناء ترحيل الفاتورة");
     } finally {
       setLoading(false);
     }
@@ -263,7 +294,10 @@ export function NewTransactionClient({ contacts, products }: NewTransactionClien
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">{t("title")}</h1>
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+              {t("title")}
+              {isOfflineMode && <WifiOff className="w-5 h-5 text-amber-500 animate-pulse ml-2" />}
+            </h1>
             <p className="text-xs text-slate-500">{t("back")}</p>
           </div>
         </div>

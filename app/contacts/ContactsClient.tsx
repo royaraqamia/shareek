@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppStore, type Language } from '@/store/useAppStore';
+import { useOfflineDataStore } from '@/store/useOfflineDataStore';
 import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
-import { Plus, Users, Loader2 } from 'lucide-react';
+import { Plus, Users, Loader2, WifiOff } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -17,13 +18,27 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createContact } from '@/features/contacts/actions';
-import { toast } from 'sonner';
+import { toast } from '@/utils/toast';
 import { useRouter } from 'next/navigation';
 
 export function ContactsClient({ initialContacts }: { initialContacts: any[] }) {
+  const { contacts: offlineContacts, setContacts: setOfflineContacts, enqueueMutation } = useOfflineDataStore();
   const [contacts, setContacts] = useState(initialContacts);
+  const [isOfflineMode, setIsOfflineMode] = useState(false);
   const language = useAppStore(state => state.language) as Language;
   const router = useRouter();
+
+  // Sync server data to offline store on mount if online
+  useEffect(() => {
+    if (navigator.onLine) {
+      setIsOfflineMode(false);
+      setOfflineContacts(initialContacts);
+      setContacts(initialContacts);
+    } else {
+      setIsOfflineMode(true);
+      setContacts(offlineContacts);
+    }
+  }, [initialContacts, navigator.onLine, setOfflineContacts]);
 
   // Create Contact Form States
   const [isOpen, setIsOpen] = useState(false);
@@ -60,16 +75,39 @@ export function ContactsClient({ initialContacts }: { initialContacts: any[] }) 
 
     setIsSubmitting(true);
     try {
-      const response = await createContact({
-        type,
-        name,
-        phone: phone || undefined,
-        email: email || undefined,
-      }) as any;
+      const contactData = { type, name, phone: phone || undefined, email: email || undefined };
+      
+      if (!navigator.onLine) {
+        // Offline Flow
+        enqueueMutation({
+          type: 'CREATE_CONTACT',
+          data: contactData
+        });
+        
+        const tempContact = {
+          id: crypto.randomUUID(),
+          ...contactData,
+          created_at: new Date().toISOString()
+        };
+        
+        const newContacts = [tempContact, ...contacts];
+        setOfflineContacts(newContacts);
+        setContacts(newContacts);
+        
+        toast.success("تم تسجيل جهة الاتصال محلياً (وضع عدم الاتصال)");
+        setIsOpen(false);
+        setName(''); setPhone(''); setEmail(''); setType('CLIENT');
+        return;
+      }
+
+      // Online Flow
+      const response = await createContact(contactData) as any;
 
       if (response.success && response.data) {
         toast.success('تم تسجيل جهة الاتصال بنجاح!');
-        setContacts(prev => [response.data, ...prev]);
+        const newContacts = [response.data, ...contacts];
+        setContacts(newContacts);
+        setOfflineContacts(newContacts);
         setIsOpen(false);
         // Clear fields
         setName('');
@@ -91,8 +129,14 @@ export function ContactsClient({ initialContacts }: { initialContacts: any[] }) 
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h1 className="text-3xl font-black tracking-tight text-slate-900">{t.title[language]}</h1>
-          <p className="text-slate-500 text-sm">{t.subtitle[language]}</p>
+          <h1 className="text-3xl font-black tracking-tight text-slate-900 flex items-center gap-2">
+            {t.title[language]}
+            {isOfflineMode && <WifiOff className="w-5 h-5 text-amber-500 animate-pulse ml-2" />}
+          </h1>
+          <p className="text-slate-500 text-sm">
+            {t.subtitle[language]}
+            {isOfflineMode && <span className="text-amber-500 font-bold mr-1">(وضع عدم الاتصال)</span>}
+          </p>
         </div>
         
         <Dialog open={isOpen} onOpenChange={setIsOpen}>

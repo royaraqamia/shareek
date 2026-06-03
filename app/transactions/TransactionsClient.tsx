@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppStore, type Language } from '@/store/useAppStore';
+import { useOfflineDataStore } from '@/store/useOfflineDataStore';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
-import { Plus, Receipt, TrendingUp, TrendingDown, Eye } from 'lucide-react';
+import { Plus, Receipt, TrendingUp, TrendingDown, Eye, WifiOff } from 'lucide-react';
 
 interface TransactionsClientProps {
   initialTransactions: any[];
@@ -14,9 +15,22 @@ interface TransactionsClientProps {
 }
 
 export function TransactionsClient({ initialTransactions, contacts, products }: TransactionsClientProps) {
-  const [transactions] = useState(initialTransactions);
+  const { transactions: offlineTransactions, setTransactions: setOfflineTransactions } = useOfflineDataStore();
+  const [transactions, setTransactions] = useState(initialTransactions);
+  const [isOfflineMode, setIsOfflineMode] = useState(false);
   const language = useAppStore(state => state.language) as Language;
   const router = useRouter();
+
+  useEffect(() => {
+    if (navigator.onLine) {
+      setIsOfflineMode(false);
+      setOfflineTransactions(initialTransactions);
+      setTransactions(initialTransactions);
+    } else {
+      setIsOfflineMode(true);
+      setTransactions(offlineTransactions);
+    }
+  }, [initialTransactions, navigator.onLine, setOfflineTransactions]);
 
   const t = {
     title: { ar: 'المعاملات المالية', en: 'Transactions' },
@@ -42,8 +56,14 @@ export function TransactionsClient({ initialTransactions, contacts, products }: 
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h1 className="text-3xl font-black tracking-tight text-slate-900">{t.title[language]}</h1>
-          <p className="text-slate-500 text-sm">{t.subtitle[language]}</p>
+          <h1 className="text-3xl font-black tracking-tight text-slate-900 flex items-center gap-2">
+            {t.title[language]}
+            {isOfflineMode && <WifiOff className="w-5 h-5 text-amber-500 animate-pulse ml-2" />}
+          </h1>
+          <p className="text-slate-500 text-sm">
+            {t.subtitle[language]}
+            {isOfflineMode && <span className="text-amber-500 font-bold mr-1">(وضع عدم الاتصال)</span>}
+          </p>
         </div>
         <Button className="gap-2 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-medium" onClick={() => router.push('/transactions/new')}>
           <Plus className="w-4 h-4 text-white" />

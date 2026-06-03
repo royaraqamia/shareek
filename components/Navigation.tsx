@@ -17,7 +17,8 @@ import {
 import { useAppStore } from '@/store/useAppStore';
 import { getUser, signOutAction } from '@/features/auth/actions';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
+import { toast } from '@/utils/toast';
+import { GlobalSearch } from './GlobalSearch';
 
 const MENU_ITEMS = [
   { href: '/dashboard', icon: LayoutDashboard, labelAr: 'لوحة القيادة' },
@@ -124,6 +125,8 @@ export function Navigation() {
           <div className="flex items-center gap-2.5">
             {profile ? (
               <>
+                <GlobalSearch />
+                
                 {/* Admin Dashboard Entry Shortcut for system owners */}
                 {profile.isPlatformAdmin && (
                   <Link href="/admin" className="ml-1 shrink-0">

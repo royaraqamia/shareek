@@ -5,11 +5,14 @@ import { useAppStore } from '@/store/useAppStore';
 import { usePathname, useRouter } from 'next/navigation';
 import { getUser, signOutAction } from '@/features/auth/actions';
 import { Button } from '@/components/ui/button';
-import { Hourglass, LogOut, RefreshCw, RefreshCcw, ShieldCheck, User, Mail } from 'lucide-react';
-import { toast } from 'sonner';
+import { Hourglass, LogOut, RefreshCw, LogIn, Mail, User, ShieldCheck } from 'lucide-react';
+import { toast } from '@/utils/toast';
+import { useOfflineSync } from '@/utils/hooks/useOfflineSync';
 
 export function AppInitializer({ children }: { children: React.ReactNode }) {
+  useOfflineSync();  
   const language = useAppStore(state => state.language);
+
   const router = useRouter();
   const pathname = usePathname();
   
