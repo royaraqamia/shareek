@@ -144,6 +144,22 @@ export async function signUpAction(input: SignUpInput) {
       return { success: false, code: "CONFLICT", message: "البريد الإلكتروني هذا مستخدم بالفعل من قِبَل شخص آخر، يُرجى استخدام بريد إلكتروني آخر أو تسجيل الدخول." };
     }
 
+    // Clean up orphaned user from auth.users if they exist there but not in public.profiles.
+    // This heals states caused by manual public database wipes/truncation without clearing Auth.
+    try {
+      const { data: listUsersData, error: listUsersError } = await adminSupabase.auth.admin.listUsers();
+      if (!listUsersError && listUsersData?.users) {
+        const existingAuthUser = listUsersData.users.find(
+          (u) => u.email?.toLowerCase() === validation.data.email.toLowerCase()
+        );
+        if (existingAuthUser) {
+          await adminSupabase.auth.admin.deleteUser(existingAuthUser.id);
+        }
+      }
+    } catch (cleanupErr) {
+      console.error("Orphaned user cleanup error:", cleanupErr);
+    }
+
     // 2. Log in / Sign up via supabase.auth
     const headerList = await headers();
     const host = headerList.get('host');
