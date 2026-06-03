@@ -133,6 +133,17 @@ export async function signUpAction(input: SignUpInput) {
       return { success: false, code: "CONFLICT", message: "اسم المستخدم هذا مستخدم بالفعل من قِبَل شخص آخر، يُرجى اختيار اسم مستخدم مختلف." };
     }
 
+    // Check if email is already taken
+    const { data: existingEmailUser } = await adminSupabase
+      .from('profiles')
+      .select('email')
+      .eq('email', validation.data.email.toLowerCase())
+      .maybeSingle();
+
+    if (existingEmailUser) {
+      return { success: false, code: "CONFLICT", message: "البريد الإلكتروني هذا مستخدم بالفعل من قِبَل شخص آخر، يُرجى استخدام بريد إلكتروني آخر أو تسجيل الدخول." };
+    }
+
     // 2. Log in / Sign up via supabase.auth
     const headerList = await headers();
     const host = headerList.get('host');
