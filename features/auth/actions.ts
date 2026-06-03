@@ -84,7 +84,8 @@ export async function getUser() {
       email: profile.email,
       username: profile.username || "",
       is_approved: !!profile.is_approved,
-      isPlatformAdmin: !!(profile as any).is_platform_admin
+      isPlatformAdmin: !!(profile as any).is_platform_admin,
+      isEmailConfirmed: !!data.user?.email_confirmed_at
     };
   } catch (err: any) {
     return { success: false as const, code: "UNAUTHORIZED", message: err.message || "Failed to retrieve authenticated profile info." };
