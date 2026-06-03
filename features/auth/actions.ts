@@ -43,8 +43,8 @@ export async function isPlatformAdmin(userId: string): Promise<boolean> {
   if (!userId) return false;
   try {
     const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
-    const { data: profile } = await supabase
+    const adminSupabase = createAdminClient(cookieStore);
+    const { data: profile } = await adminSupabase
       .from('profiles')
       .select('is_platform_admin')
       .eq('id', userId)
@@ -65,11 +65,12 @@ export async function getUser() {
       return { success: false as const, code: "UNAUTHORIZED", message: "User not authenticated." };
     }
     
-    const { data: profile } = await supabase
+    const adminSupabase = createAdminClient(cookieStore);
+    const { data: profile } = await adminSupabase
       .from('profiles')
       .select('organization_id, role, full_name, email, username, is_approved, is_platform_admin')
       .eq('id', data.user.id)
-      .single();
+      .maybeSingle();
       
     if (!profile) {
       return { success: false as const, code: "UNAUTHORIZED", message: "User profile not found." };
@@ -254,6 +255,10 @@ export async function signInAction(input: SignInInput) {
         .maybeSingle();
 
       if (profileError || !profile || !profile.email) {
+        if (profileError) {
+          console.error("DEBUG signInAction profile query error:", profileError);
+          return { success: false, code: "USER_NOT_FOUND", message: `فشل البحث عن اسم المستخدم: ${profileError.message} (رمز: ${profileError.code})` };
+        }
         return { success: false, code: "USER_NOT_FOUND", message: "اسم المستخدم المكتوب غير موجود بالنظام." };
       }
       email = profile.email;
@@ -299,14 +304,16 @@ export async function checkUsernameAction(username: string) {
       .maybeSingle();
 
     if (error) {
-      return { success: false, code: "DB_ERROR", message: "فشل التحقق." };
+      console.error("DEBUG checkUsernameAction Database error:", error);
+      return { success: false, code: "DB_ERROR", message: `فشل التحقق: ${error.message} (رمز الخطأ: ${error.code})` };
     }
     if (data) {
       return { success: false, code: "TAKEN", message: "اسم المستخدم مستخدم بالفعل" };
     }
     return { success: true, code: "AVAILABLE", message: "اسم المستخدم متاح!" };
-  } catch {
-    return { success: false, code: "EXCEPTION", message: "خطأ بالاتصال بقاعدة البيانات" };
+  } catch (err: any) {
+    console.error("DEBUG checkUsernameAction Exception:", err);
+    return { success: false, code: "EXCEPTION", message: `خطأ بالاتصال بقاعدة البيانات: ${err.message || err}` };
   }
 }
 
