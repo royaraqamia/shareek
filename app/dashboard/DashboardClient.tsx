@@ -2,7 +2,8 @@
 
 import { useAppStore } from '@/store/useAppStore';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
-import { Package, Users, Receipt, DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
+import { Package, Users, Receipt, DollarSign, TrendingUp, TrendingDown, Zap, Plus, PackagePlus, ClipboardPlus } from 'lucide-react';
+import Link from 'next/link';
 
 interface DashboardClientProps {
   initialProducts: any[];
@@ -16,6 +17,16 @@ export function DashboardClient({ initialProducts, initialTransactions, initialC
   const t = {
     title: { ar: 'لوحة القيادة', en: 'Dashboard' },
     subtitle: { ar: 'نظرة عامة على أداء ومخزون المؤسسة الحالية.', en: 'Overview of current organization performance and inventory.' },
+    quickActions: {
+      title: { ar: 'الإجراءات السريعة', en: 'Quick Actions' },
+      desc: { ar: 'اختصارات مباشرة للبدء فوراً في تسجيل المعاملات والعمليات وتتبعها بقوة.', en: 'Direct shortcuts to start transactions, processes, and tracking instantly.' },
+      newTransaction: { ar: 'معاملة مالية جديدة', en: 'New Transaction' },
+      newTransactionDesc: { ar: 'تسجيل فاتورة مبيعات أو مشتريات جديدة', en: 'Record a new sales or purchase invoice' },
+      addProduct: { ar: 'إضافة منتج / خدمة', en: 'Add Product / Service' },
+      addProductDesc: { ar: 'تسجيل بند جديد في مستودع المخازن', en: 'Register a new item in your inventory' },
+      addTask: { ar: 'إنشاء مهمة عمل', en: 'Create Business Task' },
+      addTaskDesc: { ar: 'إسناد وجدولة عمل جديد للمتابعة', en: 'Assign and schedule a new task to track' }
+    },
     metrics: {
       products: { ar: 'إجمالي المنتجات', en: 'Total Products' },
       transactions: { ar: 'المعاملات المالية', en: 'Transactions' },
@@ -47,6 +58,84 @@ export function DashboardClient({ initialProducts, initialTransactions, initialC
         <h1 className="text-4xl font-black tracking-tight text-slate-900">{t.title[language]}</h1>
         <p className="text-slate-500 text-base md:text-lg font-medium">{t.subtitle[language]}</p>
       </div>
+
+      {/* Quick Actions Card */}
+      <Card className="border border-slate-200/60 shadow-sm rounded-2xl overflow-hidden bg-white/90 backdrop-blur-sm">
+        <CardHeader className="pb-4 bg-slate-50/40 border-b border-slate-100/70 px-6 sm:px-8">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-amber-50 border border-amber-100/80 text-amber-600 rounded-xl">
+              <Zap className="w-5 h-5 animate-pulse" />
+            </div>
+            <div>
+              <CardTitle className="text-lg font-black text-slate-900 tracking-tight">{t.quickActions.title[language]}</CardTitle>
+              <CardDescription className="text-xs sm:text-sm font-semibold text-slate-500 mt-0.5">{t.quickActions.desc[language]}</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="p-6 sm:p-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {/* Action 1: New Transaction */}
+            <Link href="/transactions/new" className="group">
+              <div className="h-full border border-slate-200/70 hover:border-emerald-500/30 rounded-2xl p-5 bg-white hover:bg-emerald-50/20 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between relative overflow-hidden text-right">
+                <div className="absolute top-0 left-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl z-0 pointer-events-none group-hover:scale-125 transition-transform" />
+                <div className="relative z-10 space-y-3">
+                  <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-300 shadow-sm">
+                    <Plus className="w-6 h-6 stroke-[2.5]" />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-base font-black text-slate-900 group-hover:text-emerald-700 transition-colors">
+                      {t.quickActions.newTransaction[language]}
+                    </h3>
+                    <p className="text-xs sm:text-sm font-medium text-slate-500 leading-relaxed">
+                      {t.quickActions.newTransactionDesc[language]}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Link>
+
+            {/* Action 2: Add Product / Service */}
+            <Link href="/inventory?new=true" className="group">
+              <div className="h-full border border-slate-200/70 hover:border-blue-500/30 rounded-2xl p-5 bg-white hover:bg-blue-50/20 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between relative overflow-hidden text-right">
+                <div className="absolute top-0 left-0 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl z-0 pointer-events-none group-hover:scale-125 transition-transform" />
+                <div className="relative z-10 space-y-3">
+                  <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 group-hover:bg-blue-500 group-hover:text-white transition-colors duration-300 shadow-sm">
+                    <PackagePlus className="w-6 h-6 stroke-[2.5]" />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-base font-black text-slate-900 group-hover:text-blue-700 transition-colors">
+                      {t.quickActions.addProduct[language]}
+                    </h3>
+                    <p className="text-xs sm:text-sm font-medium text-slate-500 leading-relaxed">
+                      {t.quickActions.addProductDesc[language]}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Link>
+
+            {/* Action 3: Create Task */}
+            <Link href="/tasks/create" className="group">
+              <div className="h-full border border-slate-200/70 hover:border-violet-500/30 rounded-2xl p-5 bg-white hover:bg-violet-50/20 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between relative overflow-hidden text-right">
+                <div className="absolute top-0 left-0 w-24 h-24 bg-violet-500/5 rounded-full blur-2xl z-0 pointer-events-none group-hover:scale-125 transition-transform" />
+                <div className="relative z-10 space-y-3">
+                  <div className="w-12 h-12 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center border border-violet-100 group-hover:bg-violet-600 group-hover:text-white transition-colors duration-300 shadow-sm">
+                    <ClipboardPlus className="w-6 h-6 stroke-[2.5]" />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-base font-black text-slate-900 group-hover:text-violet-700 transition-colors">
+                      {t.quickActions.addTask[language]}
+                    </h3>
+                    <p className="text-xs sm:text-sm font-medium text-slate-500 leading-relaxed">
+                      {t.quickActions.addTaskDesc[language]}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Bento Grid Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

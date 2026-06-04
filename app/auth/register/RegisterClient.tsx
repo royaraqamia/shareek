@@ -503,22 +503,27 @@ export function RegisterClient() {
             </div>
 
             {/* Accept Privacy & Terms Checkbox */}
-            <div className="flex items-center gap-2 pt-1 font-arabic select-none">
-              <label htmlFor="accept-terms" className="flex items-center gap-2.5 cursor-pointer text-xs sm:text-sm text-slate-600 font-bold hover:text-slate-850 transition-colors">
-                <input
-                  type="checkbox"
-                  id="accept-terms"
-                  onChange={(e) => setAcceptTerms(e.target.checked)}
-                  checked={acceptTerms}
-                  className="w-4.5 h-4.5 rounded border-slate-300 text-primary focus:ring-primary focus:ring-offset-1 accent-blue-600 cursor-pointer"
-                />
-                <span>
+            <div className="flex items-start gap-2 pt-1 font-arabic select-none">
+              <button
+                type="button"
+                id="accept-terms-btn"
+                onClick={() => setAcceptTerms(!acceptTerms)}
+                className="flex items-start gap-3 cursor-pointer text-xs sm:text-sm text-slate-600 font-bold hover:text-slate-850 transition-colors focus:outline-none group text-right"
+              >
+                <div className={`w-5 h-5 rounded-lg border-2 mt-0.5 flex items-center justify-center transition-all duration-200 shrink-0 ${
+                  acceptTerms 
+                    ? "bg-primary border-primary shadow-md shadow-primary/20 scale-105" 
+                    : "border-slate-300 bg-white group-hover:border-slate-400 group-focus:ring-2 group-focus:ring-primary/25"
+                }`}>
+                  {acceptTerms && <Check className="w-3.5 h-3.5 text-white stroke-[3.5]" />}
+                </div>
+                <span className="leading-relaxed text-right">
                   أوافق على{" "}
-                  <span className="text-blue-600 hover:underline cursor-pointer">الشروط والأحكام</span>
+                  <Link href="/terms" className="text-blue-600 hover:underline font-black decoration-blue-200" onClick={(e) => e.stopPropagation()}>الشُّروط والأحكام</Link>
                   {" "}و{" "}
-                  <span className="text-blue-600 hover:underline cursor-pointer">سياسة الخصوصية</span> 📜
+                  <Link href="/privacy" className="text-blue-600 hover:underline font-black decoration-blue-200" onClick={(e) => e.stopPropagation()}>سياسة الخصوصيَّة</Link>
                 </span>
-              </label>
+              </button>
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4 px-8 pb-8 pt-4">

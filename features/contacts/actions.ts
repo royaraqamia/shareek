@@ -41,6 +41,52 @@ export async function createContact(input: CreateContactInput) {
   return { success: true, data };
 }
 
+export async function bulkCreateContacts(contactsList: CreateContactInput[]) {
+  const user = await getApprovedUser();
+  if (!user.success) return user;
+
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  const validatedContacts = [];
+  for (const contact of contactsList) {
+    const cleanContact = {
+      ...contact,
+      email: contact.email === "" ? undefined : contact.email
+    };
+    const validation = CreateContactSchema.safeParse(cleanContact);
+    if (!validation.success) {
+      return {
+        success: false,
+        code: "VALIDATION_FAILED",
+        message: `بيانات جهة الاتصال "${contact.name || ''}" غير صالحة: ${validation.error.issues.map(i => i.message).join(', ')}`,
+      };
+    }
+    validatedContacts.push({
+      organization_id: user.organizationId,
+      type: validation.data.type,
+      name: validation.data.name,
+      phone: validation.data.phone || null,
+      email: validation.data.email || null,
+    });
+  }
+
+  if (validatedContacts.length === 0) {
+    return { success: false, message: "لا توجد جهات اتصال صالحة للاستيراد." };
+  }
+
+  const { data, error } = await supabase
+    .from('contacts')
+    .insert(validatedContacts)
+    .select();
+
+  if (error) {
+    return { success: false, code: "DATABASE_ERROR", message: error.message };
+  }
+
+  return { success: true, data };
+}
+
 export async function getContacts() {
   const user = await getApprovedUser();
   if (!user.success) return user;

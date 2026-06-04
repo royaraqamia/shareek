@@ -2,11 +2,14 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export type Language = 'ar';
+export type Theme = 'light' | 'dark';
 
 interface AppState {
   language: Language;
   setLanguage: (lang: Language) => void;
   dir: () => 'rtl';
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -21,6 +24,8 @@ export const useAppStore = create<AppState>()(
         }
       },
       dir: () => 'rtl',
+      theme: 'light',
+      setTheme: (theme) => set({ theme }),
     }),
     {
       name: 'shareek-app-settings',

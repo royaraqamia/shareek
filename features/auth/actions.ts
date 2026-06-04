@@ -12,7 +12,7 @@ function createAdminClient() {
 
   if (!url || !serviceRoleKey) {
     throw new Error(
-      "لم يتم العثور على مفتاح الخدمة الإشرافية الإدارية لـ Supabase (SUPABASE_SERVICE_ROLE_KEY) أو رابط الخدمة. يرجى التأكد من تكوينهم في متغيرات البيئة الخاصة بمشروعك (سواء في إعدادات Vercel أو AI Studio) ثم إعادة بناء ونشر التطبيق.\n\nSupabase URL or SUPABASE_SERVICE_ROLE_KEY not found in environment variables. Please configure them in your Vercel or AI Studio project settings, then redeploy."
+      "لم يتم العثور على مفتاح الخدمة الإشرافية الإدارية لـ Supabase (SUPABASE_SERVICE_ROLE_KEY) أو رابط الخدمة. يرجى التأكد من تكوينهم في متغيرات البيئة الخاصة بمشروعك (سواء في إعدادات Vercel أو AI Studio) ثم إعادة بناء ونشر التطبيق."
     );
   }
 
@@ -365,33 +365,23 @@ export async function toggleUserApprovalAction(targetUserId: string, approved: b
 }
 
 /**
- * Requests a password reset link for the provided email or username.
- * Supports both emails and usernames by checking the profile database.
+ * Requests a password reset link for the provided email.
+ * This ensures that when resetting a password, we only require an email address.
  * Sends email generated from the current host with correct redirect configurations.
  */
-export async function requestPasswordResetAction(emailOrUsername: string) {
-  if (!emailOrUsername) {
-    return { success: false, message: "يُرجى إدخال البريد الإلكتروني أو اسم المستخدم." };
+export async function requestPasswordResetAction(email: string) {
+  if (!email) {
+    return { success: false, message: "يُرجَى إدخال البريد الإلكتروني." };
+  }
+
+  const emailTrimmed = email.trim().toLowerCase();
+  
+  // Basic email validation
+  if (!emailTrimmed.includes('@') || emailTrimmed.length < 5) {
+    return { success: false, message: "يُرجَى إدخال بريد إلكتروني صحيح." };
   }
 
   try {
-    let email = emailOrUsername.trim();
-
-    // Look up email if username is provided (does not contain '@')
-    if (!email.includes('@')) {
-      const adminSupabase = createAdminClient();
-      const { data: profile, error: profileError } = await adminSupabase
-        .from('profiles')
-        .select('email')
-        .eq('username', email.toLowerCase())
-        .maybeSingle();
-
-      if (profileError || !profile || !profile.email) {
-        return { success: false, message: "اسم المستخدم المكتوب غير موجود بالنظام." };
-      }
-      email = profile.email;
-    }
-
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
 
@@ -402,7 +392,7 @@ export async function requestPasswordResetAction(emailOrUsername: string) {
     const origin = host ? `${proto}://${host}` : 'https://shareek.royaraqamia.com';
     const redirectTo = `${origin}/auth/callback?next=/auth/reset-password`;
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    const { error } = await supabase.auth.resetPasswordForEmail(emailTrimmed, {
       redirectTo,
     });
 
@@ -411,14 +401,14 @@ export async function requestPasswordResetAction(emailOrUsername: string) {
     }
 
     // Mask the email for user privacy before returning
-    const parts = email.split('@');
+    const parts = emailTrimmed.split('@');
     const maskedEmail = parts[0].length > 3 
       ? `${parts[0].slice(0, 3)}***@${parts[1]}`
       : `***@${parts[1]}`;
 
     return { 
       success: true, 
-      message: `تمَّ إرسال رابط إعادة تعيين كلمة المرور إلى البريد الإلكتروني: ${maskedEmail}`,
+      message: `تمَّ إرسال رابط تغيير كلمة المرور إلى البريد الإلكتروني: ${maskedEmail}`,
       email: maskedEmail
     };
   } catch (err: any) {

@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { KeyRound, Mail, LogIn, Sparkles, Eye, EyeOff, ShieldAlert, CheckCircle2 } from "lucide-react";
+import { KeyRound, Mail, LogIn, Sparkles, Eye, EyeOff, ShieldAlert, CheckCircle2, Check } from "lucide-react";
 import Link from "next/link";
 import {
   Dialog,
@@ -84,7 +84,7 @@ export function LoginClient() {
 
   // Forgot password dialog states
   const [isResetOpen, setIsResetOpen] = useState(false);
-  const [resetIdentifier, setResetIdentifier] = useState("");
+  const [resetEmail, setResetEmail] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
   const [resetSuccessMessage, setResetSuccessMessage] = useState("");
 
@@ -118,14 +118,14 @@ export function LoginClient() {
 
   const handleResetPasswordRequest = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!resetIdentifier.trim()) {
-      toast.error("يُرجَى إدخال البريد الإلكتروني أو اسم المستخدم");
+    if (!resetEmail.trim()) {
+      toast.error("يُرجَى إدخال البريد الإلكتروني");
       return;
     }
     setResetLoading(true);
 
     try {
-      const result = await requestPasswordResetAction(resetIdentifier);
+      const result = await requestPasswordResetAction(resetEmail);
       if (result.success) {
         toast.success(result.message);
         setResetSuccessMessage(result.message);
@@ -178,7 +178,7 @@ export function LoginClient() {
                   className="text-sm font-semibold text-primary hover:underline hover:text-primary/80 transition-colors cursor-pointer"
                   onClick={(e) => {
                     e.preventDefault();
-                    setResetIdentifier("");
+                    setResetEmail("");
                     setResetSuccessMessage("");
                     setIsResetOpen(true);
                   }}
@@ -208,16 +208,21 @@ export function LoginClient() {
 
             {/* Remember Me Checkbox */}
             <div className="flex items-center gap-2 pt-1 font-arabic select-none">
-              <label htmlFor="remember-me" className="flex items-center gap-2.5 cursor-pointer text-xs sm:text-sm text-slate-600 font-bold hover:text-slate-850 transition-colors">
-                <input
-                  type="checkbox"
-                  id="remember-me"
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  checked={rememberMe}
-                  className="w-4.5 h-4.5 rounded border-slate-300 text-primary focus:ring-primary focus:ring-offset-1 accent-blue-600 cursor-pointer"
-                />
-                تذكَّرني على هذا الجهاز 💻
-              </label>
+              <button
+                type="button"
+                id="remember-me-btn"
+                onClick={() => setRememberMe(!rememberMe)}
+                className="flex items-center gap-3 cursor-pointer text-xs sm:text-sm text-slate-600 font-bold hover:text-slate-850 transition-colors focus:outline-none group text-right"
+              >
+                <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all duration-200 shrink-0 ${
+                  rememberMe 
+                    ? "bg-primary border-primary shadow-md shadow-primary/20 scale-105" 
+                    : "border-slate-300 bg-white group-hover:border-slate-400 group-focus:ring-2 group-focus:ring-primary/25"
+                }`}>
+                  {rememberMe && <Check className="w-3.5 h-3.5 text-white stroke-[3.5]" />}
+                </div>
+                <span>تذكَّرني على هذا الجهاز</span>
+              </button>
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4 px-8 pb-8 pt-4">
@@ -238,33 +243,36 @@ export function LoginClient() {
 
       {/* Forgot Password Dialog */}
       <Dialog open={isResetOpen} onOpenChange={setIsResetOpen}>
-        <DialogContent className="max-w-md bg-white border border-slate-200/80 shadow-2xl rounded-2xl p-6 sm:p-8 font-arabic">
+        <DialogContent className="max-w-md bg-white border border-slate-100 shadow-2xl rounded-3xl p-6 sm:p-8 font-arabic">
           <DialogHeader className="text-center flex flex-col items-center">
-            <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight leading-tight mb-2">
-              إستعادة حسابك 🔑
+            <div className="w-12 h-12 bg-blue-50/80 border border-blue-100 flex items-center justify-center rounded-2xl mb-3 text-blue-600">
+              <KeyRound className="w-6 h-6 animate-pulse" />
+            </div>
+            <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight leading-tight">
+              تغيير كلمة المرور
             </DialogTitle>
             <DialogDescription className="text-sm font-medium text-slate-500 leading-relaxed max-w-sm">
-              أدخل اسم المستخدم الخاص بك أو البريد الإلكتروني وسنقوم بالتَّحقُّق من حسابك وإرسال رابط لإعادة تعيين كلمة المرور.
+              أدخل البريد الإلكتروني المُرتبط بحسابك وسنقوم بالتَّحقُّق منه وإرسال رابط لإعادة تعيين كلمة مرور جديدة آمنة.
             </DialogDescription>
           </DialogHeader>
 
           {resetSuccessMessage ? (
-            <div className="space-y-6 py-4 text-center">
+            <div className="space-y-6 pt-4 text-center animate-in fade-in zoom-in-95 duration-300">
               <div className="flex flex-col items-center">
-                <div className="flex items-center justify-center w-16 h-16 bg-emerald-50 rounded-full border border-emerald-100 mb-4 animate-bounce">
+                <div className="flex items-center justify-center w-16 h-16 bg-emerald-50 rounded-full border border-emerald-100 mb-4 text-emerald-650 animate-bounce">
                   <CheckCircle2 className="w-9 h-9 text-emerald-600" />
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 leading-tight">تمَّ إرسال رابط استعادة الحساب</h3>
+                <h3 className="text-lg font-bold text-slate-900 leading-tight">تمَّ إرسال رابط تغيير كلمة المرور</h3>
               </div>
-              <div className="bg-emerald-50/50 border border-emerald-100 p-4 rounded-xl text-slate-700 text-sm leading-relaxed text-right">
-                <p>{resetSuccessMessage}</p>
-                <p className="text-[12px] text-slate-500 mt-2 border-t border-emerald-100/50 pt-2">
-                  يُرجَى فحص صندوق البريد الوارد (او صندوق البريد المزعج/Spam) للوصول إلى رسالة لإعادة تعيين كلمة مرور جديدة.
+              <div className="bg-emerald-50/40 border border-emerald-100/60 p-4 rounded-2xl text-slate-700 text-sm leading-relaxed text-right">
+                <p className="font-semibold text-slate-800">{resetSuccessMessage}</p>
+                <p className="text-[12px] text-slate-500 mt-2.5 border-t border-emerald-100/50 pt-2.5">
+                  يُرجَى فحص صندوق البريد الوارد (أو صندوق البريد العشوائي/المهملات/Spam) للوصول إلى رسالة إعادة التعيين بأمان.
                 </p>
               </div>
               <Button
                 type="button"
-                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold h-11 rounded-lg"
+                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold h-12 rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
                 onClick={() => setIsResetOpen(false)}
               >
                 حسنًا، فهمت
@@ -273,18 +281,18 @@ export function LoginClient() {
           ) : (
             <form onSubmit={handleResetPasswordRequest} className="space-y-5 mt-4">
               <div className="space-y-2">
-                <Label htmlFor="reset-identifier" className="font-bold text-slate-700">
-                  البريد الإلكتروني أو اسم المستخدم
+                <Label htmlFor="reset-email" className="font-bold text-slate-700">
+                  البريد الإلكتروني للتحقق
                 </Label>
                 <div className="relative">
                   <Mail className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-400" />
                   <Input
-                    id="reset-identifier"
-                    type="text"
-                    placeholder="البريد الإلكتروني أو اسم المستخدم"
+                    id="reset-email"
+                    type="email"
+                    placeholder="مثال: user@example.com"
                     className="pl-11 h-12 bg-slate-50/50 border-slate-200 focus:bg-white transition-all rounded-xl shadow-sm font-medium"
-                    value={resetIdentifier}
-                    onChange={(e) => setResetIdentifier(e.target.value)}
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
                     required
                   />
                 </div>
@@ -293,18 +301,18 @@ export function LoginClient() {
               <div className="flex flex-col gap-2 pt-2">
                 <Button
                   type="submit"
-                  className="w-full bg-primary hover:bg-primary/95 text-white font-bold h-12 rounded-xl shadow-lg shadow-primary/25 transition-all text-base"
+                  className="w-full bg-primary hover:bg-primary/95 text-white font-bold h-12 rounded-xl shadow-lg shadow-primary/25 transition-all text-base hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                   disabled={resetLoading}
                 >
-                  {resetLoading ? "جاري الإرسال..." : "إرسال رابط استعادة الحساب"}
+                  {resetLoading ? "جاري الإرسال للتَّحقُّق..." : "إرسال رابط تغيير كلمة المرور"}
                 </Button>
                 <Button
                   type="button"
                   variant="ghost"
-                  className="w-full h-11 text-slate-500 hover:text-slate-800"
+                  className="w-full h-11 text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded-xl transition-all font-semibold"
                   onClick={() => setIsResetOpen(false)}
                 >
-                  إلغاء التَّراجع
+                  تراجع
                 </Button>
               </div>
             </form>

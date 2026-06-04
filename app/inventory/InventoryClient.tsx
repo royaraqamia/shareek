@@ -42,6 +42,15 @@ export function InventoryClient({ initialProducts }: { initialProducts: any[] })
     }
   }, [initialProducts, navigator.onLine, setOfflineProducts]);
 
+  // Open "Add Product" Dialog automatically if ?new=true query param is present
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.search.includes('new=true')) {
+      setIsOpen(true);
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, []);
+
   // Create Product Form States
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);

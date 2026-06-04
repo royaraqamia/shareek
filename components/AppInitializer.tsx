@@ -12,6 +12,7 @@ import { useOfflineSync } from '@/utils/hooks/useOfflineSync';
 export function AppInitializer({ children }: { children: React.ReactNode }) {
   useOfflineSync();  
   const language = useAppStore(state => state.language);
+  const theme = useAppStore(state => state.theme);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -70,7 +71,12 @@ export function AppInitializer({ children }: { children: React.ReactNode }) {
     setMounted(true);
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = language;
-  }, [language]);
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [language, theme]);
 
   useEffect(() => {
     // Check status on mount and on route changes to ensure instant protection
@@ -266,7 +272,7 @@ export function AppInitializer({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className={`font-sans antialiased bg-slate-50 relative ${language === 'ar' ? 'font-arabic' : 'font-english'}`}>
+    <div className={`font-sans antialiased bg-background relative ${language === 'ar' ? 'font-arabic' : 'font-english'}`}>
       <main className="min-h-screen pb-20 md:pb-0">
         {children}
       </main>
