@@ -100,3 +100,44 @@ export async function getTransactionById(id: string) {
 
   return { success: true, data };
 }
+
+export async function bulkDeleteTransactionsAction(ids: string[]) {
+  const user = await getApprovedUser();
+  if (!user.success) return user;
+
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  const { error } = await supabase
+    .from('transactions')
+    .delete()
+    .in('id', ids)
+    .eq('organization_id', user.organizationId);
+
+  if (error) {
+    return { success: false, code: "DATABASE_ERROR", message: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function bulkUpdateTransactionsPaymentAction(ids: string[], paymentStatus: 'PAID' | 'PARTIAL' | 'UNPAID') {
+  const user = await getApprovedUser();
+  if (!user.success) return user;
+
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  const { error } = await supabase
+    .from('transactions')
+    .update({ payment_status: paymentStatus })
+    .in('id', ids)
+    .eq('organization_id', user.organizationId);
+
+  if (error) {
+    return { success: false, code: "DATABASE_ERROR", message: error.message };
+  }
+
+  return { success: true };
+}
+

@@ -6,9 +6,10 @@ import { useOfflineDataStore } from '@/store/useOfflineDataStore';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
-import { Plus, Receipt, TrendingUp, TrendingDown, Eye, WifiOff, Search, Download } from 'lucide-react';
+import { Plus, Receipt, TrendingUp, TrendingDown, Eye, WifiOff, Search, Download, Trash2, SlidersHorizontal, Check, Clock, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/utils/toast';
+import { bulkDeleteTransactionsAction, bulkUpdateTransactionsPaymentAction } from '@/features/transactions/actions';
 
 interface TransactionsClientProps {
   initialTransactions: any[];
@@ -24,6 +25,57 @@ export function TransactionsClient({ initialTransactions, contacts, products }: 
   const [filterType, setFilterType] = useState<'ALL' | 'SALE' | 'PURCHASE'>('ALL');
   const language = useAppStore(state => state.language) as Language;
   const router = useRouter();
+
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+  const [isBulkUpdating, setIsBulkUpdating] = useState(false);
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    if (!window.confirm(language === 'ar' ? `هل أنت متأكد من حذف ${selectedIds.length} عنصر؟` : `Are you sure you want to delete ${selectedIds.length} items?`)) {
+      return;
+    }
+
+    setIsBulkDeleting(true);
+    try {
+      const res = await bulkDeleteTransactionsAction(selectedIds);
+      if (res.success) {
+        toast.success(language === 'ar' ? 'تم الحذف بنجاح!' : 'Deleted successfully!');
+        const updated = transactions.filter(t => !selectedIds.includes(t.id));
+        setTransactions(updated);
+        setOfflineTransactions(updated);
+        setSelectedIds([]);
+      } else {
+        toast.error(res.message || 'فشلت عملية الحذف');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Error deleting');
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
+
+  const handleBulkUpdatePayment = async (status: 'PAID' | 'PARTIAL' | 'UNPAID') => {
+    if (selectedIds.length === 0) return;
+    setIsBulkUpdating(true);
+    try {
+      const res = await bulkUpdateTransactionsPaymentAction(selectedIds, status);
+      if (res.success) {
+        toast.success(language === 'ar' ? 'تم التحديث بنجاح!' : 'Updated successfully!');
+        const updated = transactions.map(t => selectedIds.includes(t.id) ? { ...t, payment_status: status } : t);
+        setTransactions(updated);
+        setOfflineTransactions(updated);
+        setSelectedIds([]);
+      } else {
+        toast.error(res.message || 'فشل التحديث');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Error updating');
+    } finally {
+      setIsBulkUpdating(false);
+    }
+  };
+
 
   const filteredTransactions = transactions.filter((tx) => {
     const matchesSearch = 
@@ -205,6 +257,65 @@ export function TransactionsClient({ initialTransactions, contacts, products }: 
         </div>
       </div>
 
+      {selectedIds.length > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-900 dark:text-amber-100 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-sm">
+              {language === 'ar' ? `تم تحديد ${selectedIds.length} عنصر:` : `Selected ${selectedIds.length} items:`}
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2 justify-end w-full sm:w-auto">
+            {/* Set Paid */}
+            <Button 
+              size="sm" 
+              variant="outline"
+              disabled={isBulkUpdating}
+              onClick={() => handleBulkUpdatePayment('PAID')}
+              className="gap-1.5 h-9 rounded-lg border-amber-500/30 bg-white/50 text-amber-900 font-bold text-xs cursor-pointer"
+            >
+              <Check className="w-3.5 h-3.5 text-emerald-600" />
+              {language === 'ar' ? 'تعيين كمدفوع بالكامل' : 'Set as Fully Paid'}
+            </Button>
+
+            {/* Set Partial */}
+            <Button 
+              size="sm" 
+              variant="outline"
+              disabled={isBulkUpdating}
+              onClick={() => handleBulkUpdatePayment('PARTIAL')}
+              className="gap-1.5 h-9 rounded-lg border-amber-500/30 bg-white/50 text-amber-900 font-bold text-xs cursor-pointer"
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5 text-blue-600" />
+              {language === 'ar' ? 'تعيين كمدفوع جزئياً' : 'Set as Partially Paid'}
+            </Button>
+
+            {/* Set Unpaid */}
+            <Button 
+              size="sm" 
+              variant="outline"
+              disabled={isBulkUpdating}
+              onClick={() => handleBulkUpdatePayment('UNPAID')}
+              className="gap-1.5 h-9 rounded-lg border-amber-500/30 bg-white/50 text-amber-900 font-bold text-xs cursor-pointer"
+            >
+              <Clock className="w-3.5 h-3.5 text-red-650" />
+              {language === 'ar' ? 'تعيين كغير مدفوع' : 'Set as Unpaid'}
+            </Button>
+
+            {/* Delete button */}
+            <Button 
+              size="sm" 
+              variant="destructive" 
+              disabled={isBulkDeleting}
+              onClick={handleBulkDelete}
+              className="gap-1.5 h-9 rounded-lg font-bold text-xs hover:bg-red-650 cursor-pointer"
+            >
+              {isBulkDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+              {language === 'ar' ? 'حذف المحدد' : 'Delete Selected'}
+            </Button>
+          </div>
+        </div>
+      )}
+
       <div className="rounded-2xl border border-slate-200/60 bg-white/60 backdrop-blur-xl overflow-hidden shadow-sm">
         {transactions.length === 0 ? (
           <div className="py-24 flex flex-col items-center justify-center text-center space-y-6">
@@ -237,6 +348,20 @@ export function TransactionsClient({ initialTransactions, contacts, products }: 
           <Table>
             <TableHeader className="bg-slate-50/80">
               <TableRow className="border-b border-slate-200">
+                <TableHead className="w-[50px] px-4 text-center font-bold text-slate-600">
+                  <input
+                    type="checkbox"
+                    checked={filteredTransactions.length > 0 && selectedIds.length === filteredTransactions.length}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedIds(filteredTransactions.map(tx => tx.id));
+                      } else {
+                        setSelectedIds([]);
+                      }
+                    }}
+                    className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 accent-blue-600 cursor-pointer"
+                  />
+                </TableHead>
                 <TableHead className="font-bold text-slate-600 h-12 px-6 text-right">{t.headers.ref[language]}</TableHead>
                 <TableHead className="font-bold text-slate-600 px-6 text-right">{t.headers.type[language]}</TableHead>
                 <TableHead className="font-bold text-slate-600 px-6 text-right">{t.headers.contact[language]}</TableHead>
@@ -247,51 +372,70 @@ export function TransactionsClient({ initialTransactions, contacts, products }: 
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredTransactions.map((tx) => (
-                <TableRow 
-                  key={tx.id}
-                  className="cursor-pointer border-b border-slate-100 hover:bg-blue-50/40 transition-colors group h-16"
-                  onClick={() => router.push(`/transactions/${tx.id}`)}
-                >
-                  <TableCell className="font-bold text-slate-900 px-6 text-right">
-                    <span className="flex items-center gap-3 justify-start">
-                      <div className={`p-1.5 rounded-md ${tx.type === 'SALE' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'}`}>
-                        {tx.type === 'SALE' ? (
-                          <TrendingUp className="w-4 h-4 shrink-0" />
-                        ) : (
-                          <TrendingDown className="w-4 h-4 shrink-0" />
-                        )}
+              {filteredTransactions.map((tx) => {
+                const isSelected = selectedIds.includes(tx.id);
+                return (
+                  <TableRow 
+                    key={tx.id}
+                    className={`cursor-pointer border-b border-slate-100 hover:bg-blue-50/40 transition-colors group h-16 ${
+                      isSelected ? 'bg-amber-500/5 hover:bg-amber-500/10' : ''
+                    }`}
+                    onClick={() => router.push(`/transactions/${tx.id}`)}
+                  >
+                    <TableCell className="w-[50px] px-4 text-center" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedIds(prev => [...prev, tx.id]);
+                          } else {
+                            setSelectedIds(prev => prev.filter(id => id !== tx.id));
+                          }
+                        }}
+                        className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 accent-blue-600 cursor-pointer"
+                      />
+                    </TableCell>
+                    <TableCell className="font-bold text-slate-900 px-6 text-right">
+                      <span className="flex items-center gap-3 justify-start">
+                        <div className={`p-1.5 rounded-md ${tx.type === 'SALE' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'}`}>
+                          {tx.type === 'SALE' ? (
+                            <TrendingUp className="w-4 h-4 shrink-0" />
+                          ) : (
+                            <TrendingDown className="w-4 h-4 shrink-0" />
+                          )}
+                        </div>
+                        <span className="font-mono text-[15px]">{tx.reference_number}</span>
+                      </span>
+                    </TableCell>
+                    <TableCell className="px-6 text-right">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-[13px] font-bold border ${
+                        tx.type === 'SALE' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60' : 'bg-blue-50 text-blue-700 border-blue-200/60'
+                      }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ml-1.5 ${tx.type === 'SALE' ? 'bg-emerald-500' : 'bg-blue-500'}`} />
+                        {t.types[tx.type as 'SALE' | 'PURCHASE'][language]}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-slate-700 font-medium px-6 text-right">{tx.contacts?.name || '-'}</TableCell>
+                    <TableCell className="text-left text-slate-500 font-mono text-[15px] font-semibold px-6">
+                      {Number(tx.subtotal).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </TableCell>
+                    <TableCell className="text-left font-black text-slate-900 font-mono text-[15px] px-6">
+                      {Number(tx.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </TableCell>
+                    <TableCell className="text-left text-slate-400 text-sm font-mono font-medium px-6">
+                      {new Date(tx.transaction_date).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="text-left px-6">
+                      <div className="flex justify-start opacity-0 group-hover:opacity-100 transition-opacity translate-x-2 group-hover:translate-x-0">
+                        <Button variant="outline" size="icon" className="h-9 w-9 rounded-full bg-white shadow-sm border-slate-200 text-primary hover:bg-primary hover:text-white hover:scale-110 transition-all duration-300">
+                          <Eye className="w-4 h-4" />
+                        </Button>
                       </div>
-                      <span className="font-mono text-[15px]">{tx.reference_number}</span>
-                    </span>
-                  </TableCell>
-                  <TableCell className="px-6 text-right">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-[13px] font-bold border ${
-                      tx.type === 'SALE' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60' : 'bg-blue-50 text-blue-700 border-blue-200/60'
-                    }`}>
-                      <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ml-1.5 ${tx.type === 'SALE' ? 'bg-emerald-500' : 'bg-blue-500'}`} />
-                      {t.types[tx.type as 'SALE' | 'PURCHASE'][language]}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-slate-700 font-medium px-6 text-right">{tx.contacts?.name || '-'}</TableCell>
-                  <TableCell className="text-left text-slate-500 font-mono text-[15px] font-semibold px-6">
-                    {Number(tx.subtotal).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                  </TableCell>
-                  <TableCell className="text-left font-black text-slate-900 font-mono text-[15px] px-6">
-                    {Number(tx.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                  </TableCell>
-                  <TableCell className="text-left text-slate-400 text-sm font-mono font-medium px-6">
-                    {new Date(tx.transaction_date).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell className="text-left px-6">
-                    <div className="flex justify-start opacity-0 group-hover:opacity-100 transition-opacity translate-x-2 group-hover:translate-x-0">
-                      <Button variant="outline" size="icon" className="h-9 w-9 rounded-full bg-white shadow-sm border-slate-200 text-primary hover:bg-primary hover:text-white hover:scale-110 transition-all duration-300">
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         )}

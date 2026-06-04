@@ -2,14 +2,14 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { fetchTasksAction } from "@/features/tasks/actions";
+import { fetchTasksAction, bulkDeleteTasksAction, bulkUpdateTasksStatusAction } from "@/features/tasks/actions";
 import { Task } from "@/features/tasks/schemas";
 import { useAppStore } from "@/store/useAppStore";
 import { useOfflineDataStore } from "@/store/useOfflineDataStore";
 import { toast } from '@/utils/toast';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Plus, ClipboardList, Clock, ArrowRight, Loader2, CheckCircle2, WifiOff, Search } from "lucide-react";
+import { Plus, ClipboardList, Clock, ArrowRight, Loader2, CheckCircle2, WifiOff, Search, Trash2, SlidersHorizontal, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,57 @@ export default function TasksClient() {
   const [filterStatus, setFilterStatus] = useState<'ALL' | 'TODO' | 'IN_PROGRESS' | 'DONE'>('ALL');
   const language = useAppStore(state => state.language);
   const { tasks: offlineTasks, setTasks: setOfflineTasks } = useOfflineDataStore();
+
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+  const [isBulkUpdating, setIsBulkUpdating] = useState(false);
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    if (!window.confirm(language === 'ar' ? `هل أنت متأكد من حذف ${selectedIds.length} عنصر؟` : `Are you sure you want to delete ${selectedIds.length} items?`)) {
+      return;
+    }
+
+    setIsBulkDeleting(true);
+    try {
+      const res = await bulkDeleteTasksAction(selectedIds);
+      if (res.success) {
+        toast.success(language === 'ar' ? 'تم الحذف بنجاح!' : 'Deleted successfully!');
+        const updated = tasks.filter(t => !selectedIds.includes(t.id));
+        setTasks(updated);
+        setOfflineTasks(updated);
+        setSelectedIds([]);
+      } else {
+        toast.error(res.error || 'فشلت عملية الحذف');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Error deleting');
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
+
+  const handleBulkUpdateStatus = async (newStatus: 'TODO' | 'IN_PROGRESS' | 'DONE') => {
+    if (selectedIds.length === 0) return;
+    setIsBulkUpdating(true);
+    try {
+      const res = await bulkUpdateTasksStatusAction(selectedIds, newStatus);
+      if (res.success) {
+        toast.success(language === 'ar' ? 'تم التحديث بنجاح!' : 'Updated successfully!');
+        const updated = tasks.map(t => selectedIds.includes(t.id) ? { ...t, status: newStatus } : t);
+        setTasks(updated);
+        setOfflineTasks(updated);
+        setSelectedIds([]);
+      } else {
+        toast.error(res.error || 'فشلت عملية التحديث');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Error updating');
+    } finally {
+      setIsBulkUpdating(false);
+    }
+  };
+
 
   const filteredTasks = tasks.filter((task) => {
     const matchesSearch = 
@@ -143,6 +194,65 @@ export default function TasksClient() {
         </div>
       </div>
 
+      {selectedIds.length > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-900 dark:text-amber-100 animate-in fade-in slide-in-from-top-2 duration-200 mb-8">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-sm">
+              {language === 'ar' ? `تم تحديد ${selectedIds.length} عنصر:` : `Selected ${selectedIds.length} items:`}
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2 justify-end w-full sm:w-auto">
+            {/* Update status to Pending */}
+            <Button 
+              size="sm" 
+              variant="outline"
+              disabled={isBulkUpdating}
+              onClick={() => handleBulkUpdateStatus('TODO')}
+              className="gap-1.5 h-9 rounded-lg border-amber-500/30 bg-white/50 text-amber-900 font-bold text-xs cursor-pointer"
+            >
+              <Clock className="w-3.5 h-3.5" />
+              {language === 'ar' ? 'تعيين كمعلق' : 'Set Pending'}
+            </Button>
+
+            {/* Update status to In Progress */}
+            <Button 
+              size="sm" 
+              variant="outline"
+              disabled={isBulkUpdating}
+              onClick={() => handleBulkUpdateStatus('IN_PROGRESS')}
+              className="gap-1.5 h-9 rounded-lg border-amber-500/30 bg-white/50 text-amber-900 font-bold text-xs cursor-pointer"
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              {language === 'ar' ? 'تعيين قيد التنفيذ' : 'Set In Progress'}
+            </Button>
+
+            {/* Update status to Completed */}
+            <Button 
+              size="sm" 
+              variant="outline"
+              disabled={isBulkUpdating}
+              onClick={() => handleBulkUpdateStatus('DONE')}
+              className="gap-1.5 h-9 rounded-lg border-amber-500/30 bg-white/50 text-amber-900 font-bold text-xs cursor-pointer"
+            >
+              <Check className="w-3.5 h-3.5" />
+              {language === 'ar' ? 'تعيين كمكتمل' : 'Set Completed'}
+            </Button>
+
+            {/* Delete button */}
+            <Button 
+              size="sm" 
+              variant="destructive" 
+              disabled={isBulkDeleting}
+              onClick={handleBulkDelete}
+              className="gap-1.5 h-9 rounded-lg font-bold text-xs hover:bg-red-650 cursor-pointer"
+            >
+              {isBulkDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+              {language === 'ar' ? 'حذف المحدد' : 'Delete Selected'}
+            </Button>
+          </div>
+        </div>
+      )}
+
       {isLoading ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 animate-in fade-in duration-500">
           {[...Array(8)].map((_, i) => (
@@ -182,31 +292,63 @@ export default function TasksClient() {
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 animate-in fade-in duration-300">
-          {filteredTasks.map(task => (
-            <Card key={task.id} className="group hover:-translate-y-1 transition-all duration-300 border-slate-200/50 bg-white/70 backdrop-blur-sm overflow-hidden cursor-pointer shadow-lg shadow-slate-200/40 rounded-2xl relative">
-              <div className="absolute inset-0 bg-gradient-to-b from-white/50 to-transparent pointer-events-none" />
-              <div className="h-1.5 w-full bg-slate-100 relative z-10">
-                <div 
-                  className={`h-full transition-all duration-500 ease-in-out ${task.status === 'DONE' ? 'bg-emerald-500 w-full' : task.status === 'IN_PROGRESS' ? 'bg-blue-500 w-1/2' : 'bg-slate-300 w-1/12'}`} 
-                />
-              </div>
-              <CardHeader className="pt-6 pb-2 px-6 relative z-10">
-                <div className="flex justify-between items-start mb-3">
-                  {getStatusBadge(task.status)}
-                  <div className="bg-slate-50 border border-slate-100 px-2 py-1 rounded-md flex items-center text-[11px] font-mono font-bold text-slate-500">
-                    <Clock className="w-3 h-3 ml-1.5 text-slate-400" />
-                    {new Date(task.updated_at || task.created_at).toLocaleDateString('ar-SA')}
-                  </div>
+          {filteredTasks.map(task => {
+            const isSelected = selectedIds.includes(task.id);
+            return (
+              <Card 
+                key={task.id} 
+                className={`group hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer shadow-lg rounded-2xl relative ${
+                  isSelected 
+                    ? 'border-amber-500 bg-amber-500/5 shadow-amber-500/10' 
+                    : 'border-slate-200/50 bg-white/70 backdrop-blur-sm shadow-slate-200/40'
+                }`}
+                onClick={() => {
+                  if (isSelected) {
+                    setSelectedIds(prev => prev.filter(id => id !== task.id));
+                  } else {
+                    setSelectedIds(prev => [...prev, task.id]);
+                  }
+                }}
+              >
+                <div className="absolute top-10 left-3 z-30">
+                  <input 
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      if (e.target.checked) {
+                        setSelectedIds(prev => [...prev, task.id]);
+                      } else {
+                        setSelectedIds(prev => prev.filter(id => id !== task.id));
+                      }
+                    }}
+                    className="w-4.5 h-4.5 rounded border-slate-300 text-amber-500 focus:ring-amber-500 accent-amber-500 cursor-pointer"
+                  />
                 </div>
-                <CardTitle className="text-xl font-bold tracking-tight text-slate-800 line-clamp-1">{task.title}</CardTitle>
-              </CardHeader>
-              <CardContent className="px-6 pb-6 pt-2 relative z-10">
-                <p className="text-[15px] font-medium text-slate-500 line-clamp-2 min-h-[44px]">
-                  {task.description || <span className="italic opacity-50">لا يوجد تفاصيل إضافية</span>}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
+                <div className="absolute inset-0 bg-gradient-to-b from-white/50 to-transparent pointer-events-none" />
+                <div className="h-1.5 w-full bg-slate-100 relative z-10">
+                  <div 
+                    className={`h-full transition-all duration-500 ease-in-out ${task.status === 'DONE' ? 'bg-emerald-500 w-full' : task.status === 'IN_PROGRESS' ? 'bg-blue-500 w-1/2' : 'bg-slate-300 w-1/12'}`} 
+                  />
+                </div>
+                <CardHeader className="pt-6 pb-2 px-6 relative z-10 pr-10">
+                  <div className="flex justify-between items-start mb-3">
+                    {getStatusBadge(task.status)}
+                    <div className="bg-slate-50 border border-slate-100 px-2 py-1 rounded-md flex items-center text-[11px] font-mono font-bold text-slate-500">
+                      <Clock className="w-3 h-3 ml-1.5 text-slate-400" />
+                      {new Date(task.updated_at || task.created_at).toLocaleDateString('ar-SA')}
+                    </div>
+                  </div>
+                  <CardTitle className="text-xl font-bold tracking-tight text-slate-800 line-clamp-1">{task.title}</CardTitle>
+                </CardHeader>
+                <CardContent className="px-6 pb-6 pt-2 relative z-10 pr-10">
+                  <p className="text-[15px] font-medium text-slate-500 line-clamp-2 min-h-[44px]">
+                    {task.description || <span className="italic opacity-50">لا يوجد تفاصيل إضافية</span>}
+                  </p>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
 

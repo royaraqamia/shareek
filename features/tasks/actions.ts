@@ -123,3 +123,60 @@ export async function updateTaskAction(input: UpdateTaskInput) {
     return { success: false as const, error: err.message };
   }
 }
+
+export async function bulkDeleteTasksAction(ids: string[]) {
+  try {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+    
+    const { data: userData, error: authError } = await supabase.auth.getUser();
+    if (authError || !userData.user) {
+      return { success: false as const, error: "Unauthorized" };
+    }
+
+    const { error } = await supabase
+      .from('tasks')
+      .delete()
+      .in('id', ids);
+
+    if (error) {
+      console.error('Bulk delete tasks error:', error);
+      return { success: false as const, error: error.message };
+    }
+
+    return { success: true as const };
+  } catch (err: any) {
+    console.error('Bulk delete tasks exception:', err);
+    return { success: false as const, error: err.message };
+  }
+}
+
+export async function bulkUpdateTasksStatusAction(ids: string[], status: 'TODO' | 'IN_PROGRESS' | 'DONE') {
+  try {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+    
+    const { data: userData, error: authError } = await supabase.auth.getUser();
+    if (authError || !userData.user) {
+      return { success: false as const, error: "Unauthorized" };
+    }
+
+    const { error } = await supabase
+      .from('tasks')
+      .update({
+        status,
+        updated_at: new Date().toISOString(),
+      })
+      .in('id', ids);
+
+    if (error) {
+      console.error('Bulk update tasks status error:', error);
+      return { success: false as const, error: error.message };
+    }
+
+    return { success: true as const };
+  } catch (err: any) {
+    console.error('Bulk update tasks status exception:', err);
+    return { success: false as const, error: err.message };
+  }
+}

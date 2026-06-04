@@ -89,10 +89,15 @@ export function AppInitializer({ children }: { children: React.ReactNode }) {
     pathname === '/auth/register' || 
     pathname === '/' || 
     pathname === '/auth/reset-password';
+
+  const isPublicRoute = 
+    isAuthRoute || 
+    pathname === '/privacy' || 
+    pathname === '/terms';
   
   useEffect(() => {
     if (!loading) {
-      if (!userState.authenticated && !isAuthRoute) {
+      if (!userState.authenticated && !isPublicRoute) {
         // Redirect to login if user is unauthorized on private route
         router.push('/auth/login');
       } else if (userState.authenticated && isAuthRoute && pathname !== '/') {
@@ -100,7 +105,7 @@ export function AppInitializer({ children }: { children: React.ReactNode }) {
         router.push('/dashboard');
       }
     }
-  }, [loading, userState.authenticated, isAuthRoute, pathname]);
+  }, [loading, userState.authenticated, isAuthRoute, isPublicRoute, pathname]);
 
   const handleLogoutInWait = async () => {
     try {
@@ -124,7 +129,7 @@ export function AppInitializer({ children }: { children: React.ReactNode }) {
     return <div className="min-h-screen opacity-0" />; // hide until initialized to prevent hydration mismatch for RTL
   }
 
-  if (loading && !isAuthRoute) {
+  if (loading && !isPublicRoute) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center space-y-4">
         <div className="w-12 h-12 rounded-full border-4 border-blue-600/20 border-t-blue-600 animate-spin" />
@@ -134,7 +139,7 @@ export function AppInitializer({ children }: { children: React.ReactNode }) {
   }
 
   // Double gate screen to prevent unapproved and unconfirmed email access
-  const showWaitingScreen = userState.authenticated && !userState.isPlatform && !isAuthRoute;
+  const showWaitingScreen = userState.authenticated && !userState.isPlatform && !isPublicRoute;
 
   if (showWaitingScreen) {
     // Gate 1: If email is not confirmed

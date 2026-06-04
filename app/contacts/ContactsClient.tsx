@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { 
   Plus, Users, Loader2, WifiOff, Search, FileSpreadsheet, 
-  Download, UploadCloud, CheckCircle2, AlertTriangle, ArrowRight, ArrowLeft, Check
+  Download, UploadCloud, CheckCircle2, AlertTriangle, ArrowRight, ArrowLeft, Check,
+  Trash2, SlidersHorizontal
 } from 'lucide-react';
 import {
   Dialog,
@@ -20,7 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createContact, bulkCreateContacts } from '@/features/contacts/actions';
+import { createContact, bulkCreateContacts, bulkDeleteContactsAction, bulkUpdateContactsTypeAction } from '@/features/contacts/actions';
 import { toast } from '@/utils/toast';
 import { useRouter } from 'next/navigation';
 
@@ -78,6 +79,56 @@ export function ContactsClient({ initialContacts }: { initialContacts: any[] }) 
   const [filterType, setFilterType] = useState<'ALL' | 'CLIENT' | 'SUPPLIER'>('ALL');
   const language = useAppStore(state => state.language) as Language;
   const router = useRouter();
+
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+  const [isBulkUpdating, setIsBulkUpdating] = useState(false);
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    if (!window.confirm(language === 'ar' ? `هل أنت متأكد من حذف ${selectedIds.length} عنصر؟` : `Are you sure you want to delete ${selectedIds.length} items?`)) {
+      return;
+    }
+
+    setIsBulkDeleting(true);
+    try {
+      const res = await bulkDeleteContactsAction(selectedIds);
+      if (res.success) {
+        toast.success(language === 'ar' ? 'تم الحذف بنجاح!' : 'Deleted successfully!');
+        const updated = contacts.filter(c => !selectedIds.includes(c.id));
+        setContacts(updated);
+        setOfflineContacts(updated);
+        setSelectedIds([]);
+      } else {
+        toast.error(res.message || 'فشلت عملية الحذف');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Error deleting');
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
+
+  const handleBulkUpdateType = async (newType: 'CLIENT' | 'SUPPLIER') => {
+    if (selectedIds.length === 0) return;
+    setIsBulkUpdating(true);
+    try {
+      const res = await bulkUpdateContactsTypeAction(selectedIds, newType);
+      if (res.success) {
+        toast.success(language === 'ar' ? 'تم التحديث بنجاح!' : 'Updated successfully!');
+        const updated = contacts.map(c => selectedIds.includes(c.id) ? { ...c, type: newType } : c);
+        setContacts(updated);
+        setOfflineContacts(updated);
+        setSelectedIds([]);
+      } else {
+        toast.error(res.message || 'فشلت عملية التحديث');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Error updating');
+    } finally {
+      setIsBulkUpdating(false);
+    }
+  };
 
   // Sync server data to offline store on mount if online
   useEffect(() => {
@@ -874,6 +925,53 @@ export function ContactsClient({ initialContacts }: { initialContacts: any[] }) 
         </div>
       </div>
 
+      {selectedIds.length > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-900 dark:text-amber-100 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-sm">
+              {language === 'ar' ? `تم تحديد ${selectedIds.length} عنصر:` : `Selected ${selectedIds.length} items:`}
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2 justify-end w-full sm:w-auto">
+            {/* Update type to Client */}
+            <Button 
+              size="sm" 
+              variant="outline"
+              disabled={isBulkUpdating}
+              onClick={() => handleBulkUpdateType('CLIENT')}
+              className="gap-1.5 h-9 rounded-lg border-amber-500/30 bg-white/50 text-amber-900 font-bold text-xs cursor-pointer"
+            >
+              <Check className="w-3.5 h-3.5" />
+              {language === 'ar' ? 'تعيين كعميل' : 'Set as Client'}
+            </Button>
+
+            {/* Update type to Supplier */}
+            <Button 
+              size="sm" 
+              variant="outline"
+              disabled={isBulkUpdating}
+              onClick={() => handleBulkUpdateType('SUPPLIER')}
+              className="gap-1.5 h-9 rounded-lg border-amber-500/30 bg-white/50 text-amber-900 font-bold text-xs cursor-pointer"
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              {language === 'ar' ? 'تعيين كمورد' : 'Set as Supplier'}
+            </Button>
+
+            {/* Delete button */}
+            <Button 
+              size="sm" 
+              variant="destructive" 
+              disabled={isBulkDeleting}
+              onClick={handleBulkDelete}
+              className="gap-1.5 h-9 rounded-lg font-bold text-xs hover:bg-red-600 cursor-pointer"
+            >
+              {isBulkDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+              {language === 'ar' ? 'حذف المحدد' : 'Delete Selected'}
+            </Button>
+          </div>
+        </div>
+      )}
+
       <div className="rounded-2xl border border-slate-200/60 bg-white/60 backdrop-blur-xl flex-1 overflow-hidden shadow-sm">
         {contacts.length === 0 ? (
           <div className="py-24 flex flex-col items-center justify-center text-center space-y-6">
@@ -906,6 +1004,20 @@ export function ContactsClient({ initialContacts }: { initialContacts: any[] }) 
           <Table>
             <TableHeader className="bg-slate-50/80">
               <TableRow className="border-b border-slate-200">
+                <TableHead className="w-[50px] px-4 text-center font-bold text-slate-600">
+                  <input
+                    type="checkbox"
+                    checked={filteredContacts.length > 0 && selectedIds.length === filteredContacts.length}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedIds(filteredContacts.map(c => c.id));
+                      } else {
+                        setSelectedIds([]);
+                      }
+                    }}
+                    className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 accent-blue-600 cursor-pointer"
+                  />
+                </TableHead>
                 <TableHead className="text-right font-bold text-slate-600 h-12 px-6">{t.headers.name[language]}</TableHead>
                 <TableHead className="text-right font-bold text-slate-600 px-6">{t.headers.type[language]}</TableHead>
                 <TableHead className="text-right font-bold text-slate-600 px-6">{t.headers.phone[language]}</TableHead>
@@ -915,6 +1027,20 @@ export function ContactsClient({ initialContacts }: { initialContacts: any[] }) 
             <TableBody>
               {filteredContacts.map((contact) => (
                 <TableRow key={contact.id} className="border-b border-slate-100 hover:bg-blue-50/40 transition-colors group h-16">
+                  <TableCell className="w-[50px] px-4 text-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.includes(contact.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedIds(prev => [...prev, contact.id]);
+                        } else {
+                          setSelectedIds(prev => prev.filter(id => id !== contact.id));
+                        }
+                      }}
+                      className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 accent-blue-600 cursor-pointer"
+                    />
+                  </TableCell>
                   <TableCell className="font-bold text-slate-900 text-right px-6 text-[15px]">{contact.name}</TableCell>
                   <TableCell className="text-right px-6">
                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-[13px] font-bold border ${

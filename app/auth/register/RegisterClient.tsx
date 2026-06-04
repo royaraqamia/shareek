@@ -519,9 +519,9 @@ export function RegisterClient() {
                 </div>
                 <span className="leading-relaxed text-right">
                   أوافق على{" "}
-                  <Link href="/terms" className="text-blue-600 hover:underline font-black decoration-blue-200" onClick={(e) => e.stopPropagation()}>الشُّروط والأحكام</Link>
+                  <Link href="/terms" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-black decoration-blue-200" onClick={(e) => e.stopPropagation()}>الشُّروط والأحكام</Link>
                   {" "}و{" "}
-                  <Link href="/privacy" className="text-blue-600 hover:underline font-black decoration-blue-200" onClick={(e) => e.stopPropagation()}>سياسة الخصوصيَّة</Link>
+                  <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-black decoration-blue-200" onClick={(e) => e.stopPropagation()}>سياسة الخصوصيَّة</Link>
                 </span>
               </button>
             </div>

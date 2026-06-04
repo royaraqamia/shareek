@@ -64,3 +64,49 @@ export async function getProducts() {
 
   return { success: true, data };
 }
+
+export async function bulkDeleteProductsAction(ids: string[]) {
+  const user = await getApprovedUser();
+  if (!user.success) return user;
+
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  const { error } = await supabase
+    .from('products_or_services')
+    .delete()
+    .in('id', ids)
+    .eq('organization_id', user.organizationId);
+
+  if (error) {
+    return { success: false, code: "DATABASE_ERROR", message: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function bulkUpdateProductsAction(ids: string[], updates: { currentStock?: number; salePrice?: number; isService?: boolean }) {
+  const user = await getApprovedUser();
+  if (!user.success) return user;
+
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  // Map to DB column names if necessary
+  const dbUpdates: any = {};
+  if (updates.currentStock !== undefined) dbUpdates.current_stock = updates.currentStock;
+  if (updates.salePrice !== undefined) dbUpdates.sale_price = updates.salePrice;
+  if (updates.isService !== undefined) dbUpdates.is_service = updates.isService;
+
+  const { error } = await supabase
+    .from('products_or_services')
+    .update(dbUpdates)
+    .in('id', ids)
+    .eq('organization_id', user.organizationId);
+
+  if (error) {
+    return { success: false, code: "DATABASE_ERROR", message: error.message };
+  }
+
+  return { success: true };
+}

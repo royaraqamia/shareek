@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAppStore, type Language } from '@/store/useAppStore';
 import { useOfflineDataStore } from '@/store/useOfflineDataStore';
-import { PackageOpen, Plus, Loader2, WifiOff, Search } from 'lucide-react';
+import { PackageOpen, Plus, Loader2, WifiOff, Search, Trash2, Edit, SlidersHorizontal, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import {
@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createProduct } from '@/features/inventory/actions';
+import { createProduct, bulkDeleteProductsAction, bulkUpdateProductsAction } from '@/features/inventory/actions';
 import { toast } from '@/utils/toast';
 import { useRouter } from 'next/navigation';
 
@@ -29,6 +29,14 @@ export function InventoryClient({ initialProducts }: { initialProducts: any[] })
   const [filterType, setFilterType] = useState<'ALL' | 'PRODUCT' | 'SERVICE'>('ALL');
   const language = useAppStore(state => state.language) as Language;
   const router = useRouter();
+
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [bulkStockOpen, setBulkStockOpen] = useState(false);
+  const [bulkStockVal, setBulkStockVal] = useState('');
+  const [bulkPriceOpen, setBulkPriceOpen] = useState(false);
+  const [bulkPriceVal, setBulkPriceVal] = useState('');
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+  const [isBulkUpdating, setIsBulkUpdating] = useState(false);
 
   // Sync server data to offline store on mount if online
   useEffect(() => {
@@ -160,7 +168,91 @@ export function InventoryClient({ initialProducts }: { initialProducts: any[] })
     }
   };
 
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    if (!window.confirm(language === 'ar' ? `هل أنت متأكد من حذف ${selectedIds.length} عنصر؟` : `Are you sure you want to delete ${selectedIds.length} items?`)) {
+      return;
+    }
+    
+    setIsBulkDeleting(true);
+    try {
+      const res = await bulkDeleteProductsAction(selectedIds);
+      if (res.success) {
+        toast.success(language === 'ar' ? 'تم الحذف بنجاح!' : 'Deleted successfully!');
+        const updated = products.filter(p => !selectedIds.includes(p.id));
+        setProducts(updated);
+        setOfflineProducts(updated);
+        setSelectedIds([]);
+      } else {
+        toast.error(res.message || 'فشلت عملية الحذف');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Error deleting');
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
+
+  const handleBulkUpdateStock = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const stock = Number(bulkStockVal);
+    if (isNaN(stock) || stock < 0) {
+      toast.error(language === 'ar' ? 'يرجى إدخال قيمة مخزون صحيحة' : 'Invalid stock value');
+      return;
+    }
+
+    setIsBulkUpdating(true);
+    try {
+      const res = await bulkUpdateProductsAction(selectedIds, { currentStock: stock });
+      if (res.success) {
+        toast.success(language === 'ar' ? 'تم التحديث بنجاح!' : 'Updated successfully!');
+        const updated = products.map(p => selectedIds.includes(p.id) ? { ...p, current_stock: stock } : p);
+        setProducts(updated);
+        setOfflineProducts(updated);
+        setSelectedIds([]);
+        setBulkStockOpen(false);
+        setBulkStockVal('');
+      } else {
+        toast.error(res.message || 'فشل التحديث');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Error updating');
+    } finally {
+      setIsBulkUpdating(false);
+    }
+  };
+
+  const handleBulkUpdatePrice = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const price = Number(bulkPriceVal);
+    if (isNaN(price) || price < 0) {
+      toast.error(language === 'ar' ? 'يرجى إدخال سعر بيع صحيح' : 'Invalid price value');
+      return;
+    }
+
+    setIsBulkUpdating(true);
+    try {
+      const res = await bulkUpdateProductsAction(selectedIds, { salePrice: price });
+      if (res.success) {
+        toast.success(language === 'ar' ? 'تم التحديث بنجاح!' : 'Updated successfully!');
+        const updated = products.map(p => selectedIds.includes(p.id) ? { ...p, sale_price: price } : p);
+        setProducts(updated);
+        setOfflineProducts(updated);
+        setSelectedIds([]);
+        setBulkPriceOpen(false);
+        setBulkPriceVal('');
+      } else {
+        toast.error(res.message || 'فشل التحديث');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Error updating');
+    } finally {
+      setIsBulkUpdating(false);
+    }
+  };
+
   return (
+
     <div className="flex flex-col h-full space-y-8 container max-w-[90rem] mx-auto px-4 md:px-8 py-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-2">
@@ -324,12 +416,112 @@ export function InventoryClient({ initialProducts }: { initialProducts: any[] })
           </Button>
         </div>
       </div>
+ 
+      {selectedIds.length > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-900 dark:text-amber-100 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-sm">
+              {language === 'ar' ? `تم تحديد ${selectedIds.length} عنصر:` : `Selected ${selectedIds.length} items:`}
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2 justify-end w-full sm:w-auto">
+            {/* Update Stock Dialog */}
+            <Dialog open={bulkStockOpen} onOpenChange={setBulkStockOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm" variant="outline" className="gap-1.5 h-9 rounded-lg border-amber-500/30 font-bold text-xs">
+                  <SlidersHorizontal className="w-3.5 h-3.5" />
+                  {language === 'ar' ? 'تحديث المخزون' : 'Update Stock'}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[400px]">
+                <DialogHeader>
+                  <DialogTitle className="text-right">تحديث مخزون العناصر المحددة</DialogTitle>
+                  <DialogDescription className="text-right">
+                    سيتم تطبيق هذه القيمة على {selectedIds.length} عنصر محدد.
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleBulkUpdateStock} className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="bulk-stock" className="text-right block">الكمية الجديدة للمخزون</Label>
+                    <Input
+                      id="bulk-stock"
+                      type="number"
+                      min="0"
+                      value={bulkStockVal}
+                      onChange={(e) => setBulkStockVal(e.target.value)}
+                      required
+                      className="text-right"
+                    />
+                  </div>
+                  <DialogFooter className="flex sm:justify-start gap-2">
+                    <Button type="submit" disabled={isBulkUpdating} className="bg-blue-600 text-white hover:bg-blue-700 cursor-pointer">
+                      {isBulkUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'تحديث الكل'}
+                    </Button>
+                    <Button type="button" variant="outline" onClick={() => setBulkStockOpen(false)}>إلغاء</Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+
+            {/* Update Price Dialog */}
+            <Dialog open={bulkPriceOpen} onOpenChange={setBulkPriceOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm" variant="outline" className="gap-1.5 h-9 rounded-lg border-amber-500/30 font-bold text-xs">
+                  <Edit className="w-3.5 h-3.5" />
+                  {language === 'ar' ? 'تحديث سعر البيع' : 'Update Price'}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[400px]">
+                <DialogHeader>
+                  <DialogTitle className="text-right">تحديث سعر البيع للعناصر المحددة</DialogTitle>
+                  <DialogDescription className="text-right">
+                    سيتم تطبيق هذه القيمة على {selectedIds.length} عنصر محدد.
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleBulkUpdatePrice} className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="bulk-price" className="text-right block">سعر البيع الجديد (SAR)</Label>
+                    <Input
+                      id="bulk-price"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={bulkPriceVal}
+                      onChange={(e) => setBulkPriceVal(e.target.value)}
+                      required
+                      className="text-right"
+                    />
+                  </div>
+                  <DialogFooter className="flex sm:justify-start gap-2">
+                    <Button type="submit" disabled={isBulkUpdating} className="bg-blue-600 text-white hover:bg-blue-700 cursor-pointer">
+                      {isBulkUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'تحديث الكل'}
+                    </Button>
+                    <Button type="button" variant="outline" onClick={() => setBulkPriceOpen(false)}>إلغاء</Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+
+            {/* Delete button */}
+            <Button 
+              size="sm" 
+              variant="destructive" 
+              disabled={isBulkDeleting}
+              onClick={handleBulkDelete}
+              className="gap-1.5 h-9 rounded-lg font-bold text-xs hover:bg-red-655 cursor-pointer"
+            >
+              {isBulkDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+              {language === 'ar' ? 'حذف المحدد' : 'Delete Selected'}
+            </Button>
+          </div>
+        </div>
+      )}
 
       <div className="rounded-2xl border border-slate-200/60 bg-white/60 backdrop-blur-xl flex-1 overflow-hidden shadow-sm">
         {products.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center p-8 lg:p-24 text-center space-y-6">
             <div className="w-20 h-20 bg-slate-50 border border-slate-100 shadow-sm rounded-full flex items-center justify-center text-slate-400">
-              <PackageOpen className="w-10 h-10 text-slate-400" />
+               <PackageOpen className="w-10 h-10 text-slate-400" />
             </div>
             <div className="space-y-2">
               <h3 className="text-xl font-bold tracking-tight text-slate-800">{t('emptyTitle')}</h3>
@@ -357,6 +549,20 @@ export function InventoryClient({ initialProducts }: { initialProducts: any[] })
           <Table>
             <TableHeader className="bg-slate-50/80">
               <TableRow className="border-b border-slate-200">
+                <TableHead className="w-[50px] px-4 text-center font-bold text-slate-600">
+                  <input
+                    type="checkbox"
+                    checked={filteredProducts.length > 0 && selectedIds.length === filteredProducts.length}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedIds(filteredProducts.map(p => p.id));
+                      } else {
+                        setSelectedIds([]);
+                      }
+                    }}
+                    className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 accent-blue-600 cursor-pointer"
+                  />
+                </TableHead>
                 <TableHead className="text-right font-bold text-slate-600 h-12 px-6">{tCol('name')}</TableHead>
                 <TableHead className="text-right font-bold text-slate-600 px-6">{tCol('sku')}</TableHead>
                 <TableHead className="text-left font-bold text-slate-600 px-6">{tCol('stock')}</TableHead>
@@ -366,6 +572,20 @@ export function InventoryClient({ initialProducts }: { initialProducts: any[] })
             <TableBody>
               {filteredProducts.map((product) => (
                 <TableRow key={product.id} className="border-b border-slate-100 hover:bg-blue-50/40 transition-colors group h-16">
+                  <TableCell className="w-[50px] px-4 text-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.includes(product.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedIds(prev => [...prev, product.id]);
+                        } else {
+                          setSelectedIds(prev => prev.filter(id => id !== product.id));
+                        }
+                      }}
+                      className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 accent-blue-600 cursor-pointer"
+                    />
+                  </TableCell>
                   <TableCell className="font-bold text-slate-900 text-right px-6 text-[15px]">{product.name}</TableCell>
                   <TableCell className="text-right font-mono text-[15px] text-slate-600 font-medium px-6">{product.sku || '-'}</TableCell>
                   <TableCell className="text-left px-6">
@@ -383,3 +603,4 @@ export function InventoryClient({ initialProducts }: { initialProducts: any[] })
     </div>
   );
 }
+

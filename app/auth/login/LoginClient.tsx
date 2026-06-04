@@ -243,36 +243,36 @@ export function LoginClient() {
 
       {/* Forgot Password Dialog */}
       <Dialog open={isResetOpen} onOpenChange={setIsResetOpen}>
-        <DialogContent className="max-w-md bg-white border border-slate-100 shadow-2xl rounded-3xl p-6 sm:p-8 font-arabic">
+        <DialogContent className="max-w-md bg-card border border-border/80 shadow-2xl rounded-3xl p-6 sm:p-8 font-arabic text-card-foreground">
           <DialogHeader className="text-center flex flex-col items-center">
-            <div className="w-12 h-12 bg-blue-50/80 border border-blue-100 flex items-center justify-center rounded-2xl mb-3 text-blue-600">
+            <div className="w-12 h-12 bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/40 flex items-center justify-center rounded-2xl mb-3 text-blue-600 dark:text-blue-450 z-10">
               <KeyRound className="w-6 h-6 animate-pulse" />
             </div>
-            <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight leading-tight">
+            <DialogTitle className="text-2xl font-black text-slate-950 dark:text-slate-50 tracking-tight leading-tight">
               تغيير كلمة المرور
             </DialogTitle>
-            <DialogDescription className="text-sm font-medium text-slate-500 leading-relaxed max-w-sm">
-              أدخل البريد الإلكتروني المُرتبط بحسابك وسنقوم بالتَّحقُّق منه وإرسال رابط لإعادة تعيين كلمة مرور جديدة آمنة.
+            <DialogDescription className="text-sm font-medium text-slate-500 dark:text-slate-400 leading-relaxed max-w-sm mt-1">
+              أدخل البريد الإلكتروني المُرتبط بحسابك وسنقوم بالتَّحقُّق منه وإرسال رابط لإعادة تعيين كلمة مرور جديدة.
             </DialogDescription>
           </DialogHeader>
 
           {resetSuccessMessage ? (
             <div className="space-y-6 pt-4 text-center animate-in fade-in zoom-in-95 duration-300">
               <div className="flex flex-col items-center">
-                <div className="flex items-center justify-center w-16 h-16 bg-emerald-50 rounded-full border border-emerald-100 mb-4 text-emerald-650 animate-bounce">
-                  <CheckCircle2 className="w-9 h-9 text-emerald-600" />
+                <div className="flex items-center justify-center w-16 h-16 bg-emerald-50 dark:bg-emerald-950/40 rounded-full border border-emerald-100 dark:border-emerald-900/40 mb-4 text-emerald-600 dark:text-emerald-450 animate-bounce">
+                  <CheckCircle2 className="w-9 h-9" />
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 leading-tight">تمَّ إرسال رابط تغيير كلمة المرور</h3>
+                <h3 className="text-lg font-bold text-slate-950 dark:text-slate-50 leading-tight">تمَّ إرسال رابط تغيير كلمة المرور</h3>
               </div>
-              <div className="bg-emerald-50/40 border border-emerald-100/60 p-4 rounded-2xl text-slate-700 text-sm leading-relaxed text-right">
-                <p className="font-semibold text-slate-800">{resetSuccessMessage}</p>
-                <p className="text-[12px] text-slate-500 mt-2.5 border-t border-emerald-100/50 pt-2.5">
+              <div className="bg-emerald-50/40 dark:bg-emerald-950/10 border border-emerald-100/60 dark:border-emerald-900/30 p-4 rounded-2xl text-slate-700 dark:text-slate-300 text-sm leading-relaxed text-right">
+                <p className="font-semibold text-slate-850 dark:text-slate-200">{resetSuccessMessage}</p>
+                <p className="text-[12px] text-slate-500 dark:text-slate-450 mt-2.5 border-t border-emerald-100/50 dark:border-emerald-900/20 pt-2.5">
                   يُرجَى فحص صندوق البريد الوارد (أو صندوق البريد العشوائي/المهملات/Spam) للوصول إلى رسالة إعادة التعيين بأمان.
                 </p>
               </div>
               <Button
                 type="button"
-                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold h-12 rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
+                className="w-full bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-bold h-12 rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
                 onClick={() => setIsResetOpen(false)}
               >
                 حسنًا، فهمت
@@ -281,16 +281,16 @@ export function LoginClient() {
           ) : (
             <form onSubmit={handleResetPasswordRequest} className="space-y-5 mt-4">
               <div className="space-y-2">
-                <Label htmlFor="reset-email" className="font-bold text-slate-700">
-                  البريد الإلكتروني للتحقق
+                <Label htmlFor="reset-email" className="font-bold text-slate-700 dark:text-slate-300">
+                  البريد الإلكتروني
                 </Label>
                 <div className="relative">
-                  <Mail className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-400" />
+                  <Mail className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-400 dark:text-slate-500" />
                   <Input
                     id="reset-email"
                     type="email"
                     placeholder="مثال: user@example.com"
-                    className="pl-11 h-12 bg-slate-50/50 border-slate-200 focus:bg-white transition-all rounded-xl shadow-sm font-medium"
+                    className="pl-11 h-12 bg-slate-50/50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-950 transition-all rounded-xl shadow-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 font-medium"
                     value={resetEmail}
                     onChange={(e) => setResetEmail(e.target.value)}
                     required
@@ -309,7 +309,7 @@ export function LoginClient() {
                 <Button
                   type="button"
                   variant="ghost"
-                  className="w-full h-11 text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded-xl transition-all font-semibold"
+                  className="w-full h-11 text-slate-500 dark:text-slate-405 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900 rounded-xl transition-all font-semibold"
                   onClick={() => setIsResetOpen(false)}
                 >
                   تراجع

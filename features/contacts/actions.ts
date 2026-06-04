@@ -105,3 +105,44 @@ export async function getContacts() {
 
   return { success: true, data };
 }
+
+export async function bulkDeleteContactsAction(ids: string[]) {
+  const user = await getApprovedUser();
+  if (!user.success) return user;
+
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  const { error } = await supabase
+    .from('contacts')
+    .delete()
+    .in('id', ids)
+    .eq('organization_id', user.organizationId);
+
+  if (error) {
+    return { success: false, code: "DATABASE_ERROR", message: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function bulkUpdateContactsTypeAction(ids: string[], type: 'CLIENT' | 'SUPPLIER') {
+  const user = await getApprovedUser();
+  if (!user.success) return user;
+
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  const { error } = await supabase
+    .from('contacts')
+    .update({ type })
+    .in('id', ids)
+    .eq('organization_id', user.organizationId);
+
+  if (error) {
+    return { success: false, code: "DATABASE_ERROR", message: error.message };
+  }
+
+  return { success: true };
+}
+
