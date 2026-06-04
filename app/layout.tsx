@@ -17,6 +17,10 @@ const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
 export const metadata: Metadata = {
   title: 'شَريك',
   description: '',
+  icons: {
+    icon: '/shareek_logo.png',
+    apple: '/shareek_logo.png',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',

@@ -172,10 +172,11 @@ export async function signUpAction(input: SignUpInput) {
     }
 
     // 3. Create organization in database
+    const orgName = validation.data.organizationName || `مؤسسة ${validation.data.fullName}`;
     const { data: orgData, error: orgError } = await adminSupabase
       .from('organizations')
       .insert([{
-        name: validation.data.organizationName,
+        name: orgName,
         currency: 'SAR',
       }])
       .select()

@@ -22,9 +22,6 @@ const translations = {
   username: {
     ar: "اسم المستخدم (بالإنجليزيَّة)"
   },
-  organizationName: {
-    ar: "اسم المشروع / الشَّركة"
-  },
   email: {
     ar: "البريد الإلكتروني"
   },
@@ -68,7 +65,6 @@ export function RegisterClient() {
 
   const [formData, setFormData] = useState({
     fullName: "",
-    organizationName: "",
     username: "",
     email: "",
     password: "",
@@ -82,7 +78,6 @@ export function RegisterClient() {
   const [registerSuccessInfo, setRegisterSuccessInfo] = useState({
     email: "",
     fullName: "",
-    orgName: "",
     username: ""
   });
   
@@ -167,7 +162,6 @@ export function RegisterClient() {
         setRegisterSuccessInfo({
           email: formData.email,
           fullName: formData.fullName,
-          orgName: formData.organizationName,
           username: formData.username
         });
         setIsSuccess(true);
@@ -221,10 +215,6 @@ export function RegisterClient() {
                   <span className="text-xs text-slate-500">اسم المستخدم:</span>
                   <span className="font-semibold font-mono text-xs">@{registerSuccessInfo.username}</span>
                 </div>
-                <div className="flex justify-between items-center text-slate-700">
-                  <span className="text-xs text-slate-500">اسم المشروع/الشركة:</span>
-                  <span className="font-semibold text-xs">{registerSuccessInfo.orgName}</span>
-                </div>
               </div>
 
               <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl space-y-3.5 text-xs text-slate-600 leading-relaxed">
@@ -265,7 +255,7 @@ export function RegisterClient() {
       <div className="text-center flex flex-col items-center">
         <img
           src="/shareek_logo.png"
-          alt="Shareek ERP Logo"
+          alt="Shareek Logo"
           className="w-24 h-24 object-contain mb-5"
         />
         <h1 className="text-3xl font-black text-slate-900 tracking-tight">{t("title")}</h1>
@@ -315,21 +305,6 @@ export function RegisterClient() {
                   {usernameStatus.loading ? "جاري التَّحقُّق من التَّوفُّر..." : usernameStatus.message}
                 </div>
               )}
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="register-orgname" className="font-bold text-slate-700">{t("organizationName")}</Label>
-              <div className="relative">
-                <Building className="absolute left-3.5 top-3 h-5 w-5 text-slate-400" />
-                <Input
-                  id="register-orgname"
-                  type="text"
-                  className="pl-11 h-12 bg-slate-50/50 border-slate-200 focus:bg-white transition-all rounded-xl shadow-sm font-medium"
-                  value={formData.organizationName}
-                  onChange={(e) => setFormData(prev => ({ ...prev, organizationName: e.target.value }))}
-                  required
-                />
-              </div>
             </div>
 
             <div className="space-y-1.5">
