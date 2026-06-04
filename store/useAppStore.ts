@@ -24,7 +24,7 @@ export const useAppStore = create<AppState>()(
         }
       },
       dir: () => 'rtl',
-      theme: 'light',
+      theme: 'dark',
       setTheme: (theme) => set({ theme }),
     }),
     {

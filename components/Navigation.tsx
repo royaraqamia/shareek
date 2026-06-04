@@ -129,19 +129,6 @@ export function Navigation() {
 
            {/* Profile & End Actions */}
           <div className="flex items-center gap-2.5">
-            {/* Theme Toggle Button */}
-            <button
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="p-2 rounded-xl border border-border bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all cursor-pointer flex items-center justify-center h-10 w-10 shadow-sm"
-              title={theme === 'dark' ? 'المظهر النَّهاري' : 'المظهر الليلي'}
-            >
-              {theme === 'dark' ? (
-                <Sun className="w-5 h-5 text-amber-500 animate-[spin_12s_linear_infinite]" />
-              ) : (
-                <Moon className="w-5 h-5 text-slate-500" />
-              )}
-            </button>
-
             {profile ? (
               <>
                 <GlobalSearch />

@@ -42,7 +42,7 @@ export const viewport = {
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
-    <html lang="ar" dir="rtl" className={`${inter.variable} ${ibmPlexSansArabic.variable}`}>
+    <html lang="ar" dir="rtl" className={`dark ${inter.variable} ${ibmPlexSansArabic.variable}`}>
       <body suppressHydrationWarning>
         <AppInitializer>
           <PwaRegister />

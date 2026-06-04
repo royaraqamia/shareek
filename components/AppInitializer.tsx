@@ -71,12 +71,8 @@ export function AppInitializer({ children }: { children: React.ReactNode }) {
     setMounted(true);
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = language;
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [language, theme]);
+    document.documentElement.classList.add('dark');
+  }, [language]);
 
   useEffect(() => {
     // Check status on mount and on route changes to ensure instant protection
