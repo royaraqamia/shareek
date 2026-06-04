@@ -2,10 +2,11 @@
 
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
+import { getApprovedUser } from '../auth/actions';
 
 export type SearchResultItem = {
   id: string;
-  type: 'TASK' | 'TRANSACTION' | 'PRODUCT' | 'CONTACT' | 'USER';
+  type: 'TASK' | 'TRANSACTION' | 'PRODUCT' | 'CONTACT';
   title: string;
   subtitle?: string;
   href: string;
@@ -14,41 +15,42 @@ export type SearchResultItem = {
 export async function globalSearchAction(query: string) {
   try {
     if (!query || query.trim().length === 0) {
-      return { success: true, data: [] };
+      return { success: true as const, data: [] };
     }
+
+    const user = await getApprovedUser();
+    if (!user.success) return { success: false as const, error: "Unauthorized" };
 
     const searchQuery = query.trim();
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
-    
-    const { data: userData, error: authError } = await supabase.auth.getUser();
-    if (authError || !userData.user) {
-      return { success: false as const, error: "Unauthorized" };
-    }
 
-    // Parallel fetch from multiple tables
     const [tasksRes, transactionsRes, productsRes, contactsRes] = await Promise.all([
       supabase
         .from('tasks')
         .select('id, title, status')
+        .eq('organization_id', user.organizationId)
         .ilike('title', `%${searchQuery}%`)
         .limit(5),
-      
+
       supabase
         .from('transactions')
-        .select('id, concept, amount, type')
-        .ilike('concept', `%${searchQuery}%`)
+        .select('id, reference_number, total_amount, type')
+        .eq('organization_id', user.organizationId)
+        .ilike('reference_number', `%${searchQuery}%`)
         .limit(5),
-        
+
       supabase
         .from('products_or_services')
-        .select('id, name, type')
+        .select('id, name, is_service')
+        .eq('organization_id', user.organizationId)
         .ilike('name', `%${searchQuery}%`)
         .limit(5),
-        
+
       supabase
         .from('contacts')
-        .select('id, name, contact_type')
+        .select('id, name, type')
+        .eq('organization_id', user.organizationId)
         .ilike('name', `%${searchQuery}%`)
         .limit(5),
     ]);
@@ -61,7 +63,7 @@ export async function globalSearchAction(query: string) {
         type: 'TASK',
         title: t.title,
         subtitle: t.status,
-        href: `/tasks` // Right now we might not have a specific view page for a task, so just link to tasks
+        href: `/tasks`,
       }));
     }
 
@@ -69,9 +71,9 @@ export async function globalSearchAction(query: string) {
       transactionsRes.data.forEach(t => results.push({
         id: t.id,
         type: 'TRANSACTION',
-        title: t.concept,
-        subtitle: `${t.type === 'INCOME' ? '+' : '-'}${t.amount}`,
-        href: `/transactions`
+        title: t.reference_number,
+        subtitle: `${t.type === 'SALE' ? 'مبيعات' : 'مشتريات'} — ${Number(t.total_amount ?? 0).toLocaleString('ar-SA')}`,
+        href: `/transactions/${t.id}`,
       }));
     }
 
@@ -80,8 +82,8 @@ export async function globalSearchAction(query: string) {
         id: t.id,
         type: 'PRODUCT',
         title: t.name,
-        subtitle: t.type,
-        href: `/inventory`
+        subtitle: t.is_service ? 'خدمة' : 'منتج',
+        href: `/inventory`,
       }));
     }
 
@@ -90,13 +92,12 @@ export async function globalSearchAction(query: string) {
         id: t.id,
         type: 'CONTACT',
         title: t.name,
-        subtitle: t.contact_type,
-        href: `/contacts`
+        subtitle: t.type === 'CLIENT' ? 'عميل' : 'مورد',
+        href: `/contacts`,
       }));
     }
 
     return { success: true as const, data: results };
-
   } catch (err: any) {
     console.error('Global search error:', err);
     return { success: false as const, error: err.message };

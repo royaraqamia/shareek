@@ -2,6 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
+import { revalidatePath } from 'next/cache';
 import { CreateProductSchema, CreateProductInput } from './schemas';
 import { getApprovedUser } from '../auth/actions';
 
@@ -37,12 +38,14 @@ export async function createProduct(input: CreateProductInput) {
     .single();
 
   if (error) {
-    if (error.code === '23505') { // Unique violation
+    if (error.code === '23505') {
       return { success: false, code: "CONFLICT", message: "SKU already exists" };
     }
     return { success: false, code: "DATABASE_ERROR", message: error.message };
   }
 
+  revalidatePath('/inventory');
+  revalidatePath('/dashboard');
   return { success: true, data };
 }
 
@@ -56,7 +59,8 @@ export async function getProducts() {
   const { data, error } = await supabase
     .from('products_or_services')
     .select('*')
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(500);
 
   if (error) {
     return { success: false, code: "DATABASE_ERROR", message: error.message };
@@ -82,6 +86,8 @@ export async function bulkDeleteProductsAction(ids: string[]) {
     return { success: false, code: "DATABASE_ERROR", message: error.message };
   }
 
+  revalidatePath('/inventory');
+  revalidatePath('/dashboard');
   return { success: true };
 }
 
@@ -92,8 +98,7 @@ export async function bulkUpdateProductsAction(ids: string[], updates: { current
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
-  // Map to DB column names if necessary
-  const dbUpdates: any = {};
+  const dbUpdates: Record<string, unknown> = {};
   if (updates.currentStock !== undefined) dbUpdates.current_stock = updates.currentStock;
   if (updates.salePrice !== undefined) dbUpdates.sale_price = updates.salePrice;
   if (updates.isService !== undefined) dbUpdates.is_service = updates.isService;
@@ -108,5 +113,6 @@ export async function bulkUpdateProductsAction(ids: string[], updates: { current
     return { success: false, code: "DATABASE_ERROR", message: error.message };
   }
 
+  revalidatePath('/inventory');
   return { success: true };
 }

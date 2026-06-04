@@ -2,75 +2,47 @@
 
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
+import { revalidatePath } from 'next/cache';
 import { CreateTaskInput, UpdateTaskInput, Task } from './schemas';
+import { getApprovedUser } from '../auth/actions';
 
 export async function fetchTasksAction() {
+  const user = await getApprovedUser();
+  if (!user.success) return { success: false as const, code: user.code, message: user.message };
+
   try {
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
-    
-    const { data: userData, error: authError } = await supabase.auth.getUser();
-    if (authError || !userData.user) {
-      return { success: false as const, error: "Unauthorized" };
-    }
 
     const { data, error } = await supabase
       .from('tasks')
       .select('*')
+      .eq('organization_id', user.organizationId)
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Fetch tasks error:', error);
-      return { success: false as const, error: error.message };
+      return { success: false as const, code: "DATABASE_ERROR", message: error.message };
     }
 
     return { success: true as const, data: data as Task[] };
   } catch (err: any) {
-    console.error('Fetch tasks exception:', err);
-    return { success: false as const, error: err.message };
+    return { success: false as const, code: "EXCEPTION", message: err.message };
   }
 }
 
 export async function createTaskAction(input: CreateTaskInput) {
+  const user = await getApprovedUser();
+  if (!user.success) return { success: false as const, code: user.code, message: user.message };
+
   try {
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
-    
-    const { data: userData, error: authError } = await supabase.auth.getUser();
-    if (authError || !userData.user) {
-      return { success: false as const, error: "Unauthorized" };
-    }
-
-    // Getting the user's organization_id requires fetching their profile.
-    const { data: profileError } = await supabase
-      .from('profiles')
-      .select('organization_id')
-      .eq('id', userData.user.id)
-      .single();
-
-    if (profileError) {
-       console.error("Profile fetch error", profileError);
-    }
-    // Alternatively, getting organization_id using the RPC or it being set correctly using RLS 
-    // but the tasks table `organization_id` requires explicit population if not defaulting usingtrigger. 
-    // Wait, the transaction table uses `get_user_org_id()` but generally it's better to provide it or rely on DB default if we created a trigger.
-    // Let's explicitly fetch it.
-    
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('organization_id')
-      .eq('id', userData.user.id)
-      .single();
-
-    if (!profile || !profile.organization_id) {
-       return { success: false as const, error: "User has no organization associated" };
-    }
 
     const { data, error } = await supabase
       .from('tasks')
       .insert({
-        organization_id: profile.organization_id,
-        created_by: userData.user.id,
+        organization_id: user.organizationId,
+        created_by: user.user.id,
         title: input.title,
         description: input.description,
         status: input.status,
@@ -79,26 +51,23 @@ export async function createTaskAction(input: CreateTaskInput) {
       .single();
 
     if (error) {
-      console.error('Create task error:', error);
-      return { success: false as const, error: error.message };
+      return { success: false as const, code: "DATABASE_ERROR", message: error.message };
     }
 
+    revalidatePath('/tasks');
     return { success: true as const, data: data as Task };
   } catch (err: any) {
-    console.error('Create task exception:', err);
-    return { success: false as const, error: err.message };
+    return { success: false as const, code: "EXCEPTION", message: err.message };
   }
 }
 
 export async function updateTaskAction(input: UpdateTaskInput) {
+  const user = await getApprovedUser();
+  if (!user.success) return { success: false as const, code: user.code, message: user.message };
+
   try {
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
-    
-    const { data: userData, error: authError } = await supabase.auth.getUser();
-    if (authError || !userData.user) {
-      return { success: false as const, error: "Unauthorized" };
-    }
 
     const { data, error } = await supabase
       .from('tasks')
@@ -109,57 +78,53 @@ export async function updateTaskAction(input: UpdateTaskInput) {
         updated_at: new Date().toISOString(),
       })
       .eq('id', input.id)
+      .eq('organization_id', user.organizationId)
       .select()
       .single();
 
     if (error) {
-      console.error('Update task error:', error);
-      return { success: false as const, error: error.message };
+      return { success: false as const, code: "DATABASE_ERROR", message: error.message };
     }
 
+    revalidatePath('/tasks');
     return { success: true as const, data: data as Task };
   } catch (err: any) {
-    console.error('Update task exception:', err);
-    return { success: false as const, error: err.message };
+    return { success: false as const, code: "EXCEPTION", message: err.message };
   }
 }
 
 export async function bulkDeleteTasksAction(ids: string[]) {
+  const user = await getApprovedUser();
+  if (!user.success) return { success: false as const, code: user.code, message: user.message };
+
   try {
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
-    
-    const { data: userData, error: authError } = await supabase.auth.getUser();
-    if (authError || !userData.user) {
-      return { success: false as const, error: "Unauthorized" };
-    }
 
     const { error } = await supabase
       .from('tasks')
       .delete()
-      .in('id', ids);
+      .in('id', ids)
+      .eq('organization_id', user.organizationId);
 
     if (error) {
-      console.error('Bulk delete tasks error:', error);
-      return { success: false as const, error: error.message };
+      return { success: false as const, code: "DATABASE_ERROR", message: error.message };
     }
 
+    revalidatePath('/tasks');
     return { success: true as const };
   } catch (err: any) {
-    console.error('Bulk delete tasks exception:', err);
-    return { success: false as const, error: err.message };
+    return { success: false as const, code: "EXCEPTION", message: err.message };
   }
 }
 
 export async function bulkUpdateTasksStatusAction(ids: string[], status: 'TODO' | 'IN_PROGRESS' | 'DONE') {
+  const user = await getApprovedUser();
+  if (!user.success) return { success: false as const, code: user.code, message: user.message };
+
   try {
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
-    
-    const { data: userData, error: authError } = await supabase.auth.getUser();
-    if (authError || !userData.user) {
-      return { success: false as const, error: "Unauthorized" };
-    }
 
     const { error } = await supabase
       .from('tasks')
@@ -167,16 +132,16 @@ export async function bulkUpdateTasksStatusAction(ids: string[], status: 'TODO' 
         status,
         updated_at: new Date().toISOString(),
       })
-      .in('id', ids);
+      .in('id', ids)
+      .eq('organization_id', user.organizationId);
 
     if (error) {
-      console.error('Bulk update tasks status error:', error);
-      return { success: false as const, error: error.message };
+      return { success: false as const, code: "DATABASE_ERROR", message: error.message };
     }
 
+    revalidatePath('/tasks');
     return { success: true as const };
   } catch (err: any) {
-    console.error('Bulk update tasks status exception:', err);
-    return { success: false as const, error: err.message };
+    return { success: false as const, code: "EXCEPTION", message: err.message };
   }
 }

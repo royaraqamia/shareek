@@ -2,6 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
+import { revalidatePath } from 'next/cache';
 import { CreateContactSchema, CreateContactInput } from './schemas';
 import { getApprovedUser } from '../auth/actions';
 
@@ -38,6 +39,8 @@ export async function createContact(input: CreateContactInput) {
     return { success: false, code: "DATABASE_ERROR", message: error.message };
   }
 
+  revalidatePath('/contacts');
+  revalidatePath('/transactions/new');
   return { success: true, data };
 }
 
@@ -84,6 +87,7 @@ export async function bulkCreateContacts(contactsList: CreateContactInput[]) {
     return { success: false, code: "DATABASE_ERROR", message: error.message };
   }
 
+  revalidatePath('/contacts');
   return { success: true, data };
 }
 
@@ -97,7 +101,8 @@ export async function getContacts() {
   const { data, error } = await supabase
     .from('contacts')
     .select('*')
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(500);
 
   if (error) {
     return { success: false, code: "DATABASE_ERROR", message: error.message };
@@ -123,6 +128,7 @@ export async function bulkDeleteContactsAction(ids: string[]) {
     return { success: false, code: "DATABASE_ERROR", message: error.message };
   }
 
+  revalidatePath('/contacts');
   return { success: true };
 }
 
@@ -143,6 +149,6 @@ export async function bulkUpdateContactsTypeAction(ids: string[], type: 'CLIENT'
     return { success: false, code: "DATABASE_ERROR", message: error.message };
   }
 
+  revalidatePath('/contacts');
   return { success: true };
 }
-

@@ -1,0 +1,2 @@
+- [Shareek app setup](shareek-setup.md) — Next.js 15 + Supabase ERP app; review complete, all 19 issues fixed.
+- [Middleware + Server Actions](middleware-server-actions.md) — Must exempt `next-action` header requests from redirect logic.

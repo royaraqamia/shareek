@@ -5,14 +5,13 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { cookies, headers } from 'next/headers';
 import { SignUpSchema, SignInSchema, SignUpInput, SignInInput } from './schemas';
 
-// Creates an administrative client using the service role key to bypass RLS policies for platform-level profile management
 function createAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!url || !serviceRoleKey) {
     throw new Error(
-      "لم يتم العثور على مفتاح الخدمة الإشرافية الإدارية لـ Supabase (SUPABASE_SERVICE_ROLE_KEY) أو رابط الخدمة. يرجى التأكد من تكوينهم في متغيرات البيئة الخاصة بمشروعك (سواء في إعدادات Vercel أو AI Studio) ثم إعادة بناء ونشر التطبيق."
+      "لم يتم العثور على مفتاح الخدمة الإشرافية الإدارية لـ Supabase (SUPABASE_SERVICE_ROLE_KEY) أو رابط الخدمة."
     );
   }
 
@@ -24,7 +23,6 @@ function createAdminClient() {
   });
 }
 
-// Checks if a specific user UUID is registered as a platform administrator in the profiles table
 export async function isPlatformAdmin(userId: string): Promise<boolean> {
   if (!userId) return false;
   try {
@@ -44,27 +42,29 @@ export async function getUser() {
   try {
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
-    
+
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) {
       return { success: false as const, code: "UNAUTHORIZED", message: "User not authenticated." };
     }
-    
-    const adminSupabase = createAdminClient();
-    const { data: profile } = await adminSupabase
+
+    // Use the regular (session-scoped) client so RLS enforces the user can only
+    // read their own profile row (auth.uid() = id). Admin client is reserved for
+    // operations that must bypass RLS (admin panel, signup bootstrap, etc.).
+    const { data: profile } = await supabase
       .from('profiles')
       .select('organization_id, role, full_name, email, username, is_approved, is_platform_admin')
       .eq('id', data.user.id)
       .maybeSingle();
-      
+
     if (!profile) {
       return { success: false as const, code: "UNAUTHORIZED", message: "User profile not found." };
     }
-    
-    return { 
-      success: true as const, 
-      user: data.user, 
-      organizationId: profile.organization_id, 
+
+    return {
+      success: true as const,
+      user: data.user,
+      organizationId: profile.organization_id,
       role: profile.role,
       fullName: profile.full_name,
       email: profile.email,
@@ -78,18 +78,17 @@ export async function getUser() {
   }
 }
 
-// Security gate: blocks any database mutation/query action from unapproved or unauthenticated sessions
 export async function getApprovedUser() {
   const result = await getUser();
   if (!result.success) {
     return { success: false as const, code: "UNAUTHORIZED", message: "User not authenticated." };
   }
-  
+
   const isPlatform = !!result.isPlatformAdmin;
   if (!result.is_approved && !isPlatform) {
     return { success: false as const, code: "APPROVAL_PENDING", message: "حسابك قيد المراجعة والتدقيق والقبول من قِبَل الإدارة العامة، يُرجى الانتظار." };
   }
-  
+
   return result;
 }
 
@@ -109,7 +108,7 @@ export async function signUpAction(input: SignUpInput) {
     const supabase = createClient(cookieStore);
     const adminSupabase = createAdminClient();
 
-    // 1. Check if username is already taken
+    // Check if username is already taken
     const { data: existingUser } = await adminSupabase
       .from('profiles')
       .select('username')
@@ -131,23 +130,7 @@ export async function signUpAction(input: SignUpInput) {
       return { success: false, code: "CONFLICT", message: "البريد الإلكتروني هذا مستخدم بالفعل من قِبَل شخص آخر، يُرجى استخدام بريد إلكتروني آخر أو تسجيل الدخول." };
     }
 
-    // Clean up orphaned user from auth.users if they exist there but not in public.profiles.
-    // This heals states caused by manual public database wipes/truncation without clearing Auth.
-    try {
-      const { data: listUsersData, error: listUsersError } = await adminSupabase.auth.admin.listUsers();
-      if (!listUsersError && listUsersData?.users) {
-        const existingAuthUser = listUsersData.users.find(
-          (u) => u.email?.toLowerCase() === validation.data.email.toLowerCase()
-        );
-        if (existingAuthUser) {
-          await adminSupabase.auth.admin.deleteUser(existingAuthUser.id);
-        }
-      }
-    } catch (cleanupErr) {
-      console.error("Orphaned user cleanup error:", cleanupErr);
-    }
-
-    // 2. Log in / Sign up via supabase.auth
+    // Build redirect URL from request headers
     const headerList = await headers();
     const host = headerList.get('host');
     const proto = headerList.get('x-forwarded-proto') || 'https';
@@ -171,7 +154,7 @@ export async function signUpAction(input: SignUpInput) {
       return { success: false, code: "AUTH_ERROR", message: "Authentication provider failed to assign a user ID." };
     }
 
-    // 3. Create organization in database
+    // Create organization
     const orgName = validation.data.organizationName || `مؤسسة ${validation.data.fullName}`;
     const { data: orgData, error: orgError } = await adminSupabase
       .from('organizations')
@@ -183,10 +166,12 @@ export async function signUpAction(input: SignUpInput) {
       .single();
 
     if (orgError) {
+      // Clean up the auth user so the email is free to retry
+      await adminSupabase.auth.admin.deleteUser(userId).catch(() => {});
       return { success: false, code: "DATABASE_ERROR", message: orgError.message };
     }
 
-    // 4. Create profile linked to organization
+    // Create profile linked to organization
     const { error: profileError } = await adminSupabase
       .from('profiles')
       .insert([{
@@ -196,18 +181,21 @@ export async function signUpAction(input: SignUpInput) {
         role: 'ADMIN',
         full_name: validation.data.fullName,
         username: validation.data.username,
-        is_approved: false, // Default to false, can be approved by a platform administrator
+        is_approved: false,
       }]);
 
     if (profileError) {
+      // Clean up both org and auth user so the state is consistent
+      await adminSupabase.from('organizations').delete().eq('id', orgData.id).catch(() => {});
+      await adminSupabase.auth.admin.deleteUser(userId).catch(() => {});
       return { success: false, code: "DATABASE_ERROR", message: profileError.message };
     }
 
-    return { 
-      success: true, 
-      user: authData.user, 
+    return {
+      success: true,
+      user: authData.user,
       organizationId: orgData.id,
-      is_approved: false 
+      is_approved: false
     };
   } catch (err: any) {
     return { success: false, code: "SYSTEM_EXCEPTION", message: err.message || "An exception occurred during signup." };
@@ -231,7 +219,6 @@ export async function signInAction(input: SignInInput) {
 
     let email = validation.data.email.trim();
 
-    // If identifier doesn't look like an email (no '@'), treat as username
     if (!email.includes('@')) {
       const adminSupabase = createAdminClient();
       const { data: profile, error: profileError } = await adminSupabase
@@ -241,10 +228,6 @@ export async function signInAction(input: SignInInput) {
         .maybeSingle();
 
       if (profileError || !profile || !profile.email) {
-        if (profileError) {
-          console.error("DEBUG signInAction profile query error:", profileError);
-          return { success: false, code: "USER_NOT_FOUND", message: `فشل البحث عن اسم المستخدم: ${profileError.message} (رمز: ${profileError.code})` };
-        }
         return { success: false, code: "USER_NOT_FOUND", message: "اسم المستخدم المكتوب غير موجود بالنظام." };
       }
       email = profile.email;
@@ -266,7 +249,6 @@ export async function signInAction(input: SignInInput) {
   }
 }
 
-// Checks if a username meets constraints & isn't already taken
 export async function checkUsernameAction(username: string) {
   if (!username) {
     return { success: false, code: "EMPTY", message: "اسم المستخدم مطلوب." };
@@ -289,15 +271,13 @@ export async function checkUsernameAction(username: string) {
       .maybeSingle();
 
     if (error) {
-      console.error("DEBUG checkUsernameAction Database error:", error);
-      return { success: false, code: "DB_ERROR", message: `فشل التحقق: ${error.message} (رمز الخطأ: ${error.code})` };
+      return { success: false, code: "DB_ERROR", message: `فشل التحقق: ${error.message}` };
     }
     if (data) {
       return { success: false, code: "TAKEN", message: "اسم المستخدم مستخدم بالفعل" };
     }
     return { success: true, code: "AVAILABLE", message: "اسم المستخدم متاح!" };
   } catch (err: any) {
-    console.error("DEBUG checkUsernameAction Exception:", err);
     return { success: false, code: "EXCEPTION", message: `خطأ بالاتصال بقاعدة البيانات: ${err.message || err}` };
   }
 }
@@ -313,25 +293,21 @@ export async function signOutAction() {
   }
 }
 
-// Fetch all registered profiles across organizations (Platform Admin ONLY)
 export async function getAdminUsers() {
   const user = await getUser();
   if (!user.success) return { success: false, message: "غير مصرح لك بالوصول" };
-  
-  const isPlatform = !!user.isPlatformAdmin;
-  if (!isPlatform) {
+
+  if (!user.isPlatformAdmin) {
     return { success: false, message: "هذه الصلاحية مخصصة لإدارة النظام العامة فقط." };
   }
-  
+
   try {
     const supabase = createAdminClient();
-    
-    // We get all profiles together with their organizations
     const { data, error } = await supabase
       .from('profiles')
       .select('id, email, role, full_name, username, is_approved, created_at, organizations(name)')
       .order('created_at', { ascending: false });
-      
+
     if (error) return { success: false, message: error.message };
     return { success: true, data };
   } catch (err: any) {
@@ -339,24 +315,21 @@ export async function getAdminUsers() {
   }
 }
 
-// Toggle an account's approval flag (Platform Admin ONLY)
 export async function toggleUserApprovalAction(targetUserId: string, approved: boolean) {
   const user = await getUser();
   if (!user.success) return { success: false, message: "غير مصرح لك بالوصول" };
-  
-  const isPlatform = !!user.isPlatformAdmin;
-  if (!isPlatform) {
+
+  if (!user.isPlatformAdmin) {
     return { success: false, message: "هذه الصلاحية مخصصة لإدارة النظام العامة فقط." };
   }
-  
+
   try {
     const supabase = createAdminClient();
-    
     const { error } = await supabase
       .from('profiles')
       .update({ is_approved: approved })
       .eq('id', targetUserId);
-      
+
     if (error) return { success: false, message: error.message };
     return { success: true };
   } catch (err: any) {
@@ -364,19 +337,13 @@ export async function toggleUserApprovalAction(targetUserId: string, approved: b
   }
 }
 
-/**
- * Requests a password reset link for the provided email.
- * This ensures that when resetting a password, we only require an email address.
- * Sends email generated from the current host with correct redirect configurations.
- */
 export async function requestPasswordResetAction(email: string) {
   if (!email) {
     return { success: false, message: "يُرجَى إدخال البريد الإلكتروني." };
   }
 
   const emailTrimmed = email.trim().toLowerCase();
-  
-  // Basic email validation
+
   if (!emailTrimmed.includes('@') || emailTrimmed.length < 5) {
     return { success: false, message: "يُرجَى إدخال بريد إلكتروني صحيح." };
   }
@@ -385,7 +352,6 @@ export async function requestPasswordResetAction(email: string) {
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
 
-    // Get host/origin dynamically to generate the redirect URL
     const headerList = await headers();
     const host = headerList.get('host');
     const proto = headerList.get('x-forwarded-proto') || 'https';
@@ -400,15 +366,14 @@ export async function requestPasswordResetAction(email: string) {
       return { success: false, message: `فشل إرسال بريد إعادة التعيين: ${error.message}` };
     }
 
-    // Mask the email for user privacy before returning
     const parts = emailTrimmed.split('@');
-    const maskedEmail = parts[0].length > 3 
+    const maskedEmail = parts[0].length > 3
       ? `${parts[0].slice(0, 3)}***@${parts[1]}`
       : `***@${parts[1]}`;
 
-    return { 
-      success: true, 
-      message: `تمَّ إرسال رابط تغيير كلمة المرور إلى البريد الإلكتروني: ${maskedEmail}`,
+    return {
+      success: true,
+      message: `تمَّ إرسال رابط تغيير كلمة المرور إلى البريد الإلكتروني: ${maskedEmail}`,
       email: maskedEmail
     };
   } catch (err: any) {
@@ -416,13 +381,9 @@ export async function requestPasswordResetAction(email: string) {
   }
 }
 
-/**
- * Updates the authenticated user's password.
- * This runs when they have loaded the secure recovery callback page /auth/reset-password.
- */
 export async function updatePasswordAction(password: string) {
-  if (!password || password.length < 6) {
-    return { success: false, message: "يجب أن تكون كلمة المرور 6 أحرف على الأقل." };
+  if (!password || password.length < 8) {
+    return { success: false, message: "يجب أن تكون كلمة المرور 8 أحرف على الأقل." };
   }
 
   try {
@@ -437,12 +398,10 @@ export async function updatePasswordAction(password: string) {
       return { success: false, message: `فشل تحديث كلمة المرور: ${error.message}` };
     }
 
-    // Also sign the user out to let them log in fresh with their new password
     await supabase.auth.signOut();
 
-    return { success: true, message: "تمَّ تحديث كلمة المرور بنجاح! يُرجى الدخول بكلمة المرور الجديدة." };
+    return { success: true, message: "تمَّ تحديث كلمة المرور بنجاح! يُرجى الدخول بكلمة المرور الجديدة." };
   } catch (err: any) {
     return { success: false, message: err.message || "حدث خطأ غير متوقع أثناء تحديث كلمة المرور." };
   }
 }
-

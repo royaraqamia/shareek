@@ -2,6 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
+import { revalidatePath } from 'next/cache';
 import { CreateTransactionSchema, CreateTransactionInput } from './schemas';
 import { getApprovedUser } from '../auth/actions';
 
@@ -22,7 +23,6 @@ export async function createTransaction(input: CreateTransactionInput) {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
-  // We are calling the custom RPC function created in migrations
   const { data: transactionId, error } = await supabase.rpc('create_transaction_with_items', {
     p_organization_id: user.organizationId,
     p_contact_id: validation.data.contactId,
@@ -52,13 +52,15 @@ export async function createTransaction(input: CreateTransactionInput) {
     return { success: false, code: "DATABASE_ERROR", message: error.message };
   }
 
-  // Fetch the created transaction to return
   const { data } = await supabase
     .from('transactions')
     .select('*, transaction_items(*)')
     .eq('id', transactionId)
     .single();
 
+  revalidatePath('/transactions');
+  revalidatePath('/dashboard');
+  revalidatePath('/inventory');
   return { success: true, data };
 }
 
@@ -72,7 +74,8 @@ export async function getTransactions() {
   const { data, error } = await supabase
     .from('transactions')
     .select('*, contacts(name)')
-    .order('transaction_date', { ascending: false });
+    .order('transaction_date', { ascending: false })
+    .limit(500);
 
   if (error) {
     return { success: false, code: "DATABASE_ERROR", message: error.message };
@@ -105,8 +108,57 @@ export async function bulkDeleteTransactionsAction(ids: string[]) {
   const user = await getApprovedUser();
   if (!user.success) return user;
 
+  if (!ids.length) return { success: true };
+
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
+
+  // Fetch transactions with items BEFORE deleting so we can reverse stock
+  const { data: transactions, error: fetchError } = await supabase
+    .from('transactions')
+    .select('id, type, transaction_items(product_id, quantity)')
+    .in('id', ids)
+    .eq('organization_id', user.organizationId);
+
+  if (fetchError) {
+    return { success: false, code: "DATABASE_ERROR", message: fetchError.message };
+  }
+
+  // Build net stock delta per product:
+  // SALE was created => stock was decremented => on delete, add back
+  // PURCHASE was created => stock was incremented => on delete, subtract back
+  const stockDeltas: Record<string, number> = {};
+  for (const tx of transactions ?? []) {
+    for (const item of (tx.transaction_items as any[]) ?? []) {
+      const delta = tx.type === 'SALE' ? item.quantity : -item.quantity;
+      stockDeltas[item.product_id] = (stockDeltas[item.product_id] ?? 0) + delta;
+    }
+  }
+
+  // Reverse stock for affected products (non-services only)
+  const productIds = Object.keys(stockDeltas);
+  if (productIds.length > 0) {
+    const { data: products } = await supabase
+      .from('products_or_services')
+      .select('id, current_stock, is_service')
+      .in('id', productIds)
+      .eq('organization_id', user.organizationId);
+
+    if (products) {
+      await Promise.all(
+        products
+          .filter(p => !p.is_service)
+          .map(product => {
+            const newStock = Math.max(0, (product.current_stock ?? 0) + (stockDeltas[product.id] ?? 0));
+            return supabase
+              .from('products_or_services')
+              .update({ current_stock: newStock })
+              .eq('id', product.id)
+              .eq('organization_id', user.organizationId);
+          })
+      );
+    }
+  }
 
   const { error } = await supabase
     .from('transactions')
@@ -118,6 +170,9 @@ export async function bulkDeleteTransactionsAction(ids: string[]) {
     return { success: false, code: "DATABASE_ERROR", message: error.message };
   }
 
+  revalidatePath('/transactions');
+  revalidatePath('/inventory');
+  revalidatePath('/dashboard');
   return { success: true };
 }
 
@@ -138,6 +193,6 @@ export async function bulkUpdateTransactionsPaymentAction(ids: string[], payment
     return { success: false, code: "DATABASE_ERROR", message: error.message };
   }
 
+  revalidatePath('/transactions');
   return { success: true };
 }
-

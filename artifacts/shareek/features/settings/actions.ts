@@ -2,6 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
+import { revalidatePath } from 'next/cache';
 import { UpdateSettingsSchema, UpdateSettingsInput } from './schemas';
 import { getApprovedUser } from '../auth/actions';
 
@@ -58,5 +59,7 @@ export async function updateOrganization(input: UpdateSettingsInput) {
     return { success: false, code: "DATABASE_ERROR", message: error.message };
   }
 
+  revalidatePath('/settings');
+  revalidatePath('/dashboard');
   return { success: true, data };
 }

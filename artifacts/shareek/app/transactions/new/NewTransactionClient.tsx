@@ -101,7 +101,7 @@ const translations = {
     ar: "المجموع الفرعي"
   },
   tax: {
-    en: "Tax Standard Standard Standard (15.00% VAT)",
+    en: "VAT (15.00%)",
     ar: "ضريبة القيمة المضافة القياسية (15.00%)"
   },
   grandTotal: {
@@ -183,10 +183,11 @@ export function NewTransactionClient({ contacts, products }: NewTransactionClien
 
   // Auto reference generation helper
   const generateRef = () => {
-    const timestamp = Date.now().toString().slice(-4);
-    const orderNum = Math.floor(Math.random() * 900) + 100;
     const prefix = type === 'SALE' ? 'INV' : 'PO';
-    setReferenceNumber(`${prefix}-2026-${timestamp}-${orderNum}`);
+    const year = new Date().getFullYear();
+    const seq = Date.now().toString().slice(-6);
+    const rand = Math.random().toString(36).slice(2, 7).toUpperCase();
+    setReferenceNumber(`${prefix}-${year}-${seq}-${rand}`);
   };
 
   // Add the row to invoice list
