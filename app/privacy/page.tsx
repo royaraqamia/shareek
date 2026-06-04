@@ -59,7 +59,7 @@ export default function PrivacyPage() {
             <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
               نقوم بجمع وتخزين المعلومات المحدودة والضَّروريَّة لتقديم خدمات المنصَّة لك:
             </p>
-            <ul className="space-y-2.5 text-slate-600 text-sm font-medium mr-4 list-disc list-inside">
+            <ul className="space-y-2.5 text-muted-foreground text-sm font-medium mr-4 list-disc list-inside">
               <li>المعلومات الشَّخصيَّة الأساسيَّة (الاسم، البريد الإلكتروني، واسم المستخدم).</li>
               <li>معلومات السِّجلات التجاريَّة والمعاملات مثل (الفواتير، والزَّبائن والمورِّدين، ومعاملات الشِّراء والبيع الخاصَّة بك).</li>
               <li>ملفَّات تعريف الارتباط المحدودة لتحديث وتخزين تفضيلات حسابك (مثل اللغّة ووضعيَّة الاتِّصال).</li>
@@ -75,7 +75,7 @@ export default function PrivacyPage() {
             <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
               نحن نستخدم البيانات التي نجمعها بشكلٍ حصري للأغراض التَّالية:
             </p>
-            <ul className="space-y-2.5 text-slate-600 text-sm font-medium mr-4 list-disc list-inside">
+            <ul className="space-y-2.5 text-muted-foreground text-sm font-medium mr-4 list-disc list-inside">
               <li>تخصيص لوحة التَّحكُّم والتقارير الماليَّة لتناسب مؤسَّستك التجاريَّة.</li>
               <li>إرسال الإشعارات وتنبيهات الأمان الهامَّة مثل (تغيير كلمة المرور وتعيين الحساب).</li>
               <li>توفير وتفعيل وضع عدم الاتِّصال بالإنترنت (Offline Mode) لضمان استمراريَّة إدخال فواتيرك بأمان تامّ.</li>
@@ -107,9 +107,9 @@ export default function PrivacyPage() {
         </div>
 
         {/* Footer Contact Info Card */}
-        <div className="bg-blue-50/50 border border-blue-100 p-6 rounded-3xl text-center space-y-2">
-          <p className="text-sm text-blue-800 font-bold">هل لديك أي استفسار أو مخاوف بشأن الخصوصيَّة؟</p>
-          <p className="text-xs text-blue-600 font-medium">قنواتنا مفتوحة دائمًا لدعمك. يمكنك مراسلتنا مباشرةً عبر البريد الإلكتروني الخاص بـ شَريك.</p>
+        <div className="bg-primary/5 border border-primary/20 p-6 rounded-3xl text-center space-y-2">
+          <p className="text-sm text-primary font-bold">هل لديك أي استفسار أو مخاوف بشأن الخصوصيَّة؟</p>
+          <p className="text-xs text-primary/80 font-medium">قنواتنا مفتوحة دائمًا لدعمك. يمكنك مراسلتنا مباشرةً عبر البريد الإلكتروني الخاص بـ شَريك.</p>
         </div>
       </main>
 

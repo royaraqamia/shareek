@@ -6,6 +6,7 @@ import { useOfflineDataStore } from '@/store/useOfflineDataStore';
 import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { DangerConfirmDialog } from '@/components/DangerConfirmDialog';
+import { EmptyState } from '@/components/EmptyState';
 import { 
   Plus, Users, Loader2, WifiOff, Search, FileSpreadsheet, 
   Download, UploadCloud, CheckCircle2, AlertTriangle, ArrowRight, ArrowLeft, Check,
@@ -477,7 +478,7 @@ export function ContactsClient({ initialContacts }: { initialContacts: any[] }) 
                 {language === 'ar' ? 'استيراد جماعي (CSV)' : 'Bulk Import (CSV)'}
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl bg-white border border-slate-100 shadow-2xl rounded-3xl p-6 sm:p-8 font-arabic">
+            <DialogContent className="max-w-2xl font-arabic">
               <DialogHeader className="text-right">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-emerald-50 border border-emerald-100 text-emerald-600 rounded-xl">
@@ -1004,32 +1005,22 @@ export function ContactsClient({ initialContacts }: { initialContacts: any[] }) 
 
       <div className="rounded-2xl border border-slate-200/60 bg-white/60 backdrop-blur-xl flex-1 overflow-hidden shadow-sm">
         {contacts.length === 0 ? (
-          <div className="py-24 flex flex-col items-center justify-center text-center space-y-6">
-            <div className="w-20 h-20 bg-slate-50 border border-slate-100 shadow-sm rounded-full flex items-center justify-center text-slate-400">
-              <Users className="w-10 h-10" />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-xl font-bold text-slate-800 tracking-tight">{t.emptyTitle[language]}</h3>
-              <p className="text-base text-slate-500 font-medium max-w-sm">{t.emptyDesc[language]}</p>
-            </div>
-          </div>
+          <EmptyState 
+            icon={Users}
+            title={t.emptyTitle[language]}
+            description={t.emptyDesc[language]}
+            buttonText={t.addContact[language]}
+            buttonIcon={Plus}
+            onAction={() => setIsOpen(true)}
+          />
         ) : filteredContacts.length === 0 ? (
-          <div className="py-24 flex flex-col items-center justify-center text-center space-y-6 animate-in fade-in duration-300">
-            <div className="w-20 h-20 bg-slate-50 border border-slate-100 shadow-sm rounded-full flex items-center justify-center text-slate-400">
-              <Search className="w-10 h-10 text-slate-400" />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-xl font-bold tracking-tight text-slate-800">
-                {language === 'ar' ? 'لا توجد نتائج مطابقة' : 'No matching results'}
-              </h3>
-              <p className="text-base text-slate-500 font-medium max-w-sm">
-                {language === 'ar' ? 'جرب البحث بكلمات أخرى أو إعادة تهيئة عوامل التصفية.' : 'Try searching with other keywords or reset your filters.'}
-              </p>
-            </div>
-            <Button variant="outline" className="rounded-xl font-bold text-xs h-10 px-4" onClick={() => { setSearchQuery(''); setFilterType('ALL'); }}>
-              {language === 'ar' ? 'إعادة ضبط عوامل التصفية' : 'Reset Filters'}
-            </Button>
-          </div>
+          <EmptyState 
+            icon={Search}
+            title={language === 'ar' ? 'لا توجد نتائج مطابقة' : 'No matching results'}
+            description={language === 'ar' ? 'جرب البحث بكلمات أخرى أو إعادة تهيئة عوامل التصفية.' : 'Try searching with other keywords or reset your filters.'}
+            buttonText={language === 'ar' ? 'إعادة ضبط عوامل التصفية' : 'Reset Filters'}
+            onAction={() => { setSearchQuery(''); setFilterType('ALL'); }}
+          />
         ) : (
           <>
             <div className="hidden md:block overflow-x-auto">

@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { DangerConfirmDialog } from '@/components/DangerConfirmDialog';
+import { EmptyState } from '@/components/EmptyState';
 import { Plus, Receipt, TrendingUp, TrendingDown, Eye, WifiOff, Search, Download, Trash2, SlidersHorizontal, Check, Clock, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/utils/toast';
@@ -327,32 +328,22 @@ export function TransactionsClient({ initialTransactions, contacts, products }: 
 
       <div className="rounded-2xl border border-slate-200/60 bg-white/60 backdrop-blur-xl overflow-hidden shadow-sm">
         {transactions.length === 0 ? (
-          <div className="py-24 flex flex-col items-center justify-center text-center space-y-6">
-            <div className="w-20 h-20 bg-slate-50 border border-slate-100 shadow-sm rounded-full flex items-center justify-center text-slate-400">
-              <Receipt className="w-10 h-10" />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-xl font-bold text-slate-800 tracking-tight">{t.emptyTitle[language]}</h3>
-              <p className="text-base text-slate-500 font-medium max-w-sm">{t.emptyDesc[language]}</p>
-            </div>
-          </div>
+          <EmptyState 
+            icon={Receipt}
+            title={t.emptyTitle[language]}
+            description={t.emptyDesc[language]}
+            buttonText={t.addTransaction[language]}
+            buttonIcon={Plus}
+            onAction={() => router.push('/transactions/new')}
+          />
         ) : filteredTransactions.length === 0 ? (
-          <div className="py-24 flex flex-col items-center justify-center text-center space-y-6 animate-in fade-in duration-300">
-            <div className="w-20 h-20 bg-slate-50 border border-slate-100 shadow-sm rounded-full flex items-center justify-center text-slate-400">
-              <Search className="w-10 h-10 text-slate-400" />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-xl font-bold tracking-tight text-slate-800">
-                {language === 'ar' ? 'لا توجد معاملات مطابقة' : 'No matching transactions'}
-              </h3>
-              <p className="text-base text-slate-500 font-medium max-w-sm">
-                {language === 'ar' ? 'جرب البحث بكلمات أخرى أو إعادة تهيئة عوامل التصفية.' : 'Try searching with other keywords or reset your filters.'}
-              </p>
-            </div>
-            <Button variant="outline" className="rounded-xl font-bold text-xs h-10 px-4" onClick={() => { setSearchQuery(''); setFilterType('ALL'); }}>
-              {language === 'ar' ? 'إعادة ضبط عوامل التصفية' : 'Reset Filters'}
-            </Button>
-          </div>
+          <EmptyState 
+            icon={Search}
+            title={language === 'ar' ? 'لا توجد معاملات مطابقة' : 'No matching transactions'}
+            description={language === 'ar' ? 'جرب البحث بكلمات أخرى أو إعادة تهيئة عوامل التصفية.' : 'Try searching with other keywords or reset your filters.'}
+            buttonText={language === 'ar' ? 'إعادة ضبط عوامل التصفية' : 'Reset Filters'}
+            onAction={() => { setSearchQuery(''); setFilterType('ALL'); }}
+          />
         ) : (
           <>
             {/* Desktop Table View */}

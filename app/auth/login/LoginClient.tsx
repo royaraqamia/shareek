@@ -243,7 +243,7 @@ export function LoginClient() {
 
       {/* Forgot Password Dialog */}
       <Dialog open={isResetOpen} onOpenChange={setIsResetOpen}>
-        <DialogContent className="max-w-md bg-background border border-border shadow-2xl rounded-3xl p-6 sm:p-8 font-arabic text-foreground">
+        <DialogContent className="max-w-md font-arabic">
           <DialogHeader className="text-center flex flex-col items-center">
             <div className="w-12 h-12 bg-primary/10 border border-primary/20 flex items-center justify-center rounded-2xl mb-3 text-primary z-10">
               <KeyRound className="w-6 h-6 animate-pulse" />

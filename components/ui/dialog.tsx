@@ -61,11 +61,12 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg",
+          "fixed bottom-0 left-[50%] z-50 grid w-full max-w-2xl translate-x-[-50%] gap-4 rounded-t-[1.75rem] border border-b-0 border-border bg-background p-6 pt-10 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.5)] duration-300 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-bottom-[100%] data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-bottom-[100%] sm:mb-6 sm:rounded-b-[1.75rem] sm:border max-h-[90dvh] overflow-y-auto pb-safe",
           className
         )}
         {...props}
       >
+        <div className="absolute top-3 left-[50%] h-1.5 w-12 translate-x-[-50%] rounded-full bg-slate-200 dark:bg-slate-700/60" />
         {children}
         {showCloseButton && (
           <DialogPrimitive.Close

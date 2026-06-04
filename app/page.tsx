@@ -10,8 +10,8 @@ export default function HomePage() {
   const language = useAppStore(state => state.language);
 
   const t = {
-    welcome: { ar: 'مرحبًا بك في شَريك' },
-    subtitle: { ar: 'نظام إدارة شامل متكامل لمشروعك أو شركتك.' },
+    welcome: { ar: 'السَّلام عليكم، أهلًا بك في شَريك' },
+    subtitle: { ar: 'نظام إدارة شامل متكامل لمشروعك.' },
     getStarted: { ar: 'ابدأ الآن' },
   };
 
@@ -39,7 +39,7 @@ export default function HomePage() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
             </span>
-            مستقبل الإدارة الذكية
+            مستقبل الإدارة الذَّكيَّة
           </div>
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-slate-900 dark:text-slate-50 leading-[1.1] pb-2">
             {currentT('welcome')}

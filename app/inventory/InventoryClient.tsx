@@ -5,6 +5,7 @@ import { useAppStore, type Language } from '@/store/useAppStore';
 import { useOfflineDataStore } from '@/store/useOfflineDataStore';
 import { PackageOpen, Plus, Loader2, WifiOff, Search, Trash2, Edit, SlidersHorizontal, Check } from 'lucide-react';
 import { DangerConfirmDialog } from '@/components/DangerConfirmDialog';
+import { EmptyState } from '@/components/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import {
@@ -528,32 +529,22 @@ export function InventoryClient({ initialProducts }: { initialProducts: any[] })
 
       <div className="rounded-2xl border border-slate-200/60 bg-white/60 backdrop-blur-xl flex-1 overflow-hidden shadow-sm">
         {products.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center p-8 lg:p-24 text-center space-y-6">
-            <div className="w-20 h-20 bg-slate-50 border border-slate-100 shadow-sm rounded-full flex items-center justify-center text-slate-400">
-               <PackageOpen className="w-10 h-10 text-slate-400" />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-xl font-bold tracking-tight text-slate-800">{t('emptyTitle')}</h3>
-              <p className="text-base text-slate-500 font-medium max-w-sm">{t('emptyDesc')}</p>
-            </div>
-          </div>
+          <EmptyState 
+            icon={PackageOpen}
+            title={t('emptyTitle')}
+            description={t('emptyDesc')}
+            buttonText={t('add')}
+            buttonIcon={Plus}
+            onAction={() => setIsOpen(true)}
+          />
         ) : filteredProducts.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center p-8 lg:p-24 text-center space-y-6">
-            <div className="w-20 h-20 bg-slate-50 border border-slate-100 shadow-sm rounded-full flex items-center justify-center text-slate-400">
-              <Search className="w-10 h-10 text-slate-400" />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-xl font-bold tracking-tight text-slate-800">
-                {language === 'ar' ? 'لا توجد نتائج مطابقة' : 'No matching results'}
-              </h3>
-              <p className="text-base text-slate-500 font-medium max-w-sm">
-                {language === 'ar' ? 'جرب البحث بكلمات أخرى أو إعادة تهيئة عوامل التصفية.' : 'Try searching with other keywords or reset your filters.'}
-              </p>
-            </div>
-            <Button variant="outline" className="rounded-xl font-bold text-xs h-10 px-4" onClick={() => { setSearchQuery(''); setFilterType('ALL'); }}>
-              {language === 'ar' ? 'إعادة ضبط عوامل التصفية' : 'Reset Filters'}
-            </Button>
-          </div>
+          <EmptyState 
+            icon={Search}
+            title={language === 'ar' ? 'لا توجد نتائج مطابقة' : 'No matching results'}
+            description={language === 'ar' ? 'جرب البحث بكلمات أخرى أو إعادة تهيئة عوامل التصفية.' : 'Try searching with other keywords or reset your filters.'}
+            buttonText={language === 'ar' ? 'إعادة ضبط عوامل التصفية' : 'Reset Filters'}
+            onAction={() => { setSearchQuery(''); setFilterType('ALL'); }}
+          />
         ) : (
           <>
             <div className="hidden md:block overflow-x-auto">

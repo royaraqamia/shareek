@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { fetchTasksAction, bulkDeleteTasksAction, bulkUpdateTasksStatusAction } from "@/features/tasks/actions";
 import { Task } from "@/features/tasks/schemas";
 import { useAppStore } from "@/store/useAppStore";
@@ -10,12 +11,14 @@ import { toast } from '@/utils/toast';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { DangerConfirmDialog } from "@/components/DangerConfirmDialog";
+import { EmptyState } from "@/components/EmptyState";
 import { Plus, ClipboardList, Clock, ArrowRight, Loader2, CheckCircle2, WifiOff, Search, Trash2, SlidersHorizontal, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 
 export default function TasksClient() {
+  const router = useRouter();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isOfflineMode, setIsOfflineMode] = useState(false);
@@ -269,36 +272,22 @@ export default function TasksClient() {
           ))}
         </div>
       ) : tasks.length === 0 ? (
-        <div className="rounded-2xl border border-slate-200/60 bg-white/60 backdrop-blur-xl mb-12 shadow-sm p-8 lg:p-24">
-          <div className="flex flex-col items-center justify-center text-center space-y-6">
-            <div className="w-20 h-20 bg-slate-50 border border-slate-100 shadow-sm rounded-full flex items-center justify-center text-primary">
-              <CheckCircle2 className="w-10 h-10" />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-xl font-bold text-slate-800 tracking-tight mb-1">لا توجد مهام حالياً</h3>
-              <p className="text-base text-slate-500 font-medium max-w-sm">قم بإضافة مهام جديدة لفريقك من خلال الضغط على زر إضافة مهمة أسفل الشاشة أو في الأعلى.</p>
-            </div>
-            <Link href="/tasks/create">
-              <Button size="lg" className="bg-primary hover:bg-primary/95 text-white shadow-lg shadow-primary/20 font-bold rounded-xl h-12 px-6 mt-4 transition-all hover:scale-105 active:scale-95 text-[15px]">
-                <Plus className="w-4 h-4 ml-2" />
-                أضف مهمتك الأولى
-              </Button>
-            </Link>
-          </div>
-        </div>
+        <EmptyState 
+          icon={ClipboardList}
+          title={language === 'ar' ? 'لا توجد مهام حالياً' : 'No tasks found'}
+          description={language === 'ar' ? 'قم بإضافة مهام جديدة لفريقك لتنظيم العمل ومتابعة الإنجاز بسهولة وبطريقة احترافية.' : 'Add your first task to get started.'}
+          buttonText={language === 'ar' ? 'أضف مهمتك الأولى' : 'Add First Task'}
+          buttonIcon={Plus}
+          onAction={() => router.push('/tasks/create')}
+        />
       ) : filteredTasks.length === 0 ? (
-        <div className="rounded-2xl border border-slate-200/60 bg-white/60 backdrop-blur-xl mb-12 shadow-sm p-8 lg:p-24 text-center space-y-6">
-          <div className="w-20 h-20 bg-slate-50 border border-slate-100 shadow-sm rounded-full flex items-center justify-center text-slate-400 mx-auto">
-            <Search className="w-10 h-10 text-slate-400" />
-          </div>
-          <div className="space-y-2">
-            <h3 className="text-xl font-bold tracking-tight text-slate-800">لا توجد مهام مطابقة لفلتر البحث</h3>
-            <p className="text-base text-slate-500 font-medium max-w-sm mx-auto">جرب البحث بكلمات أخرى أو إعادة ضبط فلاتر الحالة المعروضة.</p>
-          </div>
-          <Button variant="outline" className="rounded-xl font-bold text-xs h-10 px-4" onClick={() => { setSearchQuery(''); setFilterStatus('ALL'); }}>
-            إعادة ضبط عوامل التصفية
-          </Button>
-        </div>
+        <EmptyState 
+          icon={Search}
+          title={language === 'ar' ? 'لا توجد مهام مطابقة لفلتر البحث' : 'No matching tasks'}
+          description={language === 'ar' ? 'جرب البحث بكلمات أخرى أو إعادة ضبط فلاتر الحالة المعروضة.' : 'Try adjusting your filters or search query.'}
+          buttonText={language === 'ar' ? 'إعادة ضبط عوامل التصفية' : 'Reset Filters'}
+          onAction={() => { setSearchQuery(''); setFilterStatus('ALL'); }}
+        />
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 animate-in fade-in duration-300">
           {filteredTasks.map(task => {

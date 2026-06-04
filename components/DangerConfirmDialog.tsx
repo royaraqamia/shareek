@@ -25,7 +25,7 @@ export function DangerConfirmDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[420px] overflow-hidden rounded-2xl border border-destructive/20 bg-background/95 backdrop-blur-xl shadow-xl animate-in fade-in zoom-in-95 duration-200">
+      <DialogContent className="sm:max-w-[420px] overflow-hidden border border-destructive/20 bg-background/95 backdrop-blur-xl shadow-xl">
         <DialogHeader className="pt-4 pb-2">
           <div className="flex flex-col items-center gap-3 text-center">
             {/* Pulsing Alert Badge */}
