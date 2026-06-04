@@ -1,0 +1,51 @@
+{
+  "name": "@workspace/shareek",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port ${PORT:-3000}",
+    "build": "next build",
+    "start": "next start --port ${PORT:-3000}",
+    "lint": "next lint",
+    "test": "vitest run",
+    "test:all": "vitest run"
+  },
+  "dependencies": {
+    "@google/genai": "latest",
+    "@radix-ui/react-dialog": "^1.1.2",
+    "@radix-ui/react-dropdown-menu": "^2.1.1",
+    "@radix-ui/react-label": "^2.1.0",
+    "@radix-ui/react-select": "^2.1.2",
+    "@radix-ui/react-slot": "^1.1.0",
+    "@supabase/ssr": "^0.5.1",
+    "@supabase/supabase-js": "^2.45.4",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "d3": "^7.9.0",
+    "lucide-react": "^0.468.0",
+    "motion": "^12.40.0",
+    "next": "^15.1.0",
+    "next-themes": "^0.4.6",
+    "radix-ui": "^1.4.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "recharts": "^2.13.3",
+    "sonner": "^1.7.4",
+    "tailwind-merge": "^2.5.5",
+    "zod": "^3.23.8",
+    "zustand": "^5.0.14"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.0.0-beta.4",
+    "@types/d3": "latest",
+    "@types/node": "^20.17.9",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.2",
+    "eslint": "^9.16.0",
+    "eslint-config-next": "15.1.0",
+    "postcss": "^8.4.49",
+    "tailwindcss": "4.0.0-beta.4",
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.8"
+  }
+}
