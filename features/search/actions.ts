@@ -27,7 +27,7 @@ export async function globalSearchAction(query: string) {
     }
 
     // Parallel fetch from multiple tables
-    const [tasksRes, transactionsRes, productsRes, contactsRes, usersRes] = await Promise.all([
+    const [tasksRes, transactionsRes, productsRes, contactsRes] = await Promise.all([
       supabase
         .from('tasks')
         .select('id, title, status')
@@ -50,12 +50,6 @@ export async function globalSearchAction(query: string) {
         .from('contacts')
         .select('id, name, contact_type')
         .ilike('name', `%${searchQuery}%`)
-        .limit(5),
-        
-      supabase
-        .from('profiles')
-        .select('id, full_name, email')
-        .ilike('full_name', `%${searchQuery}%`)
         .limit(5),
     ]);
 
@@ -98,16 +92,6 @@ export async function globalSearchAction(query: string) {
         title: t.name,
         subtitle: t.contact_type,
         href: `/contacts`
-      }));
-    }
-
-    if (usersRes.data) {
-      usersRes.data.forEach(t => results.push({
-        id: t.id,
-        type: 'USER',
-        title: t.full_name,
-        subtitle: t.email,
-        href: `/admin` // Using admin or profiles depending on where user profiles are viewed, or maybe just `#` for now
       }));
     }
 

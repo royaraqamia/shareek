@@ -71,11 +71,7 @@ export function LoginClient() {
       const result = await signInAction(formData);
       if (result.success) {
         toast.success(t("authSuccess"));
-        if ((result as any).isPlatformAdmin) {
-          router.push("/admin");
-        } else {
-          router.push("/dashboard");
-        }
+        router.push("/dashboard");
         router.refresh();
       } else {
         toast.error((result as any).message || t("authFailed"));
@@ -90,13 +86,11 @@ export function LoginClient() {
   return (
     <div className="w-full max-w-md space-y-6 animate-in fade-in zoom-in-95 duration-500" id="login-container">
       <div className="text-center flex flex-col items-center">
-        <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-xl shadow-primary/20 border border-slate-100 bg-white relative flex items-center justify-center shrink-0 mb-6">
-          <img
-            src="/shareek_logo.png"
-            alt="Shareek ERP Logo"
-            className="w-full h-full object-contain p-1"
-          />
-        </div>
+        <img
+          src="/shareek_logo.png"
+          alt="Shareek ERP Logo"
+          className="w-24 h-24 object-contain mb-5"
+        />
         <h1 className="text-3xl font-black text-slate-900 tracking-tight">{t("title")}</h1>
       </div>
 

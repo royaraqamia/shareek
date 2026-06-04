@@ -86,13 +86,11 @@ export function Navigation() {
           {/* Logo Brand Block */}
           <div className="flex items-center gap-6 lg:gap-10">
             <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-primary/20 transition-transform group-hover:scale-105 group-active:scale-95 border border-slate-100 flex items-center justify-center bg-white relative">
-                <img
-                  src="/shareek_logo.png"
-                  alt="Shareek ERP Logo"
-                  className="w-full h-full object-contain p-1"
-                />
-              </div>
+              <img
+                src="/shareek_logo.png"
+                alt="Shareek ERP Logo"
+                className="w-11 h-11 object-contain transition-transform group-hover:scale-105 group-active:scale-95"
+              />
               <span className="font-extrabold text-xl text-slate-900 tracking-tight block">
                 شَريك
               </span>
@@ -131,15 +129,6 @@ export function Navigation() {
               <>
                 <GlobalSearch />
                 
-                {/* Admin Dashboard Entry Shortcut for system owners */}
-                {profile.isPlatformAdmin && (
-                  <Link href="/admin" className="ml-1 shrink-0">
-                    <Button variant="outline" size="sm" className="text-primary bg-primary/5 hover:bg-primary/10 border-primary/20 hover:text-primary text-xs font-bold px-4 h-9 cursor-pointer rounded-xl transition-all shadow-sm">
-                      إدارة النظام
-                    </Button>
-                  </Link>
-                )}
-
                 {/* Desktop Profile Status */}
                 <div className="hidden sm:flex items-center gap-3 bg-white border border-slate-200/60 py-1.5 px-4 rounded-full text-xs shadow-sm hover:shadow-md transition-all duration-300">
                   <div className="flex items-center gap-2 text-slate-800 font-semibold">

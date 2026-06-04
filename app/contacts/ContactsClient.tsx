@@ -5,7 +5,7 @@ import { useAppStore, type Language } from '@/store/useAppStore';
 import { useOfflineDataStore } from '@/store/useOfflineDataStore';
 import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
-import { Plus, Users, Loader2, WifiOff } from 'lucide-react';
+import { Plus, Users, Loader2, WifiOff, Search } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -25,6 +25,8 @@ export function ContactsClient({ initialContacts }: { initialContacts: any[] }) 
   const { contacts: offlineContacts, setContacts: setOfflineContacts, enqueueMutation } = useOfflineDataStore();
   const [contacts, setContacts] = useState(initialContacts);
   const [isOfflineMode, setIsOfflineMode] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterType, setFilterType] = useState<'ALL' | 'CLIENT' | 'SUPPLIER'>('ALL');
   const language = useAppStore(state => state.language) as Language;
   const router = useRouter();
 
@@ -65,6 +67,17 @@ export function ContactsClient({ initialContacts }: { initialContacts: any[] }) 
       SUPPLIER: { ar: 'مورد', en: 'Supplier' }
     }
   };
+
+  const filteredContacts = contacts.filter((contact) => {
+    const matchesSearch = 
+      contact.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      (contact.phone && contact.phone.includes(searchQuery)) ||
+      (contact.email && contact.email.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    if (filterType === 'CLIENT') return matchesSearch && contact.type === 'CLIENT';
+    if (filterType === 'SUPPLIER') return matchesSearch && contact.type === 'SUPPLIER';
+    return matchesSearch;
+  });
 
   const handleCreateContact = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -232,7 +245,45 @@ export function ContactsClient({ initialContacts }: { initialContacts: any[] }) 
         </Dialog>
       </div>
 
-      <div className="rounded-2xl border border-slate-200/60 bg-white/60 backdrop-blur-xl overflow-hidden shadow-sm">
+      {/* Elegant Search & Filter Controls Panel */}
+      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white/80 backdrop-blur-md p-4 rounded-2xl border border-slate-200/60 shadow-sm relative z-10 animate-in fade-in slide-in-from-top-4 duration-300">
+        <div className="relative w-full md:max-w-md">
+          <Search className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+          <Input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={language === 'ar' ? 'بحث باسم العميل، الهاتف، أو البريد الإلكتروني...' : 'Search by name, phone, or email...'}
+            className="pr-10 pl-4 h-11 text-right bg-slate-50/50 border-slate-200 focus:bg-white transition-all rounded-xl text-sm"
+          />
+        </div>
+        
+        <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 scrollbar-none justify-end">
+          <Button
+            variant={filterType === 'ALL' ? 'default' : 'outline'}
+            onClick={() => setFilterType('ALL')}
+            className="rounded-xl h-10 px-4 font-bold text-xs"
+          >
+            {language === 'ar' ? 'الكل' : 'All'} ({contacts.length})
+          </Button>
+          <Button
+            variant={filterType === 'CLIENT' ? 'default' : 'outline'}
+            onClick={() => setFilterType('CLIENT')}
+            className="rounded-xl h-10 px-4 font-bold text-xs"
+          >
+            {language === 'ar' ? 'العملاء' : 'Clients'} ({contacts.filter(c => c.type === 'CLIENT').length})
+          </Button>
+          <Button
+            variant={filterType === 'SUPPLIER' ? 'default' : 'outline'}
+            onClick={() => setFilterType('SUPPLIER')}
+            className="rounded-xl h-10 px-4 font-bold text-xs"
+          >
+            {language === 'ar' ? 'الموردين' : 'Suppliers'} ({contacts.filter(c => c.type === 'SUPPLIER').length})
+          </Button>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-slate-200/60 bg-white/60 backdrop-blur-xl flex-1 overflow-hidden shadow-sm">
         {contacts.length === 0 ? (
           <div className="py-24 flex flex-col items-center justify-center text-center space-y-6">
             <div className="w-20 h-20 bg-slate-50 border border-slate-100 shadow-sm rounded-full flex items-center justify-center text-slate-400">
@@ -242,6 +293,23 @@ export function ContactsClient({ initialContacts }: { initialContacts: any[] }) 
               <h3 className="text-xl font-bold text-slate-800 tracking-tight">{t.emptyTitle[language]}</h3>
               <p className="text-base text-slate-500 font-medium max-w-sm">{t.emptyDesc[language]}</p>
             </div>
+          </div>
+        ) : filteredContacts.length === 0 ? (
+          <div className="py-24 flex flex-col items-center justify-center text-center space-y-6 animate-in fade-in duration-300">
+            <div className="w-20 h-20 bg-slate-50 border border-slate-100 shadow-sm rounded-full flex items-center justify-center text-slate-400">
+              <Search className="w-10 h-10 text-slate-400" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-xl font-bold tracking-tight text-slate-800">
+                {language === 'ar' ? 'لا توجد نتائج مطابقة' : 'No matching results'}
+              </h3>
+              <p className="text-base text-slate-500 font-medium max-w-sm">
+                {language === 'ar' ? 'جرب البحث بكلمات أخرى أو إعادة تهيئة عوامل التصفية.' : 'Try searching with other keywords or reset your filters.'}
+              </p>
+            </div>
+            <Button variant="outline" className="rounded-xl font-bold text-xs h-10 px-4" onClick={() => { setSearchQuery(''); setFilterType('ALL'); }}>
+              {language === 'ar' ? 'إعادة ضبط عوامل التصفية' : 'Reset Filters'}
+            </Button>
           </div>
         ) : (
           <Table>
@@ -254,7 +322,7 @@ export function ContactsClient({ initialContacts }: { initialContacts: any[] }) 
               </TableRow>
             </TableHeader>
             <TableBody>
-              {contacts.map((contact) => (
+              {filteredContacts.map((contact) => (
                 <TableRow key={contact.id} className="border-b border-slate-100 hover:bg-blue-50/40 transition-colors group h-16">
                   <TableCell className="font-bold text-slate-900 text-right px-6 text-[15px]">{contact.name}</TableCell>
                   <TableCell className="text-right px-6">

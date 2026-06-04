@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAppStore, type Language } from '@/store/useAppStore';
 import { useOfflineDataStore } from '@/store/useOfflineDataStore';
-import { PackageOpen, Plus, Loader2, WifiOff } from 'lucide-react';
+import { PackageOpen, Plus, Loader2, WifiOff, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import {
@@ -25,6 +25,8 @@ export function InventoryClient({ initialProducts }: { initialProducts: any[] })
   const { inventory: offlineProducts, setInventory: setOfflineProducts, enqueueMutation } = useOfflineDataStore();
   const [products, setProducts] = useState(initialProducts);
   const [isOfflineMode, setIsOfflineMode] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterType, setFilterType] = useState<'ALL' | 'PRODUCT' | 'SERVICE'>('ALL');
   const language = useAppStore(state => state.language) as Language;
   const router = useRouter();
 
@@ -66,6 +68,16 @@ export function InventoryClient({ initialProducts }: { initialProducts: any[] })
 
   const t = (key: keyof typeof translations) => translations[key][language];
   const tCol = (key: keyof typeof columnTranslations) => columnTranslations[key][language];
+
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch = 
+      product.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      (product.sku && product.sku.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    if (filterType === 'PRODUCT') return matchesSearch && !product.is_service;
+    if (filterType === 'SERVICE') return matchesSearch && product.is_service;
+    return matchesSearch;
+  });
 
   const handleCreateProduct = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -266,6 +278,44 @@ export function InventoryClient({ initialProducts }: { initialProducts: any[] })
         </Dialog>
       </div>
 
+      {/* Elegant Search & Filter Controls Panel */}
+      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white/80 backdrop-blur-md p-4 rounded-2xl border border-slate-200/60 shadow-sm relative z-10 animate-in fade-in slide-in-from-top-4 duration-300">
+        <div className="relative w-full md:max-w-md">
+          <Search className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+          <Input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={language === 'ar' ? 'بحث باسم البند أو رمز فريد SKU...' : 'Search by description or SKU...'}
+            className="pr-10 pl-4 h-11 text-right bg-slate-50/50 border-slate-200 focus:bg-white transition-all rounded-xl text-sm"
+          />
+        </div>
+        
+        <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 scrollbar-none justify-end">
+          <Button
+            variant={filterType === 'ALL' ? 'default' : 'outline'}
+            onClick={() => setFilterType('ALL')}
+            className="rounded-xl h-10 px-4 font-bold text-xs"
+          >
+            {language === 'ar' ? 'الكل' : 'All'} ({products.length})
+          </Button>
+          <Button
+            variant={filterType === 'PRODUCT' ? 'default' : 'outline'}
+            onClick={() => setFilterType('PRODUCT')}
+            className="rounded-xl h-10 px-4 font-bold text-xs"
+          >
+            {language === 'ar' ? 'المنتجات' : 'Products'} ({products.filter(p => !p.is_service).length})
+          </Button>
+          <Button
+            variant={filterType === 'SERVICE' ? 'default' : 'outline'}
+            onClick={() => setFilterType('SERVICE')}
+            className="rounded-xl h-10 px-4 font-bold text-xs"
+          >
+            {language === 'ar' ? 'الخدمات' : 'Services'} ({products.filter(p => p.is_service).length})
+          </Button>
+        </div>
+      </div>
+
       <div className="rounded-2xl border border-slate-200/60 bg-white/60 backdrop-blur-xl flex-1 overflow-hidden shadow-sm">
         {products.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center p-8 lg:p-24 text-center space-y-6">
@@ -276,6 +326,23 @@ export function InventoryClient({ initialProducts }: { initialProducts: any[] })
               <h3 className="text-xl font-bold tracking-tight text-slate-800">{t('emptyTitle')}</h3>
               <p className="text-base text-slate-500 font-medium max-w-sm">{t('emptyDesc')}</p>
             </div>
+          </div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="h-full flex flex-col items-center justify-center p-8 lg:p-24 text-center space-y-6">
+            <div className="w-20 h-20 bg-slate-50 border border-slate-100 shadow-sm rounded-full flex items-center justify-center text-slate-400">
+              <Search className="w-10 h-10 text-slate-400" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-xl font-bold tracking-tight text-slate-800">
+                {language === 'ar' ? 'لا توجد نتائج مطابقة' : 'No matching results'}
+              </h3>
+              <p className="text-base text-slate-500 font-medium max-w-sm">
+                {language === 'ar' ? 'جرب البحث بكلمات أخرى أو إعادة تهيئة عوامل التصفية.' : 'Try searching with other keywords or reset your filters.'}
+              </p>
+            </div>
+            <Button variant="outline" className="rounded-xl font-bold text-xs h-10 px-4" onClick={() => { setSearchQuery(''); setFilterType('ALL'); }}>
+              {language === 'ar' ? 'إعادة ضبط عوامل التصفية' : 'Reset Filters'}
+            </Button>
           </div>
         ) : (
           <Table>
@@ -288,7 +355,7 @@ export function InventoryClient({ initialProducts }: { initialProducts: any[] })
               </TableRow>
             </TableHeader>
             <TableBody>
-              {products.map((product) => (
+              {filteredProducts.map((product) => (
                 <TableRow key={product.id} className="border-b border-slate-100 hover:bg-blue-50/40 transition-colors group h-16">
                   <TableCell className="font-bold text-slate-900 text-right px-6 text-[15px]">{product.name}</TableCell>
                   <TableCell className="text-right font-mono text-[15px] text-slate-600 font-medium px-6">{product.sku || '-'}</TableCell>

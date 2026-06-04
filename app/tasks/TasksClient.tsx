@@ -9,16 +9,30 @@ import { useOfflineDataStore } from "@/store/useOfflineDataStore";
 import { toast } from '@/utils/toast';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Plus, ClipboardList, Clock, ArrowRight, Loader2, CheckCircle2, WifiOff } from "lucide-react";
+import { Plus, ClipboardList, Clock, ArrowRight, Loader2, CheckCircle2, WifiOff, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 
 export default function TasksClient() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isOfflineMode, setIsOfflineMode] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState<'ALL' | 'TODO' | 'IN_PROGRESS' | 'DONE'>('ALL');
   const language = useAppStore(state => state.language);
   const { tasks: offlineTasks, setTasks: setOfflineTasks } = useOfflineDataStore();
+
+  const filteredTasks = tasks.filter((task) => {
+    const matchesSearch = 
+      task.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      (task.description && task.description.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    if (filterStatus === 'TODO') return matchesSearch && task.status === 'TODO';
+    if (filterStatus === 'IN_PROGRESS') return matchesSearch && task.status === 'IN_PROGRESS';
+    if (filterStatus === 'DONE') return matchesSearch && task.status === 'DONE';
+    return matchesSearch;
+  });
 
   // We are polling on mount or when returning to this page.
   useEffect(() => {
@@ -62,7 +76,7 @@ export default function TasksClient() {
 
   return (
     <div className="container max-w-[90rem] mx-auto px-4 md:px-8 py-8 relative min-h-[calc(100vh-4rem)]">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div className="space-y-2">
           <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3">
             <div className="p-2.5 bg-primary/10 text-primary rounded-xl shadow-sm border border-primary/10">
@@ -82,6 +96,51 @@ export default function TasksClient() {
             مهمة جديدة
           </Button>
         </Link>
+      </div>
+
+      {/* Elegant Search & Filter Controls Panel */}
+      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white/80 backdrop-blur-md p-4 rounded-2xl border border-slate-200/60 shadow-sm relative z-10 mb-8 animate-in fade-in slide-in-from-top-4 duration-300">
+        <div className="relative w-full md:max-w-md">
+          <Search className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+          <Input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={language === 'ar' ? 'بحث عن طريق عنوان المهمة أو الوصف...' : 'Search by task title or description...'}
+            className="pr-10 pl-4 h-11 text-right bg-slate-50/50 border-slate-200 focus:bg-white transition-all rounded-xl text-sm"
+          />
+        </div>
+        
+        <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 scrollbar-none justify-end">
+          <Button
+            variant={filterStatus === 'ALL' ? 'default' : 'outline'}
+            onClick={() => setFilterStatus('ALL')}
+            className="rounded-xl h-10 px-4 font-bold text-xs"
+          >
+            {language === 'ar' ? 'الكل' : 'All'} ({tasks.length})
+          </Button>
+          <Button
+            variant={filterStatus === 'TODO' ? 'default' : 'outline'}
+            onClick={() => setFilterStatus('TODO')}
+            className="rounded-xl h-10 px-4 font-bold text-xs"
+          >
+            {language === 'ar' ? 'قيد الانتظار' : 'Pending'} ({tasks.filter(t => t.status === 'TODO').length})
+          </Button>
+          <Button
+            variant={filterStatus === 'IN_PROGRESS' ? 'default' : 'outline'}
+            onClick={() => setFilterStatus('IN_PROGRESS')}
+            className="rounded-xl h-10 px-4 font-bold text-xs"
+          >
+            {language === 'ar' ? 'قيد التنفيذ' : 'In Progress'} ({tasks.filter(t => t.status === 'IN_PROGRESS').length})
+          </Button>
+          <Button
+            variant={filterStatus === 'DONE' ? 'default' : 'outline'}
+            onClick={() => setFilterStatus('DONE')}
+            className="rounded-xl h-10 px-4 font-bold text-xs"
+          >
+            {language === 'ar' ? 'مكتمل' : 'Completed'} ({tasks.filter(t => t.status === 'DONE').length})
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -108,9 +167,22 @@ export default function TasksClient() {
             </Link>
           </div>
         </div>
+      ) : filteredTasks.length === 0 ? (
+        <div className="rounded-2xl border border-slate-200/60 bg-white/60 backdrop-blur-xl mb-12 shadow-sm p-8 lg:p-24 text-center space-y-6">
+          <div className="w-20 h-20 bg-slate-50 border border-slate-100 shadow-sm rounded-full flex items-center justify-center text-slate-400 mx-auto">
+            <Search className="w-10 h-10 text-slate-400" />
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-xl font-bold tracking-tight text-slate-800">لا توجد مهام مطابقة لفلتر البحث</h3>
+            <p className="text-base text-slate-500 font-medium max-w-sm mx-auto">جرب البحث بكلمات أخرى أو إعادة ضبط فلاتر الحالة المعروضة.</p>
+          </div>
+          <Button variant="outline" className="rounded-xl font-bold text-xs h-10 px-4" onClick={() => { setSearchQuery(''); setFilterStatus('ALL'); }}>
+            إعادة ضبط عوامل التصفية
+          </Button>
+        </div>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {tasks.map(task => (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 animate-in fade-in duration-300">
+          {filteredTasks.map(task => (
             <Card key={task.id} className="group hover:-translate-y-1 transition-all duration-300 border-slate-200/50 bg-white/70 backdrop-blur-sm overflow-hidden cursor-pointer shadow-lg shadow-slate-200/40 rounded-2xl relative">
               <div className="absolute inset-0 bg-gradient-to-b from-white/50 to-transparent pointer-events-none" />
               <div className="h-1.5 w-full bg-slate-100 relative z-10">

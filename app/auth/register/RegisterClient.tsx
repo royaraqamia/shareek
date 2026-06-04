@@ -186,14 +186,12 @@ export function RegisterClient() {
     return (
       <div className="w-full max-w-lg space-y-6 animate-fade-in" id="register-success-container">
         <div className="text-center flex flex-col items-center">
-        <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-md border border-slate-100 bg-white relative flex items-center justify-center shrink-0 mb-4">
-          <img
-            src="/shareek_logo.png"
-            alt="Shareek ERP Logo"
-            className="w-full h-full object-contain p-1"
-          />
-        </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">شَريك</h1>
+        <img
+          src="/shareek_logo.png"
+          alt="Shareek ERP Logo"
+          className="w-20 h-20 object-contain mb-3"
+        />
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">شَريك</h1>
         </div>
 
         <Card className="border-slate-200/80 shadow-2xl overflow-hidden" id="register-success-card">
@@ -265,13 +263,11 @@ export function RegisterClient() {
   return (
     <div className="w-full max-w-md space-y-6 animate-in fade-in zoom-in-95 duration-500" id="register-container">
       <div className="text-center flex flex-col items-center">
-        <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-xl shadow-primary/20 border border-slate-100 bg-white relative flex items-center justify-center shrink-0 mb-6">
-          <img
-            src="/shareek_logo.png"
-            alt="Shareek ERP Logo"
-            className="w-full h-full object-contain p-1"
-          />
-        </div>
+        <img
+          src="/shareek_logo.png"
+          alt="Shareek ERP Logo"
+          className="w-24 h-24 object-contain mb-5"
+        />
         <h1 className="text-3xl font-black text-slate-900 tracking-tight">{t("title")}</h1>
       </div>
 
