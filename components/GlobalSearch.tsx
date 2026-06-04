@@ -106,8 +106,8 @@ export function GlobalSearch() {
           placeholder="بحث شامل..."
           className={cn(
             "h-9 pr-9 text-sm font-medium transition-all cursor-text",
-            "bg-slate-50 border-slate-200 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-full",
-            !isOpen && "sm:w-full w-10 sm:px-3 px-0 border-transparent sm:border-slate-200 bg-transparent sm:bg-slate-50 text-transparent sm:text-slate-900 placeholder:text-transparent sm:placeholder:text-slate-500 cursor-pointer sm:cursor-text",
+            "bg-secondary/50 border-input focus:bg-background focus:border-primary focus:ring-4 focus:ring-primary/10 rounded-full",
+            !isOpen && "sm:w-full w-10 sm:px-3 px-0 border-transparent sm:border-input bg-transparent sm:bg-secondary/50 text-transparent sm:text-foreground placeholder:text-transparent sm:placeholder:text-muted-foreground cursor-pointer sm:cursor-text",
             isOpen && "w-full pl-8"
           )}
         />
@@ -130,7 +130,7 @@ export function GlobalSearch() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 5, scale: 0.98 }}
             transition={{ duration: 0.15 }}
-            className="absolute top-full mt-2 w-full min-w-[300px] left-0 sm:left-auto sm:right-0 bg-white rounded-xl shadow-xl border border-slate-200/60 overflow-hidden"
+            className="absolute top-full mt-2 w-full min-w-[300px] left-0 sm:left-auto sm:right-0 bg-popover rounded-xl shadow-xl border border-border overflow-hidden"
           >
             <div className="max-h-[60vh] overflow-y-auto p-2">
               {isSearching ? (
@@ -144,10 +144,10 @@ export function GlobalSearch() {
                     <button
                       key={`${item.type}-${item.id}`}
                       onClick={() => handleItemClick(item.href)}
-                      className="w-full flex flex-col items-start gap-1 p-2.5 rounded-lg hover:bg-slate-50 transition-colors text-right"
+                      className="w-full flex flex-col items-start gap-1 p-2.5 rounded-lg hover:bg-muted transition-colors text-right"
                     >
                       <div className="flex items-center gap-2.5 w-full">
-                        <div className="bg-white border border-slate-100 p-1.5 rounded-md shadow-sm shrink-0">
+                        <div className="bg-background border border-border p-1.5 rounded-md shadow-sm shrink-0">
                           {getIcon(item.type)}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -177,7 +177,7 @@ export function GlobalSearch() {
               )}
             </div>
             
-            <div className="bg-slate-50 border-t border-slate-100 p-2.5 flex justify-between items-center text-xs text-slate-500 rounded-b-xl">
+            <div className="bg-secondary/30 border-t border-border p-2.5 flex justify-between items-center text-xs text-muted-foreground rounded-b-xl">
               <span className="font-medium text-slate-400">بحث سريع</span>
               {results.length > 0 && <span>{results.length} نتيجة</span>}
             </div>

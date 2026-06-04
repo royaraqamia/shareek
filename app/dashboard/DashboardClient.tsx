@@ -220,45 +220,73 @@ export function DashboardClient({ initialProducts, initialTransactions, initialC
           </CardHeader>
           <CardContent className="p-0">
             {initialTransactions.length === 0 ? (
-              <div className="py-12 text-center text-slate-400 text-sm">
+              <div className="py-12 text-center text-muted-foreground text-sm">
                 {t.noTransactions[language]}
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-200 bg-slate-50/80 text-slate-500 font-semibold text-start">
-                      <th className="py-4 px-6 text-start whitespace-nowrap">{t.headers.ref[language]}</th>
-                      <th className="py-4 px-6 text-start whitespace-nowrap">{t.headers.contact[language]}</th>
-                      <th className="py-4 px-6 text-end whitespace-nowrap">{t.headers.total[language]}</th>
-                      <th className="py-4 px-6 text-end whitespace-nowrap">{t.headers.date[language]}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {initialTransactions.slice(0, 5).map((tx) => (
-                      <tr key={tx.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors group">
-                        <td className="py-4 px-6 font-bold flex items-center gap-3">
-                          <div className={`p-2 rounded-lg ${tx.type === 'SALE' ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'}`}>
+              <>
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border bg-secondary/80 text-muted-foreground font-semibold text-start">
+                        <th className="py-4 px-6 text-start whitespace-nowrap">{t.headers.ref[language]}</th>
+                        <th className="py-4 px-6 text-start whitespace-nowrap">{t.headers.contact[language]}</th>
+                        <th className="py-4 px-6 text-end whitespace-nowrap">{t.headers.total[language]}</th>
+                        <th className="py-4 px-6 text-end whitespace-nowrap">{t.headers.date[language]}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {initialTransactions.slice(0, 5).map((tx) => (
+                        <tr key={tx.id} className="border-b border-border/60 hover:bg-secondary/50 transition-colors group">
+                          <td className="py-4 px-6 font-bold flex items-center gap-3">
+                            <div className={`p-2 rounded-lg ${tx.type === 'SALE' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-primary/10 text-primary'}`}>
+                              {tx.type === 'SALE' ? (
+                                <TrendingUp className="w-4 h-4 shrink-0" />
+                              ) : (
+                                <TrendingDown className="w-4 h-4 shrink-0" />
+                              )}
+                            </div>
+                            <span className="text-foreground font-mono">{tx.reference_number}</span>
+                          </td>
+                          <td className="py-4 px-6 text-muted-foreground font-medium">{tx.contacts?.name || '-'}</td>
+                          <td className="py-4 px-6 text-end font-bold text-foreground font-mono">
+                            {Number(tx.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                          </td>
+                          <td className="py-4 px-6 text-end text-muted-foreground text-xs font-mono font-medium">
+                            {new Date(tx.transaction_date).toLocaleDateString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="block md:hidden p-4 space-y-3">
+                  {initialTransactions.slice(0, 5).map((tx) => (
+                    <div key={tx.id} className="border border-border/60 rounded-xl p-3 bg-card hover:border-primary/50 transition-all flex flex-col gap-3">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                          <div className={`p-1.5 rounded-md ${tx.type === 'SALE' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-primary/10 text-primary'}`}>
                             {tx.type === 'SALE' ? (
-                              <TrendingUp className="w-4 h-4 shrink-0" />
+                              <TrendingUp className="w-3.5 h-3.5 shrink-0" />
                             ) : (
-                              <TrendingDown className="w-4 h-4 shrink-0" />
+                              <TrendingDown className="w-3.5 h-3.5 shrink-0" />
                             )}
                           </div>
-                          <span className="text-slate-800">{tx.reference_number}</span>
-                        </td>
-                        <td className="py-4 px-6 text-slate-600 font-medium">{tx.contacts?.name || '-'}</td>
-                        <td className="py-4 px-6 text-end font-bold text-slate-900 font-mono">
+                          <span className="text-foreground font-bold font-mono text-sm">{tx.reference_number}</span>
+                        </div>
+                        <span className="font-bold text-foreground font-mono text-sm">
                           {Number(tx.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                        </td>
-                        <td className="py-4 px-6 text-end text-slate-400 text-xs font-mono font-medium">
-                          {new Date(tx.transaction_date).toLocaleDateString()}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center text-xs text-muted-foreground">
+                        <span className="font-medium">{tx.contacts?.name || '-'}</span>
+                        <span className="font-mono">{new Date(tx.transaction_date).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
           </CardContent>
         </Card>

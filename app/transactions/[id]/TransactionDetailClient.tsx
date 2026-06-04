@@ -175,11 +175,12 @@ export function TransactionDetailClient({ transaction, organization }: Transacti
 
           {/* SHEET ITEMS TABLE */}
           <div className="space-y-4">
-            <h3 className="text-sm font-bold text-slate-800">{language === 'ar' ? "بنود الفاتورة والخدمات" : "Line items invoice specifics"}</h3>
-            <div className="overflow-x-auto">
+            <h3 className="text-sm font-bold text-foreground">{language === 'ar' ? "بنود الفاتورة والخدمات" : "Line items invoice specifics"}</h3>
+            
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-200 text-slate-500 text-xs">
+                  <tr className="border-b border-border text-muted-foreground text-xs">
                     <th className="py-2 text-start font-medium">{t("tableItem")}</th>
                     <th className="py-2 text-center font-medium w-16">{t("tableQty")}</th>
                     <th className="py-2 text-end font-medium w-32">{t("tablePrice")}</th>
@@ -188,18 +189,46 @@ export function TransactionDetailClient({ transaction, organization }: Transacti
                 </thead>
                 <tbody>
                   {activeTx.transaction_items?.map((item: any) => (
-                    <tr key={item.id} className="border-b border-slate-100 text-slate-700 hover:bg-slate-50/30 transition-colors">
+                    <tr key={item.id} className="border-b border-border/60 text-muted-foreground hover:bg-secondary/30 transition-colors">
                       <td className="py-3 text-start">
-                        <p className="font-semibold text-slate-800">{item.product?.name || (language === 'ar' ? 'بند غير محدد' : 'Staged catalog resource')}</p>
-                        <p className="text-xs text-slate-400 font-mono">{item.product?.sku ? `SKU: ${item.product.sku}` : ''}</p>
+                        <p className="font-semibold text-foreground">{item.product?.name || (language === 'ar' ? 'بند غير محدد' : 'Staged catalog resource')}</p>
+                        <p className="text-xs text-muted-foreground font-mono">{item.product?.sku ? `SKU: ${item.product.sku}` : ''}</p>
                       </td>
                       <td className="py-3 text-center font-mono">{item.quantity}</td>
                       <td className="py-3 text-end font-mono">SAR {Number(item.unit_price).toFixed(2)}</td>
-                      <td className="py-3 text-end font-mono">SAR {Number(item.total_price || (item.quantity * item.unit_price)).toFixed(2)}</td>
+                      <td className="py-3 text-end font-mono font-bold text-foreground">SAR {Number(item.total_price || (item.quantity * item.unit_price)).toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            <div className="block md:hidden space-y-3">
+              {activeTx.transaction_items?.map((item: any) => (
+                <div key={item.id} className="border border-border/60 rounded-xl p-3 bg-secondary/10 flex flex-col gap-2 relative">
+                   <div className="flex justify-between items-start pr-8">
+                     <div>
+                       <div className="font-bold text-foreground text-sm">{item.product?.name || (language === 'ar' ? 'بند غير محدد' : 'Staged catalog resource')}</div>
+                       <div className="text-xs text-muted-foreground font-mono">{item.product?.sku ? `SKU: ${item.product.sku}` : ''}</div>
+                     </div>
+                     <div className="text-right font-mono font-black text-foreground">
+                       <div className="text-[11px] text-muted-foreground font-sans font-normal mb-0.5">{language === 'ar' ? 'الإجمالي' : 'Total'}</div>
+                       SAR {Number(item.total_price || (item.quantity * item.unit_price)).toFixed(2)}
+                     </div>
+                   </div>
+                   
+                   <div className="flex gap-4 border-t border-border/40 pt-2 mt-1">
+                      <div className="flex flex-col text-xs">
+                        <span className="text-muted-foreground">{language === 'ar' ? 'الكمية' : 'Qty'}</span>
+                        <span className="font-mono font-bold text-foreground">{item.quantity}</span>
+                      </div>
+                      <div className="flex flex-col text-xs">
+                        <span className="text-muted-foreground">{language === 'ar' ? 'سعر الوحدة' : 'Unit Price'}</span>
+                        <span className="font-mono font-medium">SAR {Number(item.unit_price).toFixed(2)}</span>
+                      </div>
+                   </div>
+                </div>
+              ))}
             </div>
           </div>
 

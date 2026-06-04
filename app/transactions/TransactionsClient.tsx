@@ -354,99 +354,155 @@ export function TransactionsClient({ initialTransactions, contacts, products }: 
             </Button>
           </div>
         ) : (
-          <Table>
-            <TableHeader className="bg-slate-50/80">
-              <TableRow className="border-b border-slate-200">
-                <TableHead className="w-[50px] px-4 text-center font-bold text-slate-600">
-                  <input
-                    type="checkbox"
-                    checked={filteredTransactions.length > 0 && selectedIds.length === filteredTransactions.length}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedIds(filteredTransactions.map(tx => tx.id));
-                      } else {
-                        setSelectedIds([]);
-                      }
-                    }}
-                    className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 accent-blue-600 cursor-pointer"
-                  />
-                </TableHead>
-                <TableHead className="font-bold text-slate-600 h-12 px-6 text-right">{t.headers.ref[language]}</TableHead>
-                <TableHead className="font-bold text-slate-600 px-6 text-right">{t.headers.type[language]}</TableHead>
-                <TableHead className="font-bold text-slate-600 px-6 text-right">{t.headers.contact[language]}</TableHead>
-                <TableHead className="text-left font-bold text-slate-600 px-6">{t.headers.subtotal[language]}</TableHead>
-                <TableHead className="text-left font-bold text-slate-600 px-6">{t.headers.total[language]}</TableHead>
-                <TableHead className="text-left font-bold text-slate-600 px-6">{t.headers.date[language]}</TableHead>
-                <TableHead className="w-[100px] text-left px-6"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <Table>
+                <TableHeader className="bg-secondary/40">
+                  <TableRow className="border-b border-border">
+                    <TableHead className="w-[50px] px-4 text-center font-bold text-muted-foreground">
+                      <input
+                        type="checkbox"
+                        checked={filteredTransactions.length > 0 && selectedIds.length === filteredTransactions.length}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedIds(filteredTransactions.map(tx => tx.id));
+                          } else {
+                            setSelectedIds([]);
+                          }
+                        }}
+                        className="w-4 h-4 rounded border-input"
+                      />
+                    </TableHead>
+                    <TableHead className="font-bold text-muted-foreground h-12 px-6 text-right">{t.headers.ref[language]}</TableHead>
+                    <TableHead className="font-bold text-muted-foreground px-6 text-right">{t.headers.type[language]}</TableHead>
+                    <TableHead className="font-bold text-muted-foreground px-6 text-right">{t.headers.contact[language]}</TableHead>
+                    <TableHead className="text-left font-bold text-muted-foreground px-6">{t.headers.subtotal[language]}</TableHead>
+                    <TableHead className="text-left font-bold text-muted-foreground px-6">{t.headers.total[language]}</TableHead>
+                    <TableHead className="text-left font-bold text-muted-foreground px-6">{t.headers.date[language]}</TableHead>
+                    <TableHead className="w-[100px] text-left px-6"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredTransactions.map((tx) => {
+                    const isSelected = selectedIds.includes(tx.id);
+                    return (
+                      <TableRow 
+                        key={tx.id}
+                        className={`cursor-pointer border-b border-border hover:bg-secondary/30 transition-colors group h-16 ${
+                          isSelected ? 'bg-primary/5 hover:bg-primary/10' : ''
+                        }`}
+                        onClick={() => router.push(`/transactions/${tx.id}`)}
+                      >
+                        <TableCell className="w-[50px] px-4 text-center" onClick={(e) => e.stopPropagation()}>
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedIds(prev => [...prev, tx.id]);
+                              } else {
+                                setSelectedIds(prev => prev.filter(id => id !== tx.id));
+                              }
+                            }}
+                            className="w-4 h-4 rounded border-input"
+                          />
+                        </TableCell>
+                        <TableCell className="font-bold text-foreground px-6 text-right">
+                          <span className="flex items-center gap-3 justify-start">
+                            <div className={`p-1.5 rounded-md ${tx.type === 'SALE' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-primary/10 text-primary'}`}>
+                              {tx.type === 'SALE' ? (
+                                <TrendingUp className="w-4 h-4 shrink-0" />
+                              ) : (
+                                <TrendingDown className="w-4 h-4 shrink-0" />
+                              )}
+                            </div>
+                            <span className="font-mono text-[15px]">{tx.reference_number}</span>
+                          </span>
+                        </TableCell>
+                        <TableCell className="px-6 text-right">
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-[13px] font-bold border ${
+                            tx.type === 'SALE' ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200/20' : 'bg-primary/10 text-primary border-primary/20'
+                          }`}>
+                            <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ml-1.5 ${tx.type === 'SALE' ? 'bg-emerald-500' : 'bg-primary'}`} />
+                            {t.types[tx.type as 'SALE' | 'PURCHASE'][language]}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground font-medium px-6 text-right">{tx.contacts?.name || '-'}</TableCell>
+                        <TableCell className="text-left text-muted-foreground font-mono text-[15px] font-semibold px-6">
+                          {Number(tx.subtotal).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        </TableCell>
+                        <TableCell className="text-left font-black text-foreground font-mono text-[15px] px-6">
+                          {Number(tx.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        </TableCell>
+                        <TableCell className="text-left text-muted-foreground text-sm font-mono font-medium px-6">
+                          {new Date(tx.transaction_date).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="text-left px-6">
+                          <div className="flex justify-start opacity-0 group-hover:opacity-100 transition-opacity translate-x-2 group-hover:translate-x-0">
+                            <Button variant="outline" size="icon" className="h-9 w-9 rounded-full bg-card shadow-sm border-border text-primary hover:bg-primary hover:text-primary-foreground hover:scale-110 transition-all duration-300">
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="block md:hidden space-y-3 p-4">
               {filteredTransactions.map((tx) => {
                 const isSelected = selectedIds.includes(tx.id);
                 return (
-                  <TableRow 
-                    key={tx.id}
-                    className={`cursor-pointer border-b border-slate-100 hover:bg-blue-50/40 transition-colors group h-16 ${
-                      isSelected ? 'bg-amber-500/5 hover:bg-amber-500/10' : ''
+                  <div 
+                    key={tx.id} 
+                    onClick={() => router.push(`/transactions/${tx.id}`)} 
+                    className={`bg-card border rounded-2xl p-4 shadow-sm cursor-pointer transition-all ${
+                      isSelected ? 'border-primary ring-1 ring-primary/20' : 'border-border hover:border-primary/50'
                     }`}
-                    onClick={() => router.push(`/transactions/${tx.id}`)}
                   >
-                    <TableCell className="w-[50px] px-4 text-center" onClick={(e) => e.stopPropagation()}>
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedIds(prev => [...prev, tx.id]);
-                          } else {
-                            setSelectedIds(prev => prev.filter(id => id !== tx.id));
-                          }
-                        }}
-                        className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 accent-blue-600 cursor-pointer"
-                      />
-                    </TableCell>
-                    <TableCell className="font-bold text-slate-900 px-6 text-right">
-                      <span className="flex items-center gap-3 justify-start">
-                        <div className={`p-1.5 rounded-md ${tx.type === 'SALE' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'}`}>
-                          {tx.type === 'SALE' ? (
-                            <TrendingUp className="w-4 h-4 shrink-0" />
-                          ) : (
-                            <TrendingDown className="w-4 h-4 shrink-0" />
-                          )}
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex items-center gap-3">
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={(e) => {
+                              if (e.target.checked) setSelectedIds(prev => [...prev, tx.id]);
+                              else setSelectedIds(prev => prev.filter(id => id !== tx.id));
+                            }}
+                            className="w-4 h-4 rounded border-input text-primary focus:ring-primary accent-primary cursor-pointer mt-1 relative z-10"
+                          />
                         </div>
-                        <span className="font-mono text-[15px]">{tx.reference_number}</span>
-                      </span>
-                    </TableCell>
-                    <TableCell className="px-6 text-right">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-[13px] font-bold border ${
-                        tx.type === 'SALE' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60' : 'bg-blue-50 text-blue-700 border-blue-200/60'
-                      }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ml-1.5 ${tx.type === 'SALE' ? 'bg-emerald-500' : 'bg-blue-500'}`} />
-                        {t.types[tx.type as 'SALE' | 'PURCHASE'][language]}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-slate-700 font-medium px-6 text-right">{tx.contacts?.name || '-'}</TableCell>
-                    <TableCell className="text-left text-slate-500 font-mono text-[15px] font-semibold px-6">
-                      {Number(tx.subtotal).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                    </TableCell>
-                    <TableCell className="text-left font-black text-slate-900 font-mono text-[15px] px-6">
-                      {Number(tx.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                    </TableCell>
-                    <TableCell className="text-left text-slate-400 text-sm font-mono font-medium px-6">
-                      {new Date(tx.transaction_date).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-left px-6">
-                      <div className="flex justify-start opacity-0 group-hover:opacity-100 transition-opacity translate-x-2 group-hover:translate-x-0">
-                        <Button variant="outline" size="icon" className="h-9 w-9 rounded-full bg-white shadow-sm border-slate-200 text-primary hover:bg-primary hover:text-white hover:scale-110 transition-all duration-300">
-                          <Eye className="w-4 h-4" />
-                        </Button>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono font-bold text-foreground">{tx.reference_number}</span>
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${tx.type === 'SALE' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' : 'bg-primary/10 text-primary border-primary/20'}`}>
+                              {t.types[tx.type as 'SALE' | 'PURCHASE'][language]}
+                            </span>
+                          </div>
+                          <div className="text-sm font-medium text-muted-foreground mt-0.5">{tx.contacts?.name || '-'}</div>
+                        </div>
                       </div>
-                    </TableCell>
-                  </TableRow>
+                      <div className="text-left font-mono font-black text-foreground bg-secondary/30 px-2.5 py-1 rounded-lg">
+                        {Number(tx.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center text-xs text-muted-foreground border-t border-border pt-3 mt-1 font-mono">
+                      <div>{new Date(tx.transaction_date).toLocaleDateString()}</div>
+                      <div className="flex items-center gap-1">
+                        <span>الفرعي:</span>
+                        <span className="font-semibold text-foreground">{Number(tx.subtotal).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                      </div>
+                    </div>
+                  </div>
                 );
               })}
-            </TableBody>
-          </Table>
+            </div>
+          </>
         )}
       </div>
     </div>

@@ -555,58 +555,97 @@ export function InventoryClient({ initialProducts }: { initialProducts: any[] })
             </Button>
           </div>
         ) : (
-          <Table>
-            <TableHeader className="bg-slate-50/80">
-              <TableRow className="border-b border-slate-200">
-                <TableHead className="w-[50px] px-4 text-center font-bold text-slate-600">
-                  <input
-                    type="checkbox"
-                    checked={filteredProducts.length > 0 && selectedIds.length === filteredProducts.length}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedIds(filteredProducts.map(p => p.id));
-                      } else {
-                        setSelectedIds([]);
-                      }
-                    }}
-                    className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 accent-blue-600 cursor-pointer"
-                  />
-                </TableHead>
-                <TableHead className="text-right font-bold text-slate-600 h-12 px-6">{tCol('name')}</TableHead>
-                <TableHead className="text-right font-bold text-slate-600 px-6">{tCol('sku')}</TableHead>
-                <TableHead className="text-left font-bold text-slate-600 px-6">{tCol('stock')}</TableHead>
-                <TableHead className="text-left font-bold text-slate-600 px-6">{tCol('price')}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          <>
+            <div className="hidden md:block overflow-x-auto">
+              <Table>
+                <TableHeader className="bg-secondary/40">
+                  <TableRow className="border-b border-border">
+                    <TableHead className="w-[50px] px-4 text-center font-bold text-muted-foreground">
+                      <input
+                        type="checkbox"
+                        checked={filteredProducts.length > 0 && selectedIds.length === filteredProducts.length}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedIds(filteredProducts.map(p => p.id));
+                          } else {
+                            setSelectedIds([]);
+                          }
+                        }}
+                        className="w-4 h-4 rounded border-input"
+                      />
+                    </TableHead>
+                    <TableHead className="text-right font-bold text-muted-foreground h-12 px-6">{tCol('name')}</TableHead>
+                    <TableHead className="text-right font-bold text-muted-foreground px-6">{tCol('sku')}</TableHead>
+                    <TableHead className="text-left font-bold text-muted-foreground px-6">{tCol('stock')}</TableHead>
+                    <TableHead className="text-left font-bold text-muted-foreground px-6">{tCol('price')}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredProducts.map((product) => (
+                    <TableRow key={product.id} className="border-b border-border hover:bg-secondary/30 transition-colors group h-16">
+                      <TableCell className="w-[50px] px-4 text-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.includes(product.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedIds(prev => [...prev, product.id]);
+                            } else {
+                              setSelectedIds(prev => prev.filter(id => id !== product.id));
+                            }
+                          }}
+                          className="w-4 h-4 rounded border-input"
+                        />
+                      </TableCell>
+                      <TableCell className="font-bold text-foreground text-right px-6 text-[15px]">{product.name}</TableCell>
+                      <TableCell className="text-right font-mono text-[15px] text-muted-foreground font-medium px-6">{product.sku || '-'}</TableCell>
+                      <TableCell className="text-left px-6">
+                        {product.is_service ? <span className="inline-flex items-center px-3 py-1 rounded-full text-[13px] font-bold border border-border bg-secondary text-muted-foreground">خدمة لا تتبع</span> : <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-[15px]">{product.current_stock}</span>}
+                      </TableCell>
+                      <TableCell className="text-left font-mono font-black text-foreground text-[15px] px-6">
+                        {Number(product.sale_price).toFixed(2)} SAR
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            
+            <div className="block md:hidden space-y-3 p-4">
               {filteredProducts.map((product) => (
-                <TableRow key={product.id} className="border-b border-slate-100 hover:bg-blue-50/40 transition-colors group h-16">
-                  <TableCell className="w-[50px] px-4 text-center">
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.includes(product.id)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedIds(prev => [...prev, product.id]);
-                        } else {
-                          setSelectedIds(prev => prev.filter(id => id !== product.id));
-                        }
-                      }}
-                      className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 accent-blue-600 cursor-pointer"
-                    />
-                  </TableCell>
-                  <TableCell className="font-bold text-slate-900 text-right px-6 text-[15px]">{product.name}</TableCell>
-                  <TableCell className="text-right font-mono text-[15px] text-slate-600 font-medium px-6">{product.sku || '-'}</TableCell>
-                  <TableCell className="text-left px-6">
-                    {product.is_service ? <span className="inline-flex items-center px-3 py-1 rounded-full text-[13px] font-bold border border-slate-200/60 bg-slate-50 text-slate-500">خدمة لا تتبع</span> : <span className="font-mono font-bold text-emerald-600 text-[15px]">{product.current_stock}</span>}
-                  </TableCell>
-                  <TableCell className="text-left font-mono font-black text-slate-900 text-[15px] px-6">
-                    {Number(product.sale_price).toFixed(2)} SAR
-                  </TableCell>
-                </TableRow>
+                <div key={product.id} className="bg-card border border-border hover:border-primary/50 rounded-2xl p-4 shadow-sm transition-all">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(product.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) setSelectedIds(prev => [...prev, product.id]);
+                          else setSelectedIds(prev => prev.filter(id => id !== product.id));
+                        }}
+                        className="w-4 h-4 rounded border-input mt-1"
+                      />
+                      <div>
+                        <div className="font-bold text-foreground text-[15px]">{product.name}</div>
+                        <div className="text-sm text-muted-foreground font-mono mt-0.5">{product.sku || '-'}</div>
+                      </div>
+                    </div>
+                    <div className="text-left font-mono font-black text-foreground bg-secondary/30 px-2.5 py-1 rounded-lg">
+                      {Number(product.sale_price).toFixed(2)} SAR
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 border-t border-border pt-3 mt-1">
+                    <span className="text-xs font-semibold text-muted-foreground">المخزون:</span>
+                    {product.is_service ? (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border border-border bg-secondary text-muted-foreground">خدمة لا تتبع</span>
+                    ) : (
+                      <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-[13px]">{product.current_stock}</span>
+                    )}
+                  </div>
+                </div>
               ))}
-            </TableBody>
-          </Table>
+            </div>
+          </>
         )}
       </div>
     </div>

@@ -84,7 +84,7 @@ export function Navigation() {
   return (
     <>
       {/* Top Header - Unified for Desktop & Mobile */}
-      <header className="sticky top-0 z-40 w-full border-b border-slate-100 dark:border-slate-800/80 bg-white dark:bg-slate-950/75 backdrop-blur-xl shadow-sm transition-all duration-300">
+      <header className="sticky top-0 z-40 w-full border-b border-border bg-background/80 backdrop-blur-xl shadow-sm transition-all duration-300">
         <div className="container max-w-[90rem] mx-auto px-4 md:px-8 h-[4.5rem] flex items-center justify-between">
           
           {/* Logo Brand Block */}
@@ -132,7 +132,7 @@ export function Navigation() {
             {/* Theme Toggle Button */}
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="p-2 rounded-xl border border-slate-200/60 dark:border-slate-800 bg-white/80 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer flex items-center justify-center h-10 w-10 shadow-sm"
+              className="p-2 rounded-xl border border-border bg-background dark:bg-slate-900 text-foreground dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer flex items-center justify-center h-10 w-10 shadow-sm"
               title={theme === 'dark' ? 'المظهر النَّهاري' : 'المظهر الليلي'}
             >
               {theme === 'dark' ? (
@@ -147,7 +147,7 @@ export function Navigation() {
                 <GlobalSearch />
                 
                 {/* Desktop Profile Status */}
-                <div className="hidden sm:flex items-center gap-3 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 py-1.5 px-4 rounded-full text-xs shadow-sm hover:shadow-md transition-all duration-300">
+                <div className="hidden sm:flex items-center gap-3 bg-background dark:bg-slate-900 border border-border py-1.5 px-4 rounded-full text-xs shadow-sm hover:shadow-md transition-all duration-300">
                   <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200 font-semibold">
                     <div className="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-full shrink-0">
                       <Building2 className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
@@ -221,7 +221,7 @@ export function Navigation() {
 
       {/* Fixed Bottom Navigation Bar - Mobile ONLY (`md:hidden`) */}
       {showMenuItems && (
-        <nav className="fixed bottom-0 inset-x-0 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800/80 h-16 flex items-center justify-around px-2 z-40 md:hidden shadow-[0_-2px_12px_rgba(0,0,0,0.06)] dark:shadow-[0_-2px_12px_rgba(0,0,0,0.4)] pb-safe">
+        <nav className="fixed bottom-0 inset-x-0 bg-background/95 dark:bg-slate-950/95 backdrop-blur-md border-t border-border h-16 flex items-center justify-around px-2 z-40 md:hidden shadow-[0_-2px_12px_rgba(0,0,0,0.06)] dark:shadow-[0_-2px_12px_rgba(0,0,0,0.4)] pb-safe">
           {MENU_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive = pathname?.startsWith(item.href);

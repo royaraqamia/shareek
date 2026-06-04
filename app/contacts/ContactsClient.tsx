@@ -724,35 +724,56 @@ export function ContactsClient({ initialContacts }: { initialContacts: any[] }) 
                   </div>
 
                   {/* Preview list */}
-                  <div className="border border-slate-200/60 rounded-2xl overflow-hidden max-h-56 overflow-y-auto bg-slate-50/50">
-                    <Table>
-                      <TableHeader className="bg-slate-50 sticky top-0 border-b border-slate-100 shadow-sm z-10">
-                        <TableRow>
-                          <TableHead className="text-right font-bold text-xs text-slate-600 h-10 px-4">{language === 'ar' ? 'الاسم' : 'Name'}</TableHead>
-                          <TableHead className="text-right font-bold text-xs text-slate-600 px-4">{language === 'ar' ? 'النوع ومجموعة التصنيف' : 'Type'}</TableHead>
-                          <TableHead className="text-right font-bold text-xs text-slate-600 px-4">{language === 'ar' ? 'الجوال' : 'Phone'}</TableHead>
-                          <TableHead className="text-right font-bold text-xs text-slate-600 px-4">{language === 'ar' ? 'البريد الإلكتروني' : 'Email'}</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {parsedContacts.slice(0, 10).map((c, idx) => (
-                          <TableRow key={idx} className="border-b border-slate-100/60 h-12 hover:bg-slate-50">
-                            <TableCell className="font-bold text-slate-900 text-right px-4 text-xs">{c.name}</TableCell>
-                            <TableCell className="text-right px-4">
-                              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold border ${
-                                c.type === 'CLIENT' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-blue-50 text-blue-700 border-blue-100'
-                              }`}>
-                                {c.type === 'CLIENT' ? (language === 'ar' ? 'عميل' : 'Client') : (language === 'ar' ? 'مورد' : 'Supplier')}
-                              </span>
-                            </TableCell>
-                            <TableCell className="text-slate-600 text-right font-mono px-4 text-xs">{c.phone || '-'}</TableCell>
-                            <TableCell className="text-slate-600 text-right font-mono px-4 text-xs">{c.email || '-'}</TableCell>
+                  <div className="border border-border/60 rounded-2xl overflow-hidden max-h-56 overflow-y-auto bg-secondary/30">
+                    <div className="hidden md:block">
+                      <Table>
+                        <TableHeader className="bg-secondary sticky top-0 border-b border-border shadow-sm z-10">
+                          <TableRow>
+                            <TableHead className="text-right font-bold text-xs text-muted-foreground h-10 px-4">{language === 'ar' ? 'الاسم' : 'Name'}</TableHead>
+                            <TableHead className="text-right font-bold text-xs text-muted-foreground px-4">{language === 'ar' ? 'النوع ومجموعة التصنيف' : 'Type'}</TableHead>
+                            <TableHead className="text-right font-bold text-xs text-muted-foreground px-4">{language === 'ar' ? 'الجوال' : 'Phone'}</TableHead>
+                            <TableHead className="text-right font-bold text-xs text-muted-foreground px-4">{language === 'ar' ? 'البريد الإلكتروني' : 'Email'}</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                        </TableHeader>
+                        <TableBody>
+                          {parsedContacts.slice(0, 10).map((c, idx) => (
+                            <TableRow key={idx} className="border-b border-border/60 h-12 hover:bg-secondary/50">
+                              <TableCell className="font-bold text-foreground text-right px-4 text-xs">{c.name}</TableCell>
+                              <TableCell className="text-right px-4">
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold border ${
+                                  c.type === 'CLIENT' ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20' : 'bg-primary/10 text-primary border-primary/20'
+                                }`}>
+                                  {c.type === 'CLIENT' ? (language === 'ar' ? 'عميل' : 'Client') : (language === 'ar' ? 'مورد' : 'Supplier')}
+                                </span>
+                              </TableCell>
+                              <TableCell className="text-muted-foreground text-right font-mono px-4 text-xs">{c.phone || '-'}</TableCell>
+                              <TableCell className="text-muted-foreground text-right font-mono px-4 text-xs">{c.email || '-'}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                    {/* Mobile cards view */}
+                    <div className="block md:hidden p-3 space-y-2">
+                      {parsedContacts.slice(0, 10).map((c, idx) => (
+                        <div key={idx} className="bg-card border border-border/60 p-3 rounded-xl flex flex-col gap-2">
+                          <div className="flex justify-between items-center">
+                            <span className="font-bold text-foreground text-sm">{c.name}</span>
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                              c.type === 'CLIENT' ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20' : 'bg-primary/10 text-primary border-primary/20'
+                            }`}>
+                              {c.type === 'CLIENT' ? (language === 'ar' ? 'عميل' : 'Client') : (language === 'ar' ? 'مورد' : 'Supplier')}
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-xs text-muted-foreground font-mono">
+                            <span>{c.phone || '-'}</span>
+                            <span>{c.email || '-'}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                     {parsedContacts.length > 10 && (
-                      <div className="py-2 px-4 text-center text-[11px] text-slate-400 font-bold border-t border-slate-100 bg-white">
+                      <div className="py-2 px-4 text-center text-[11px] text-muted-foreground font-bold border-t border-border bg-card">
                         {language === 'ar' 
                           ? `و ${parsedContacts.length - 10} جهات اتصال أخرى لم تظهر في المعاينة...` 
                           : `and ${parsedContacts.length - 10} more contacts not shown in preview...`}
@@ -1010,61 +1031,99 @@ export function ContactsClient({ initialContacts }: { initialContacts: any[] }) 
             </Button>
           </div>
         ) : (
-          <Table>
-            <TableHeader className="bg-slate-50/80">
-              <TableRow className="border-b border-slate-200">
-                <TableHead className="w-[50px] px-4 text-center font-bold text-slate-600">
-                  <input
-                    type="checkbox"
-                    checked={filteredContacts.length > 0 && selectedIds.length === filteredContacts.length}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedIds(filteredContacts.map(c => c.id));
-                      } else {
-                        setSelectedIds([]);
-                      }
-                    }}
-                    className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 accent-blue-600 cursor-pointer"
-                  />
-                </TableHead>
-                <TableHead className="text-right font-bold text-slate-600 h-12 px-6">{t.headers.name[language]}</TableHead>
-                <TableHead className="text-right font-bold text-slate-600 px-6">{t.headers.type[language]}</TableHead>
-                <TableHead className="text-right font-bold text-slate-600 px-6">{t.headers.phone[language]}</TableHead>
-                <TableHead className="text-right font-bold text-slate-600 px-6">{t.headers.email[language]}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          <>
+            <div className="hidden md:block overflow-x-auto">
+              <Table>
+                <TableHeader className="bg-secondary/40">
+                  <TableRow className="border-b border-border">
+                    <TableHead className="w-[50px] px-4 text-center font-bold text-muted-foreground">
+                      <input
+                        type="checkbox"
+                        checked={filteredContacts.length > 0 && selectedIds.length === filteredContacts.length}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedIds(filteredContacts.map(c => c.id));
+                          } else {
+                            setSelectedIds([]);
+                          }
+                        }}
+                        className="w-4 h-4 rounded border-input"
+                      />
+                    </TableHead>
+                    <TableHead className="text-right font-bold text-muted-foreground h-12 px-6">{t.headers.name[language]}</TableHead>
+                    <TableHead className="text-right font-bold text-muted-foreground px-6">{t.headers.type[language]}</TableHead>
+                    <TableHead className="text-right font-bold text-muted-foreground px-6">{t.headers.phone[language]}</TableHead>
+                    <TableHead className="text-right font-bold text-muted-foreground px-6">{t.headers.email[language]}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredContacts.map((contact) => (
+                    <TableRow key={contact.id} className="border-b border-border hover:bg-secondary/30 transition-colors group h-16">
+                      <TableCell className="w-[50px] px-4 text-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.includes(contact.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedIds(prev => [...prev, contact.id]);
+                            } else {
+                              setSelectedIds(prev => prev.filter(id => id !== contact.id));
+                            }
+                          }}
+                          className="w-4 h-4 rounded border-input"
+                        />
+                      </TableCell>
+                      <TableCell className="font-bold text-foreground text-right px-6 text-[15px]">{contact.name}</TableCell>
+                      <TableCell className="text-right px-6">
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-[13px] font-bold border ${
+                          contact.type === 'CLIENT' ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200/20' : 'bg-primary/10 text-primary border-primary/20'
+                        }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ml-1.5 ${contact.type === 'CLIENT' ? 'bg-emerald-500' : 'bg-primary'}`} />
+                          {t.types[contact.type as 'CLIENT' | 'SUPPLIER'][language]}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground font-medium text-right font-mono px-6 text-[15px]">{contact.phone || '-'}</TableCell>
+                      <TableCell className="text-muted-foreground font-medium text-right font-mono px-6 text-[15px]">{contact.email || '-'}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            
+            <div className="block md:hidden space-y-3 p-4">
               {filteredContacts.map((contact) => (
-                <TableRow key={contact.id} className="border-b border-slate-100 hover:bg-blue-50/40 transition-colors group h-16">
-                  <TableCell className="w-[50px] px-4 text-center">
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.includes(contact.id)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedIds(prev => [...prev, contact.id]);
-                        } else {
-                          setSelectedIds(prev => prev.filter(id => id !== contact.id));
-                        }
-                      }}
-                      className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 accent-blue-600 cursor-pointer"
-                    />
-                  </TableCell>
-                  <TableCell className="font-bold text-slate-900 text-right px-6 text-[15px]">{contact.name}</TableCell>
-                  <TableCell className="text-right px-6">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-[13px] font-bold border ${
-                      contact.type === 'CLIENT' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60' : 'bg-blue-50 text-blue-700 border-blue-200/60'
+                <div key={contact.id} className="bg-card border border-border hover:border-primary/50 rounded-2xl p-4 shadow-sm transition-all">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(contact.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) setSelectedIds(prev => [...prev, contact.id]);
+                          else setSelectedIds(prev => prev.filter(id => id !== contact.id));
+                        }}
+                        className="w-4 h-4 rounded border-input mt-1"
+                      />
+                      <div>
+                        <div className="font-bold text-foreground text-[15px]">{contact.name}</div>
+                        <div className="text-sm text-muted-foreground font-mono mt-0.5">{contact.phone || '-'}</div>
+                      </div>
+                    </div>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                      contact.type === 'CLIENT' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' : 'bg-primary/10 text-primary border-primary/20'
                     }`}>
-                      <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ml-1.5 ${contact.type === 'CLIENT' ? 'bg-emerald-500' : 'bg-blue-500'}`} />
                       {t.types[contact.type as 'CLIENT' | 'SUPPLIER'][language]}
                     </span>
-                  </TableCell>
-                  <TableCell className="text-slate-600 font-medium text-right font-mono px-6 text-[15px]">{contact.phone || '-'}</TableCell>
-                  <TableCell className="text-slate-600 font-medium text-right font-mono px-6 text-[15px]">{contact.email || '-'}</TableCell>
-                </TableRow>
+                  </div>
+                  {contact.email && (
+                     <div className="flex justify-start text-xs text-muted-foreground border-t border-border pt-3 mt-1 font-mono">
+                       {contact.email}
+                     </div>
+                  )}
+                </div>
               ))}
-            </TableBody>
-          </Table>
+            </div>
+          </>
         )}
       </div>
     </div>

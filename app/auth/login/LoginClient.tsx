@@ -243,15 +243,15 @@ export function LoginClient() {
 
       {/* Forgot Password Dialog */}
       <Dialog open={isResetOpen} onOpenChange={setIsResetOpen}>
-        <DialogContent className="max-w-md bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-850 shadow-2xl rounded-3xl p-6 sm:p-8 font-arabic text-slate-900 dark:text-slate-100">
+        <DialogContent className="max-w-md bg-background border border-border shadow-2xl rounded-3xl p-6 sm:p-8 font-arabic text-foreground">
           <DialogHeader className="text-center flex flex-col items-center">
-            <div className="w-12 h-12 bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/40 flex items-center justify-center rounded-2xl mb-3 text-blue-600 dark:text-blue-400 z-10">
+            <div className="w-12 h-12 bg-primary/10 border border-primary/20 flex items-center justify-center rounded-2xl mb-3 text-primary z-10">
               <KeyRound className="w-6 h-6 animate-pulse" />
             </div>
-            <DialogTitle className="text-2xl font-black text-slate-900 dark:text-slate-50 tracking-tight leading-tight">
+            <DialogTitle className="text-2xl font-black text-foreground tracking-tight leading-tight">
               تغيير كلمة المرور
             </DialogTitle>
-            <DialogDescription className="text-sm font-medium text-slate-550 dark:text-slate-400 leading-relaxed max-w-sm mt-1">
+            <DialogDescription className="text-sm font-medium text-muted-foreground leading-relaxed max-w-sm mt-1">
               أدخل البريد الإلكتروني المُرتبط بحسابك وسنقوم بالتَّحقُّق منه وإرسال رابط لإعادة تعيين كلمة مرور جديدة.
             </DialogDescription>
           </DialogHeader>

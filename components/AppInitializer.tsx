@@ -131,9 +131,9 @@ export function AppInitializer({ children }: { children: React.ReactNode }) {
 
   if (loading && !isPublicRoute) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center space-y-4">
-        <div className="w-12 h-12 rounded-full border-4 border-blue-600/20 border-t-blue-600 animate-spin" />
-        <p className="text-sm font-semibold text-slate-500 font-arabic">جاري مراجعة صلاحيَّات الوصول...</p>
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center space-y-4">
+        <div className="w-12 h-12 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+        <p className="text-sm font-semibold text-muted-foreground font-arabic">جاري مراجعة صلاحيَّات الوصول...</p>
       </div>
     );
   }
@@ -145,8 +145,8 @@ export function AppInitializer({ children }: { children: React.ReactNode }) {
     // Gate 1: If email is not confirmed
     if (!userState.isEmailConfirmed) {
       return (
-        <div className={`min-h-screen bg-slate-50 flex items-center justify-center p-4 antialiased sm:p-6 lg:p-8 ${language === 'ar' ? 'font-arabic' : 'font-english'}`}>
-          <div className="w-full max-w-lg bg-white rounded-2xl border border-slate-200/80 shadow-2xl p-8 text-center space-y-8 animate-fade-in" id="email-confirmation-card">
+        <div className={`min-h-screen bg-background flex items-center justify-center p-4 antialiased sm:p-6 lg:p-8 ${language === 'ar' ? 'font-arabic' : 'font-english'}`}>
+          <div className="w-full max-w-lg bg-card rounded-2xl border border-border shadow-2xl p-8 text-center space-y-8 animate-fade-in" id="email-confirmation-card">
             {/* Header Graphic */}
             <div className="flex flex-col items-center">
               <div className="relative flex items-center justify-center w-20 h-20 bg-blue-50 rounded-full border border-blue-200/50 mb-4 animate-bounce">
@@ -154,12 +154,12 @@ export function AppInitializer({ children }: { children: React.ReactNode }) {
                 <span className="absolute top-1 right-1 w-4.5 h-4.5 bg-blue-500 rounded-full border-2 border-white flex items-center justify-center text-[10px] text-white font-bold font-mono">!</span>
               </div>
               
-              <div className="flex items-center gap-2 border border-slate-100 bg-slate-50 py-1 px-3.5 rounded-full text-xs text-slate-600 mb-2 font-medium">
-                <User className="w-3.5 h-3.5 text-slate-400" />
+              <div className="flex items-center gap-2 border border-border bg-secondary py-1 px-3.5 rounded-full text-xs text-secondary-foreground mb-2 font-medium">
+                <User className="w-3.5 h-3.5 text-muted-foreground" />
                 <span>السَّلام عليكم، {userState.fullName || "شريك جديد"} 👋</span>
               </div>
               
-              <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-tight">
+              <h1 className="text-2xl font-black text-foreground tracking-tight leading-tight">
                 تأكيد البريد الإلكتروني مطلوب ✉️
               </h1>
             </div>
@@ -194,7 +194,7 @@ export function AppInitializer({ children }: { children: React.ReactNode }) {
               
               <Button 
                 variant="outline"
-                className="px-6 text-red-600 hover:bg-red-50 hover:text-red-700 bg-white border border-red-100 h-11 font-semibold cursor-pointer"
+                className="px-6 text-destructive hover:bg-destructive/10 hover:text-destructive bg-card border border-destructive/20 h-11 font-semibold cursor-pointer"
                 onClick={handleLogoutInWait}
               >
                 <LogOut className="w-4 h-4 ml-2" />
@@ -209,8 +209,8 @@ export function AppInitializer({ children }: { children: React.ReactNode }) {
     // Gate 2: If email is confirmed but not approved by admin yet
     if (!userState.isApproved) {
       return (
-        <div className={`min-h-screen bg-slate-50 flex items-center justify-center p-4 antialiased sm:p-6 lg:p-8 ${language === 'ar' ? 'font-arabic' : 'font-english'}`}>
-          <div className="w-full max-w-lg bg-white rounded-2xl border border-slate-200/80 shadow-2xl p-8 text-center space-y-8 animate-fade-in" id="approval-pending-card">
+        <div className={`min-h-screen bg-background flex items-center justify-center p-4 antialiased sm:p-6 lg:p-8 ${language === 'ar' ? 'font-arabic' : 'font-english'}`}>
+          <div className="w-full max-w-lg bg-card rounded-2xl border border-border shadow-2xl p-8 text-center space-y-8 animate-fade-in" id="approval-pending-card">
             {/* Header Graphic */}
             <div className="flex flex-col items-center">
               <div className="relative flex items-center justify-center w-20 h-20 bg-amber-50 rounded-full border border-amber-200/50 mb-4 animate-pulse">
@@ -218,18 +218,18 @@ export function AppInitializer({ children }: { children: React.ReactNode }) {
                 <span className="absolute top-1 right-1 w-4.5 h-4.5 bg-amber-500 rounded-full border-2 border-white flex items-center justify-center text-[10px] text-white font-bold font-mono">!</span>
               </div>
               
-              <div className="flex items-center gap-2 border border-slate-100 bg-slate-50 py-1 px-3.5 rounded-full text-xs text-slate-600 mb-2 font-medium">
-                <User className="w-3.5 h-3.5 text-slate-400" />
+              <div className="flex items-center gap-2 border border-border bg-secondary py-1 px-3.5 rounded-full text-xs text-secondary-foreground mb-2 font-medium">
+                <User className="w-3.5 h-3.5 text-muted-foreground" />
                 <span>السَّلام عليكم، {userState.fullName || "شريك جديد"} 👋</span>
                 {userState.username && (
                   <>
-                    <span className="text-slate-300">|</span>
-                    <span className="font-mono text-slate-500">@{userState.username}</span>
+                    <span className="text-muted-foreground">|</span>
+                    <span className="font-mono text-muted-foreground">@{userState.username}</span>
                   </>
                 )}
               </div>
               
-              <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-tight">
+              <h1 className="text-2xl font-black text-foreground tracking-tight leading-tight">
                 الحساب قيد المراجعة ⏳
               </h1>
             </div>
@@ -263,7 +263,7 @@ export function AppInitializer({ children }: { children: React.ReactNode }) {
               
               <Button 
                 variant="outline"
-                className="px-6 text-red-600 hover:bg-red-50 hover:text-red-700 bg-white border border-red-100 h-11 font-semibold cursor-pointer"
+                className="px-6 text-destructive hover:bg-destructive/10 hover:text-destructive bg-card border border-destructive/20 h-11 font-semibold cursor-pointer"
                 onClick={handleLogoutInWait}
               >
                 <LogOut className="w-4 h-4 ml-2" />
