@@ -84,7 +84,7 @@ export function Navigation() {
   return (
     <>
       {/* Top Header - Unified for Desktop & Mobile */}
-      <header className="sticky top-0 z-40 w-full border-b border-slate-100 dark:border-slate-800/80 bg-white/75 dark:bg-slate-950/75 backdrop-blur-xl shadow-sm transition-all duration-300">
+      <header className="sticky top-0 z-40 w-full border-b border-slate-100 dark:border-slate-800/80 bg-white dark:bg-slate-950/75 backdrop-blur-xl shadow-sm transition-all duration-300">
         <div className="container max-w-[90rem] mx-auto px-4 md:px-8 h-[4.5rem] flex items-center justify-between">
           
           {/* Logo Brand Block */}

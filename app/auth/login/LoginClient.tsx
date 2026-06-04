@@ -243,15 +243,15 @@ export function LoginClient() {
 
       {/* Forgot Password Dialog */}
       <Dialog open={isResetOpen} onOpenChange={setIsResetOpen}>
-        <DialogContent className="max-w-md bg-card border border-border/80 shadow-2xl rounded-3xl p-6 sm:p-8 font-arabic text-card-foreground">
+        <DialogContent className="max-w-md bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-850 shadow-2xl rounded-3xl p-6 sm:p-8 font-arabic text-slate-900 dark:text-slate-100">
           <DialogHeader className="text-center flex flex-col items-center">
-            <div className="w-12 h-12 bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/40 flex items-center justify-center rounded-2xl mb-3 text-blue-600 dark:text-blue-450 z-10">
+            <div className="w-12 h-12 bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/40 flex items-center justify-center rounded-2xl mb-3 text-blue-600 dark:text-blue-400 z-10">
               <KeyRound className="w-6 h-6 animate-pulse" />
             </div>
-            <DialogTitle className="text-2xl font-black text-slate-950 dark:text-slate-50 tracking-tight leading-tight">
+            <DialogTitle className="text-2xl font-black text-slate-900 dark:text-slate-50 tracking-tight leading-tight">
               تغيير كلمة المرور
             </DialogTitle>
-            <DialogDescription className="text-sm font-medium text-slate-500 dark:text-slate-400 leading-relaxed max-w-sm mt-1">
+            <DialogDescription className="text-sm font-medium text-slate-550 dark:text-slate-400 leading-relaxed max-w-sm mt-1">
               أدخل البريد الإلكتروني المُرتبط بحسابك وسنقوم بالتَّحقُّق منه وإرسال رابط لإعادة تعيين كلمة مرور جديدة.
             </DialogDescription>
           </DialogHeader>
@@ -265,8 +265,8 @@ export function LoginClient() {
                 <h3 className="text-lg font-bold text-slate-950 dark:text-slate-50 leading-tight">تمَّ إرسال رابط تغيير كلمة المرور</h3>
               </div>
               <div className="bg-emerald-50/40 dark:bg-emerald-950/10 border border-emerald-100/60 dark:border-emerald-900/30 p-4 rounded-2xl text-slate-700 dark:text-slate-300 text-sm leading-relaxed text-right">
-                <p className="font-semibold text-slate-850 dark:text-slate-200">{resetSuccessMessage}</p>
-                <p className="text-[12px] text-slate-500 dark:text-slate-450 mt-2.5 border-t border-emerald-100/50 dark:border-emerald-900/20 pt-2.5">
+                <p className="font-semibold text-slate-800 dark:text-slate-200">{resetSuccessMessage}</p>
+                <p className="text-[12px] text-slate-500 dark:text-slate-400 mt-2.5 border-t border-emerald-100/50 dark:border-emerald-900/20 pt-2.5">
                   يُرجَى فحص صندوق البريد الوارد (أو صندوق البريد العشوائي/المهملات/Spam) للوصول إلى رسالة إعادة التعيين بأمان.
                 </p>
               </div>
@@ -309,7 +309,7 @@ export function LoginClient() {
                 <Button
                   type="button"
                   variant="ghost"
-                  className="w-full h-11 text-slate-500 dark:text-slate-405 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900 rounded-xl transition-all font-semibold"
+                  className="w-full h-11 text-slate-500 dark:text-slate-400 hover:text-slate-850 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all font-semibold"
                   onClick={() => setIsResetOpen(false)}
                 >
                   تراجع

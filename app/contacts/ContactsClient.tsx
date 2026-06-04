@@ -5,6 +5,7 @@ import { useAppStore, type Language } from '@/store/useAppStore';
 import { useOfflineDataStore } from '@/store/useOfflineDataStore';
 import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
+import { DangerConfirmDialog } from '@/components/DangerConfirmDialog';
 import { 
   Plus, Users, Loader2, WifiOff, Search, FileSpreadsheet, 
   Download, UploadCloud, CheckCircle2, AlertTriangle, ArrowRight, ArrowLeft, Check,
@@ -83,12 +84,10 @@ export function ContactsClient({ initialContacts }: { initialContacts: any[] }) 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
   const handleBulkDelete = async () => {
     if (selectedIds.length === 0) return;
-    if (!window.confirm(language === 'ar' ? `هل أنت متأكد من حذف ${selectedIds.length} عنصر؟` : `Are you sure you want to delete ${selectedIds.length} items?`)) {
-      return;
-    }
 
     setIsBulkDeleting(true);
     try {
@@ -99,6 +98,7 @@ export function ContactsClient({ initialContacts }: { initialContacts: any[] }) 
         setContacts(updated);
         setOfflineContacts(updated);
         setSelectedIds([]);
+        setIsDeleteConfirmOpen(false);
       } else {
         toast.error(res.message || 'فشلت عملية الحذف');
       }
@@ -962,8 +962,8 @@ export function ContactsClient({ initialContacts }: { initialContacts: any[] }) 
               size="sm" 
               variant="destructive" 
               disabled={isBulkDeleting}
-              onClick={handleBulkDelete}
-              className="gap-1.5 h-9 rounded-lg font-bold text-xs hover:bg-red-600 cursor-pointer"
+              onClick={() => setIsDeleteConfirmOpen(true)}
+              className="gap-1.5 h-9 rounded-lg font-bold text-xs hover:bg-rose-600/90 cursor-pointer"
             >
               {isBulkDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
               {language === 'ar' ? 'حذف المحدد' : 'Delete Selected'}
@@ -971,6 +971,15 @@ export function ContactsClient({ initialContacts }: { initialContacts: any[] }) 
           </div>
         </div>
       )}
+
+      <DangerConfirmDialog
+        isOpen={isDeleteConfirmOpen}
+        onClose={() => setIsDeleteConfirmOpen(false)}
+        onConfirm={handleBulkDelete}
+        count={selectedIds.length}
+        isLoading={isBulkDeleting}
+        language={language}
+      />
 
       <div className="rounded-2xl border border-slate-200/60 bg-white/60 backdrop-blur-xl flex-1 overflow-hidden shadow-sm">
         {contacts.length === 0 ? (

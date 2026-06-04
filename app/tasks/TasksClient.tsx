@@ -9,6 +9,7 @@ import { useOfflineDataStore } from "@/store/useOfflineDataStore";
 import { toast } from '@/utils/toast';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { DangerConfirmDialog } from "@/components/DangerConfirmDialog";
 import { Plus, ClipboardList, Clock, ArrowRight, Loader2, CheckCircle2, WifiOff, Search, Trash2, SlidersHorizontal, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,12 +27,10 @@ export default function TasksClient() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
   const handleBulkDelete = async () => {
     if (selectedIds.length === 0) return;
-    if (!window.confirm(language === 'ar' ? `هل أنت متأكد من حذف ${selectedIds.length} عنصر؟` : `Are you sure you want to delete ${selectedIds.length} items?`)) {
-      return;
-    }
 
     setIsBulkDeleting(true);
     try {
@@ -42,6 +41,7 @@ export default function TasksClient() {
         setTasks(updated);
         setOfflineTasks(updated);
         setSelectedIds([]);
+        setIsDeleteConfirmOpen(false);
       } else {
         toast.error(res.error || 'فشلت عملية الحذف');
       }
@@ -243,8 +243,8 @@ export default function TasksClient() {
               size="sm" 
               variant="destructive" 
               disabled={isBulkDeleting}
-              onClick={handleBulkDelete}
-              className="gap-1.5 h-9 rounded-lg font-bold text-xs hover:bg-red-650 cursor-pointer"
+              onClick={() => setIsDeleteConfirmOpen(true)}
+              className="gap-1.5 h-9 rounded-lg font-bold text-xs hover:bg-rose-600/90 cursor-pointer"
             >
               {isBulkDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
               {language === 'ar' ? 'حذف المحدد' : 'Delete Selected'}
@@ -252,6 +252,15 @@ export default function TasksClient() {
           </div>
         </div>
       )}
+
+      <DangerConfirmDialog
+        isOpen={isDeleteConfirmOpen}
+        onClose={() => setIsDeleteConfirmOpen(false)}
+        onConfirm={handleBulkDelete}
+        count={selectedIds.length}
+        isLoading={isBulkDeleting}
+        language={language}
+      />
 
       {isLoading ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 animate-in fade-in duration-500">
