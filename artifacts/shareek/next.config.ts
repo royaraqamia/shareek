@@ -1,7 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  experimental: {
+    serverActions: {
+      allowedOrigins: [
+        process.env.REPLIT_DEV_DOMAIN ?? "",
+        `*.${process.env.REPLIT_DEV_DOMAIN ?? ""}`,
+        "localhost:3000",
+      ].filter(Boolean),
+    },
+  },
 };
 
 export default nextConfig;
