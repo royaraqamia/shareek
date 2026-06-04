@@ -132,7 +132,7 @@ export function Navigation() {
             {/* Theme Toggle Button */}
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="p-2 rounded-xl border border-border bg-background dark:bg-slate-900 text-foreground dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer flex items-center justify-center h-10 w-10 shadow-sm"
+              className="p-2 rounded-xl border border-border bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all cursor-pointer flex items-center justify-center h-10 w-10 shadow-sm"
               title={theme === 'dark' ? 'المظهر النَّهاري' : 'المظهر الليلي'}
             >
               {theme === 'dark' ? (
