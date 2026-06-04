@@ -95,7 +95,7 @@ export function Navigation() {
                 alt="Shareek ERP Logo"
                 className="w-11 h-11 object-contain transition-transform group-hover:scale-105 group-active:scale-95"
               />
-              <span className="font-extrabold text-xl text-slate-900 dark:text-slate-50 tracking-tight block">
+              <span className="font-extrabold text-xl text-foreground tracking-tight block">
                 شَريك
               </span>
             </Link>

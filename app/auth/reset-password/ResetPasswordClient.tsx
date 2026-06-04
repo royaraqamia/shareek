@@ -176,12 +176,12 @@ export function ResetPasswordClient() {
           />
         </div>
 
-        <Card className="border-slate-200/50 bg-white/80 backdrop-blur-xl shadow-2xl shadow-slate-200/50 rounded-3xl overflow-hidden p-8 text-center space-y-6">
+        <Card className="border-slate-200/50 dark:border-slate-800/50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl shadow-2xl shadow-slate-200/50 dark:shadow-none rounded-3xl overflow-hidden p-8 text-center space-y-6">
           <div className="flex flex-col items-center">
             <div className="relative flex items-center justify-center w-20 h-20 bg-emerald-50 rounded-full border border-emerald-200/50 mb-4 animate-pulse">
               <CheckCircle2 className="w-12 h-12 text-emerald-600" />
             </div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-tight">
+            <h1 className="text-2xl font-black text-slate-900 dark:text-slate-50 tracking-tight leading-tight">
               {t("successTitle")}
             </h1>
           </div>
@@ -209,22 +209,22 @@ export function ResetPasswordClient() {
           alt="Shareek Logo"
           className="w-24 h-24 object-contain mb-5"
         />
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight">{t("title")}</h1>
+        <h1 className="text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight">{t("title")}</h1>
         <p className="text-sm font-medium text-slate-400 mt-2">{t("subtitle")}</p>
       </div>
 
-      <Card className="border-slate-200/50 bg-white/80 backdrop-blur-xl shadow-2xl shadow-slate-200/50 rounded-3xl overflow-hidden" id="reset-card">
+      <Card className="border-slate-200/50 dark:border-slate-800/50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl shadow-2xl shadow-slate-200/50 dark:shadow-none rounded-3xl overflow-hidden" id="reset-card">
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-5 px-8 pt-8">
             {/* New Password */}
             <div className="space-y-2">
-              <Label htmlFor="reset-new-password" className="font-bold text-slate-700">{t("newPassword")}</Label>
+              <Label htmlFor="reset-new-password" className="font-bold text-slate-700 dark:text-slate-300">{t("newPassword")}</Label>
               <div className="relative">
-                <KeyRound className="absolute left-3.5 top-3 h-5 w-5 text-slate-400" />
+                <KeyRound className="absolute left-3.5 top-3 h-5 w-5 text-slate-400 dark:text-slate-500" />
                 <Input
                   id="reset-new-password"
                   type={showPassword ? "text" : "password"}
-                  className="pl-11 pr-11 h-12 bg-slate-50/50 border-slate-200 focus:bg-white transition-all rounded-xl shadow-sm"
+                  className="pl-11 pr-11 h-12 bg-slate-50/50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-950 transition-all rounded-xl shadow-sm dark:text-slate-100"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
@@ -234,7 +234,7 @@ export function ResetPasswordClient() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-3 h-5 w-5 text-slate-400 hover:text-slate-600 transition-colors"
+                  className="absolute right-3.5 top-3 h-5 w-5 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -243,9 +243,9 @@ export function ResetPasswordClient() {
               {password.length > 0 && (() => {
                 const strength = getPasswordStrength(password);
                 return (
-                  <div className="space-y-2.5 mt-2.5 p-3.5 bg-slate-50/80 border border-slate-100 rounded-2xl animate-in fade-in slide-in-from-top-2 duration-300 font-arabic">
+                  <div className="space-y-2.5 mt-2.5 p-3.5 bg-slate-50/80 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 rounded-2xl animate-in fade-in slide-in-from-top-2 duration-300 font-arabic">
                     <div className="flex justify-between items-center text-xs">
-                      <span className="font-bold text-slate-500">قوَّة كلمة المرور:</span>
+                      <span className="font-bold text-slate-500 dark:text-slate-400">قوَّة كلمة المرور:</span>
                       <span className={`font-black tracking-tight ${strength.bgColor}`}>{strength.label}</span>
                     </div>
                     
@@ -302,13 +302,13 @@ export function ResetPasswordClient() {
 
             {/* Confirm New Password */}
             <div className="space-y-2">
-              <Label htmlFor="reset-confirm-password" className="font-bold text-slate-700">{t("confirmPassword")}</Label>
+              <Label htmlFor="reset-confirm-password" className="font-bold text-slate-700 dark:text-slate-300">{t("confirmPassword")}</Label>
               <div className="relative">
-                <KeyRound className="absolute left-3.5 top-3 h-5 w-5 text-slate-400" />
+                <KeyRound className="absolute left-3.5 top-3 h-5 w-5 text-slate-400 dark:text-slate-500" />
                 <Input
                   id="reset-confirm-password"
                   type={showConfirmPassword ? "text" : "password"}
-                  className="pl-11 pr-11 h-12 bg-slate-50/50 border-slate-200 focus:bg-white transition-all rounded-xl shadow-sm"
+                  className="pl-11 pr-11 h-12 bg-slate-50/50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-950 transition-all rounded-xl shadow-sm dark:text-slate-100"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
@@ -317,7 +317,7 @@ export function ResetPasswordClient() {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3.5 top-3 h-5 w-5 text-slate-400 hover:text-slate-600 transition-colors"
+                  className="absolute right-3.5 top-3 h-5 w-5 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                 >
                   {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>

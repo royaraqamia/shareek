@@ -147,21 +147,21 @@ export function LoginClient() {
           alt="Shareek ERP Logo"
           className="w-24 h-24 object-contain mb-5"
         />
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight">{t("title")}</h1>
+        <h1 className="text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight">{t("title")}</h1>
       </div>
 
-      <Card className="border-slate-200/50 bg-white/80 backdrop-blur-xl shadow-2xl shadow-slate-200/50 rounded-3xl overflow-hidden" id="login-card">
+      <Card className="border-slate-200/50 dark:border-slate-800/50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl shadow-2xl shadow-slate-200/50 dark:shadow-none rounded-3xl overflow-hidden" id="login-card">
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-5 px-8 pt-8">
             <div className="space-y-2">
-              <Label htmlFor="login-email" className="font-bold text-slate-700">{t("email")}</Label>
+              <Label htmlFor="login-email" className="font-bold text-slate-700 dark:text-slate-300">{t("email")}</Label>
               <div className="relative">
-                <Mail className="absolute left-3.5 top-3 h-5 w-5 text-slate-400" />
+                <Mail className="absolute left-3.5 top-3 h-5 w-5 text-slate-400 dark:text-slate-500" />
                 <Input
                   id="login-email"
                   type="text"
                   placeholder="البريد الإلكتروني أو @اسم_المستخدم"
-                  className="pl-11 h-12 bg-slate-50/50 border-slate-200 focus:bg-white transition-all rounded-xl shadow-sm font-medium"
+                  className="pl-11 h-12 bg-slate-50/50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-950 transition-all rounded-xl shadow-sm font-medium dark:text-slate-100"
                   value={formData.email}
                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                   required
@@ -172,7 +172,7 @@ export function LoginClient() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="login-password" className="font-bold text-slate-700">{t("password")}</Label>
+                <Label htmlFor="login-password" className="font-bold text-slate-700 dark:text-slate-300">{t("password")}</Label>
                 <button
                   type="button"
                   className="text-sm font-semibold text-primary hover:underline hover:text-primary/80 transition-colors cursor-pointer"
@@ -187,11 +187,11 @@ export function LoginClient() {
                 </button>
               </div>
               <div className="relative">
-                <KeyRound className="absolute left-3.5 top-3 h-5 w-5 text-slate-400" />
+                <KeyRound className="absolute left-3.5 top-3 h-5 w-5 text-slate-400 dark:text-slate-500" />
                 <Input
                   id="login-password"
                   type={showPassword ? "text" : "password"}
-                  className="pl-11 pr-11 h-12 bg-slate-50/50 border-slate-200 focus:bg-white transition-all rounded-xl shadow-sm"
+                  className="pl-11 pr-11 h-12 bg-slate-50/50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-950 transition-all rounded-xl shadow-sm dark:text-slate-100"
                   value={formData.password}
                   onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                   required
@@ -199,7 +199,7 @@ export function LoginClient() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-3 h-5 w-5 text-slate-400 hover:text-slate-600 transition-colors"
+                  className="absolute right-3.5 top-3 h-5 w-5 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -212,12 +212,12 @@ export function LoginClient() {
                 type="button"
                 id="remember-me-btn"
                 onClick={() => setRememberMe(!rememberMe)}
-                className="flex items-center gap-3 cursor-pointer text-xs sm:text-sm text-slate-600 font-bold hover:text-slate-850 transition-colors focus:outline-none group text-right"
+                className="flex items-center gap-3 cursor-pointer text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-bold hover:text-slate-850 dark:hover:text-slate-200 transition-colors focus:outline-none group text-right"
               >
                 <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all duration-200 shrink-0 ${
                   rememberMe 
                     ? "bg-primary border-primary shadow-md shadow-primary/20 scale-105" 
-                    : "border-slate-300 bg-white group-hover:border-slate-400 group-focus:ring-2 group-focus:ring-primary/25"
+                    : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 group-hover:border-slate-400 dark:group-hover:border-slate-500 group-focus:ring-2 group-focus:ring-primary/25"
                 }`}>
                   {rememberMe && <Check className="w-3.5 h-3.5 text-white stroke-[3.5]" />}
                 </div>
@@ -231,7 +231,7 @@ export function LoginClient() {
               {loading ? t("submitting") : t("submit")}
             </Button>
 
-            <p className="text-sm text-center text-slate-500">
+            <p className="text-sm text-center text-slate-500 dark:text-slate-400">
               {t("noAccount")}{" "}
               <Link href="/auth/register" className="text-blue-600 hover:underline font-semibold">
                 {t("registerLink")}
@@ -290,7 +290,7 @@ export function LoginClient() {
                     id="reset-email"
                     type="email"
                     placeholder="مثال: user@example.com"
-                    className="pl-11 h-12 bg-slate-50/50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-950 transition-all rounded-xl shadow-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 font-medium"
+                    className="pl-11 h-12 bg-slate-50/50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-950 transition-all rounded-xl shadow-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium"
                     value={resetEmail}
                     onChange={(e) => setResetEmail(e.target.value)}
                     required

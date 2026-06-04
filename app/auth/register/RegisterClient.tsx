@@ -334,20 +334,20 @@ export function RegisterClient() {
           alt="Shareek Logo"
           className="w-24 h-24 object-contain mb-5"
         />
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight">{t("title")}</h1>
+        <h1 className="text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight">{t("title")}</h1>
       </div>
 
-      <Card className="border-slate-200/50 bg-white/80 backdrop-blur-xl shadow-2xl shadow-slate-200/50 rounded-3xl overflow-hidden" id="register-card">
+      <Card className="border-slate-200/50 dark:border-slate-800/50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl shadow-2xl shadow-slate-200/50 dark:shadow-none rounded-3xl overflow-hidden" id="register-card">
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-5 px-8 pt-8">
             <div className="space-y-1.5">
-              <Label htmlFor="register-fullname" className="font-bold text-slate-700">{t("fullName")}</Label>
+              <Label htmlFor="register-fullname" className="font-bold text-slate-700 dark:text-slate-300">{t("fullName")}</Label>
               <div className="relative">
-                <User className="absolute left-3.5 top-3 h-5 w-5 text-slate-400" />
+                <User className="absolute left-3.5 top-3 h-5 w-5 text-slate-400 dark:text-slate-500" />
                 <Input
                   id="register-fullname"
                   type="text"
-                  className="pl-11 h-12 bg-slate-50/50 border-slate-200 focus:bg-white transition-all rounded-xl shadow-sm font-medium"
+                  className="pl-11 h-12 bg-slate-50/50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-950 transition-all rounded-xl shadow-sm font-medium dark:text-slate-100"
                   value={formData.fullName}
                   onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
                   required
@@ -357,20 +357,20 @@ export function RegisterClient() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="register-username" className="font-bold text-slate-700">{t("username")}</Label>
+              <Label htmlFor="register-username" className="font-bold text-slate-700 dark:text-slate-300">{t("username")}</Label>
               <div className="relative">
-                <AtSign className="absolute left-3.5 top-3 h-5 w-5 text-slate-400" />
+                <AtSign className="absolute left-3.5 top-3 h-5 w-5 text-slate-400 dark:text-slate-500" />
                 <Input
                   id="register-username"
                   type="text"
-                  className="pl-11 h-12 bg-slate-50/50 border-slate-200 focus:bg-white transition-all rounded-xl shadow-sm text-left font-mono"
+                  className="pl-11 h-12 bg-slate-50/50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-950 transition-all rounded-xl shadow-sm text-left font-mono dark:text-slate-100"
                   placeholder="username_example"
                   value={formData.username}
                   onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value.toLowerCase().trim() }))}
                   required
                 />
               </div>
-              <p className="text-[11px] text-slate-400 text-right">أحرف إنجليزيَّة صغيرة، أرقام، أو شرطة سُفليَّة _</p>
+              <p className="text-[11px] text-slate-400 dark:text-slate-500 text-right">أحرف إنجليزيَّة صغيرة، أرقام، أو شرطة سُفليَّة _</p>
               {usernameStatus.message && (
                 <div className={`mt-1.5 text-xs text-right p-1.5 rounded-lg border font-medium ${
                   usernameStatus.loading 
@@ -385,13 +385,13 @@ export function RegisterClient() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="register-email" className="font-bold text-slate-700">{t("email")}</Label>
+              <Label htmlFor="register-email" className="font-bold text-slate-700 dark:text-slate-300">{t("email")}</Label>
               <div className="relative">
-                <Mail className="absolute left-3.5 top-3 h-5 w-5 text-slate-400" />
+                <Mail className="absolute left-3.5 top-3 h-5 w-5 text-slate-400 dark:text-slate-500" />
                 <Input
                   id="register-email"
                   type="email"
-                  className="pl-11 h-12 bg-slate-50/50 border-slate-200 focus:bg-white transition-all rounded-xl shadow-sm font-medium"
+                  className="pl-11 h-12 bg-slate-50/50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-950 transition-all rounded-xl shadow-sm font-medium dark:text-slate-100"
                   value={formData.email}
                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                   required
@@ -400,13 +400,13 @@ export function RegisterClient() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="register-password" className="font-bold text-slate-700">{t("password")}</Label>
+              <Label htmlFor="register-password" className="font-bold text-slate-700 dark:text-slate-300">{t("password")}</Label>
               <div className="relative">
-                <KeyRound className="absolute left-3.5 top-3 h-5 w-5 text-slate-400" />
+                <KeyRound className="absolute left-3.5 top-3 h-5 w-5 text-slate-400 dark:text-slate-500" />
                 <Input
                   id="register-password"
                   type={showPassword ? "text" : "password"}
-                  className="pl-11 pr-11 h-12 bg-slate-50/50 border-slate-200 focus:bg-white transition-all rounded-xl shadow-sm"
+                  className="pl-11 pr-11 h-12 bg-slate-50/50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-950 transition-all rounded-xl shadow-sm dark:text-slate-100"
                   value={formData.password}
                   onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                   required
@@ -414,7 +414,7 @@ export function RegisterClient() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-3 h-5 w-5 text-slate-400 hover:text-slate-600 transition-colors"
+                  className="absolute right-3.5 top-3 h-5 w-5 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -423,9 +423,9 @@ export function RegisterClient() {
               {formData.password.length > 0 && (() => {
                 const strength = getPasswordStrength(formData.password);
                 return (
-                  <div className="space-y-2.5 mt-2.5 p-3.5 bg-slate-50/80 border border-slate-100 rounded-2xl animate-in fade-in slide-in-from-top-2 duration-300 font-arabic">
+                  <div className="space-y-2.5 mt-2.5 p-3.5 bg-slate-50/80 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 rounded-2xl animate-in fade-in slide-in-from-top-2 duration-300 font-arabic">
                     <div className="flex justify-between items-center text-xs">
-                      <span className="font-bold text-slate-500">قوَّة كلمة المرور:</span>
+                      <span className="font-bold text-slate-500 dark:text-slate-400">قوَّة كلمة المرور:</span>
                       <span className={`font-black tracking-tight ${strength.bgColor}`}>{strength.label}</span>
                     </div>
                     
@@ -481,13 +481,13 @@ export function RegisterClient() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="register-confirm-password" className="font-bold text-slate-700">{t("confirmPassword")}</Label>
+              <Label htmlFor="register-confirm-password" className="font-bold text-slate-700 dark:text-slate-300">{t("confirmPassword")}</Label>
               <div className="relative">
-                <KeyRound className="absolute left-3.5 top-3 h-5 w-5 text-slate-400" />
+                <KeyRound className="absolute left-3.5 top-3 h-5 w-5 text-slate-400 dark:text-slate-500" />
                 <Input
                   id="register-confirm-password"
                   type={showConfirmPassword ? "text" : "password"}
-                  className="pl-11 pr-11 h-12 bg-slate-50/50 border-slate-200 focus:bg-white transition-all rounded-xl shadow-sm"
+                  className="pl-11 pr-11 h-12 bg-slate-50/50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-950 transition-all rounded-xl shadow-sm dark:text-slate-100"
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                   required
@@ -495,7 +495,7 @@ export function RegisterClient() {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3.5 top-3 h-5 w-5 text-slate-400 hover:text-slate-600 transition-colors"
+                  className="absolute right-3.5 top-3 h-5 w-5 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                 >
                   {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -508,12 +508,12 @@ export function RegisterClient() {
                 type="button"
                 id="accept-terms-btn"
                 onClick={() => setAcceptTerms(!acceptTerms)}
-                className="flex items-start gap-3 cursor-pointer text-xs sm:text-sm text-slate-600 font-bold hover:text-slate-850 transition-colors focus:outline-none group text-right"
+                className="flex items-start gap-3 cursor-pointer text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-bold hover:text-slate-850 dark:hover:text-slate-200 transition-colors focus:outline-none group text-right"
               >
                 <div className={`w-5 h-5 rounded-lg border-2 mt-0.5 flex items-center justify-center transition-all duration-200 shrink-0 ${
                   acceptTerms 
                     ? "bg-primary border-primary shadow-md shadow-primary/20 scale-105" 
-                    : "border-slate-300 bg-white group-hover:border-slate-400 group-focus:ring-2 group-focus:ring-primary/25"
+                    : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 group-hover:border-slate-400 dark:group-hover:border-slate-500 group-focus:ring-2 group-focus:ring-primary/25"
                 }`}>
                   {acceptTerms && <Check className="w-3.5 h-3.5 text-white stroke-[3.5]" />}
                 </div>
@@ -532,7 +532,7 @@ export function RegisterClient() {
               {loading ? t("submitting") : t("submit")}
             </Button>
 
-            <p className="text-sm text-center text-slate-500">
+            <p className="text-sm text-center text-slate-500 dark:text-slate-400">
               {t("hasAccount")}{" "}
               <Link href="/auth/login" className="text-blue-600 hover:underline font-semibold">
                 {t("loginLink")}
