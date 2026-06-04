@@ -78,7 +78,11 @@ export function AppInitializer({ children }: { children: React.ReactNode }) {
   }, [pathname]);
 
   // Handle route protection and auto redirection
-  const isAuthRoute = pathname === '/auth/login' || pathname === '/auth/register' || pathname === '/';
+  const isAuthRoute = 
+    pathname === '/auth/login' || 
+    pathname === '/auth/register' || 
+    pathname === '/' || 
+    pathname === '/auth/reset-password';
   
   useEffect(() => {
     if (!loading) {

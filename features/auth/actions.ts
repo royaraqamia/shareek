@@ -363,3 +363,96 @@ export async function toggleUserApprovalAction(targetUserId: string, approved: b
     return { success: false, message: err.message };
   }
 }
+
+/**
+ * Requests a password reset link for the provided email or username.
+ * Supports both emails and usernames by checking the profile database.
+ * Sends email generated from the current host with correct redirect configurations.
+ */
+export async function requestPasswordResetAction(emailOrUsername: string) {
+  if (!emailOrUsername) {
+    return { success: false, message: "يُرجى إدخال البريد الإلكتروني أو اسم المستخدم." };
+  }
+
+  try {
+    let email = emailOrUsername.trim();
+
+    // Look up email if username is provided (does not contain '@')
+    if (!email.includes('@')) {
+      const adminSupabase = createAdminClient();
+      const { data: profile, error: profileError } = await adminSupabase
+        .from('profiles')
+        .select('email')
+        .eq('username', email.toLowerCase())
+        .maybeSingle();
+
+      if (profileError || !profile || !profile.email) {
+        return { success: false, message: "اسم المستخدم المكتوب غير موجود بالنظام." };
+      }
+      email = profile.email;
+    }
+
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+
+    // Get host/origin dynamically to generate the redirect URL
+    const headerList = await headers();
+    const host = headerList.get('host');
+    const proto = headerList.get('x-forwarded-proto') || 'https';
+    const origin = host ? `${proto}://${host}` : 'https://shareek.royaraqamia.com';
+    const redirectTo = `${origin}/auth/callback?next=/auth/reset-password`;
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo,
+    });
+
+    if (error) {
+      return { success: false, message: `فشل إرسال بريد إعادة التعيين: ${error.message}` };
+    }
+
+    // Mask the email for user privacy before returning
+    const parts = email.split('@');
+    const maskedEmail = parts[0].length > 3 
+      ? `${parts[0].slice(0, 3)}***@${parts[1]}`
+      : `***@${parts[1]}`;
+
+    return { 
+      success: true, 
+      message: `تمَّ إرسال رابط إعادة تعيين كلمة المرور إلى البريد الإلكتروني: ${maskedEmail}`,
+      email: maskedEmail
+    };
+  } catch (err: any) {
+    return { success: false, message: err.message || "حدث خطأ غير متوقع أثناء معالجة الطلب." };
+  }
+}
+
+/**
+ * Updates the authenticated user's password.
+ * This runs when they have loaded the secure recovery callback page /auth/reset-password.
+ */
+export async function updatePasswordAction(password: string) {
+  if (!password || password.length < 6) {
+    return { success: false, message: "يجب أن تكون كلمة المرور 6 أحرف على الأقل." };
+  }
+
+  try {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+
+    const { error } = await supabase.auth.updateUser({
+      password: password,
+    });
+
+    if (error) {
+      return { success: false, message: `فشل تحديث كلمة المرور: ${error.message}` };
+    }
+
+    // Also sign the user out to let them log in fresh with their new password
+    await supabase.auth.signOut();
+
+    return { success: true, message: "تمَّ تحديث كلمة المرور بنجاح! يُرجى الدخول بكلمة المرور الجديدة." };
+  } catch (err: any) {
+    return { success: false, message: err.message || "حدث خطأ غير متوقع أثناء تحديث كلمة المرور." };
+  }
+}
+

@@ -6,6 +6,7 @@ import { AppInitializer } from '@/components/AppInitializer';
 import { Toaster } from "@/components/ui/sonner";
 import { Navigation } from "@/components/Navigation";
 import { PwaRegister } from "@/components/PwaRegister";
+import { CookieConsent } from "@/components/CookieConsent";
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({ 
@@ -47,6 +48,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
           <PwaRegister />
           <Navigation />
           {children}
+          <CookieConsent />
         </AppInitializer>
         <Toaster position="top-right" />
       </body>

@@ -6,8 +6,9 @@ import { useOfflineDataStore } from '@/store/useOfflineDataStore';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
-import { Plus, Receipt, TrendingUp, TrendingDown, Eye, WifiOff, Search } from 'lucide-react';
+import { Plus, Receipt, TrendingUp, TrendingDown, Eye, WifiOff, Search, Download } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { toast } from '@/utils/toast';
 
 interface TransactionsClientProps {
   initialTransactions: any[];
@@ -65,6 +66,72 @@ export function TransactionsClient({ initialTransactions, contacts, products }: 
     }
   };
 
+  const handleExport = () => {
+    if (filteredTransactions.length === 0) {
+      toast.error(
+        language === 'ar' 
+          ? 'لا توجد معاملات مصفاة لتصديرها!' 
+          : 'No filtered transactions to export!'
+      );
+      return;
+    }
+
+    // Set headers bilingually or matches the active system language
+    const headersAr = ['رقم المرجع', 'نوع الفاتورة', 'الجهة / العميل / المورد', 'المجموع الفرعي', 'الإجمالي (شامل الضريبة)', 'التاريخ (مُنسَّق)'];
+    const headersEn = ['Reference Number', 'Invoice Type', 'Contact / Client / Supplier', 'Subtotal', 'Total (Incl. Tax)', 'Date'];
+    const headers = language === 'ar' ? headersAr : headersEn;
+
+    // Map records to rows
+    const rows = filteredTransactions.map(tx => {
+      const typeLabel = tx.type === 'SALE' 
+        ? (language === 'ar' ? 'فاتورة مبيعات' : 'Sales Invoice')
+        : (language === 'ar' ? 'فاتورة مشتريات' : 'Purchase Invoice');
+      
+      const contactName = tx.contacts?.name || '-';
+      const subtotalVal = Number(tx.subtotal).toFixed(2);
+      const totalVal = Number(tx.total_amount).toFixed(2);
+      const dateVal = new Date(tx.transaction_date).toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US');
+
+      return [
+        tx.reference_number || '',
+        typeLabel,
+        contactName,
+        subtotalVal,
+        totalVal,
+        dateVal
+      ];
+    });
+
+    // Construct spreadsheet CSV string, escape double quotes safely
+    const csvContent = [
+      headers.map(h => `"${h.replace(/"/g, '""')}"`).join(','),
+      ...rows.map(row => row.map(val => `"${val.replace(/"/g, '""')}"`).join(','))
+    ].join('\r\n');
+
+    // Create the Blob with standard UTF-8 Byte Order Mark (BOM) to guarantee clean Arabic character encoding in Microsoft Excel
+    const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8;' });
+    
+    // Process download
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    
+    const dateStr = new Date().toISOString().slice(0, 10);
+    const filterLabel = filterType === 'SALE' ? '_Sales' : filterType === 'PURCHASE' ? '_Purchases' : '';
+    link.setAttribute('download', `shareek_transactions_${dateStr}${filterLabel}.csv`);
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast.success(
+      language === 'ar'
+        ? `تمَّ تصدير ${filteredTransactions.length} معاملة بنجاح! 📊`
+        : `Exported ${filteredTransactions.length} transactions successfully! 📊`
+    );
+  };
+
   return (
     <div className="space-y-8 container max-w-[90rem] mx-auto px-4 md:px-8 py-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -81,10 +148,23 @@ export function TransactionsClient({ initialTransactions, contacts, products }: 
             {isOfflineMode && <span className="text-amber-500 font-bold mr-2 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100 text-xs">(وضع عدم الاتصال)</span>}
           </p>
         </div>
-        <Button size="lg" className="gap-2 cursor-pointer bg-primary shadow-lg shadow-primary/25 hover:scale-105 active:scale-95 text-white font-bold rounded-xl transition-all h-12 px-6 w-full sm:w-auto" onClick={() => router.push('/transactions/new')}>
-          <Plus className="w-5 h-5 text-white" />
-          {t.addTransaction[language]}
-        </Button>
+        
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          <Button 
+            variant="outline"
+            size="lg" 
+            className="gap-2 cursor-pointer border-slate-200 hover:bg-slate-50 text-slate-700 font-bold rounded-xl transition-all h-12 px-5 w-full sm:w-auto shadow-sm"
+            onClick={handleExport}
+          >
+            <Download className="w-5 h-5 text-slate-500" />
+            {language === 'ar' ? 'تصدير التقرير (Excel)' : 'Export Report (Excel)'}
+          </Button>
+
+          <Button size="lg" className="gap-2 cursor-pointer bg-primary shadow-lg shadow-primary/25 hover:scale-105 active:scale-95 text-white font-bold rounded-xl transition-all h-12 px-6 w-full sm:w-auto" onClick={() => router.push('/transactions/new')}>
+            <Plus className="w-5 h-5 text-white" />
+            {t.addTransaction[language]}
+          </Button>
+        </div>
       </div>
 
       {/* Elegant Search & Filter Controls Panel */}

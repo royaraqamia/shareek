@@ -9,15 +9,79 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { KeyRound, Mail, User, Building, UserPlus, Sparkles, AtSign, CheckCircle2, Eye, EyeOff } from "lucide-react";
+import { KeyRound, Mail, User, Building, UserPlus, Sparkles, AtSign, CheckCircle2, Eye, EyeOff, Check, X } from "lucide-react";
 import Link from "next/link";
+
+interface PasswordStrength {
+  score: number;
+  label: string;
+  color: string;
+  bgColor: string;
+  checks: {
+    length: boolean;
+    mixed: boolean;
+    number: boolean;
+    special: boolean;
+  };
+}
+
+function getPasswordStrength(pass: string): PasswordStrength {
+  const checks = {
+    length: pass.length >= 6,
+    mixed: /[a-z]/.test(pass) && /[A-Z]/.test(pass),
+    number: /[0-9]/.test(pass),
+    special: /[^A-Za-z0-9]/.test(pass),
+  };
+
+  let score = 0;
+  if (pass.length > 0) {
+    if (checks.length) score++;
+    if (checks.mixed) score++;
+    if (checks.number) score++;
+    if (checks.special) score++;
+  }
+
+  let label = "ضعيفة جدًّا";
+  let color = "bg-rose-500";
+  let bgColor = "text-rose-500";
+
+  switch (score) {
+    case 0:
+      label = pass.length > 0 ? "ضعيفة جدًّا" : "فارغة";
+      color = "bg-slate-200";
+      bgColor = "text-slate-400";
+      break;
+    case 1:
+      label = "ضعيفة ⚠️";
+      color = "bg-rose-500";
+      bgColor = "text-rose-600";
+      break;
+    case 2:
+      label = "متوسِّطة ⚡";
+      color = "bg-amber-500";
+      bgColor = "text-amber-600";
+      break;
+    case 3:
+      label = "قويَّة 💪";
+      color = "bg-sky-500";
+      bgColor = "text-sky-600";
+      break;
+    case 4:
+      label = "ممتازة 🛡️";
+      color = "bg-emerald-500";
+      bgColor = "text-emerald-600";
+      break;
+  }
+
+  return { score, label, color, bgColor, checks };
+}
 
 const translations = {
   title: {
     ar: "إنشاء حساب جديد"
   },
   fullName: {
-    ar: "اسمك الكامل"
+    ar: "اسمك الكامل (بالعربيَّة)"
   },
   username: {
     ar: "اسم المستخدم (بالإنجليزيَّة)"
@@ -75,6 +139,7 @@ export function RegisterClient() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const [registerSuccessInfo, setRegisterSuccessInfo] = useState({
     email: "",
     fullName: "",
@@ -149,8 +214,19 @@ export function RegisterClient() {
       return;
     }
 
+    const strength = getPasswordStrength(formData.password);
+    if (strength.score < 2) {
+      toast.error("كلمة المرور ضعيفة جدًّا. يُرجَى إدخال كلمة مرور تحتوي على مزيج من الحروف والأرقام لضمان الأمان.");
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       toast.error(t("passwordMismatch"));
+      return;
+    }
+
+    if (!acceptTerms) {
+      toast.error("يُرجَى الموافقة على الشُّروط والأحكام وسياسة الخصوصيَّة للمتابعة.");
       return;
     }
 
@@ -182,7 +258,7 @@ export function RegisterClient() {
         <div className="text-center flex flex-col items-center">
         <img
           src="/shareek_logo.png"
-          alt="Shareek ERP Logo"
+          alt="Shareek Logo"
           className="w-20 h-20 object-contain mb-3"
         />
         <h1 className="text-2xl font-bold text-slate-900 tracking-tight">شَريك</h1>
@@ -275,6 +351,7 @@ export function RegisterClient() {
                   value={formData.fullName}
                   onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
                   required
+                  autoFocus
                 />
               </div>
             </div>
@@ -342,6 +419,65 @@ export function RegisterClient() {
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
+
+              {formData.password.length > 0 && (() => {
+                const strength = getPasswordStrength(formData.password);
+                return (
+                  <div className="space-y-2.5 mt-2.5 p-3.5 bg-slate-50/80 border border-slate-100 rounded-2xl animate-in fade-in slide-in-from-top-2 duration-300 font-arabic">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="font-bold text-slate-500">قوَّة كلمة المرور:</span>
+                      <span className={`font-black tracking-tight ${strength.bgColor}`}>{strength.label}</span>
+                    </div>
+                    
+                    {/* Multi-segment Progress Bar */}
+                    <div className="grid grid-cols-4 gap-1.5 h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                      <div className={`h-full rounded-full transition-all duration-300 ${strength.score >= 1 ? strength.color : 'bg-slate-100'}`} />
+                      <div className={`h-full rounded-full transition-all duration-300 ${strength.score >= 2 ? strength.color : 'bg-slate-100'}`} />
+                      <div className={`h-full rounded-full transition-all duration-300 ${strength.score >= 3 ? strength.color : 'bg-slate-100'}`} />
+                      <div className={`h-full rounded-full transition-all duration-300 ${strength.score >= 4 ? strength.color : 'bg-slate-100'}`} />
+                    </div>
+
+                    {/* Real-time Dynamic Checklist */}
+                    <div className="grid grid-cols-2 gap-x-3 gap-y-2 pt-1 text-[11px] font-bold text-slate-400">
+                      <div className="flex items-center gap-1.5 select-none">
+                        {strength.checks.length ? (
+                          <Check className="w-4 h-4 text-emerald-600 shrink-0 bg-emerald-50 rounded-full p-0.5" />
+                        ) : (
+                          <X className="w-4 h-4 text-slate-300 shrink-0 bg-slate-100 rounded-full p-0.5" />
+                        )}
+                        <span className={strength.checks.length ? "text-slate-700" : "text-slate-400"}>٦ أحرف على الأقل</span>
+                      </div>
+                      
+                      <div className="flex items-center gap-1.5 select-none">
+                        {strength.checks.mixed ? (
+                          <Check className="w-4 h-4 text-emerald-600 shrink-0 bg-emerald-50 rounded-full p-0.5" />
+                        ) : (
+                          <X className="w-4 h-4 text-slate-300 shrink-0 bg-slate-100 rounded-full p-0.5" />
+                        )}
+                        <span className={strength.checks.mixed ? "text-slate-700" : "text-slate-400"}>حروف كبيرة وصغيرة</span>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 select-none">
+                        {strength.checks.number ? (
+                          <Check className="w-4 h-4 text-emerald-600 shrink-0 bg-emerald-50 rounded-full p-0.5" />
+                        ) : (
+                          <X className="w-4 h-4 text-slate-300 shrink-0 bg-slate-100 rounded-full p-0.5" />
+                        )}
+                        <span className={strength.checks.number ? "text-slate-700" : "text-slate-400"}>رقم واحد على الأقل</span>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 select-none">
+                        {strength.checks.special ? (
+                          <Check className="w-4 h-4 text-emerald-600 shrink-0 bg-emerald-50 rounded-full p-0.5" />
+                        ) : (
+                          <X className="w-4 h-4 text-slate-300 shrink-0 bg-slate-100 rounded-full p-0.5" />
+                        )}
+                        <span className={strength.checks.special ? "text-slate-700" : "text-slate-400"}>رمز خاص (@، !، *...)</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
 
             <div className="space-y-1.5">
@@ -364,6 +500,25 @@ export function RegisterClient() {
                   {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
+            </div>
+
+            {/* Accept Privacy & Terms Checkbox */}
+            <div className="flex items-center gap-2 pt-1 font-arabic select-none">
+              <label htmlFor="accept-terms" className="flex items-center gap-2.5 cursor-pointer text-xs sm:text-sm text-slate-600 font-bold hover:text-slate-850 transition-colors">
+                <input
+                  type="checkbox"
+                  id="accept-terms"
+                  onChange={(e) => setAcceptTerms(e.target.checked)}
+                  checked={acceptTerms}
+                  className="w-4.5 h-4.5 rounded border-slate-300 text-primary focus:ring-primary focus:ring-offset-1 accent-blue-600 cursor-pointer"
+                />
+                <span>
+                  أوافق على{" "}
+                  <span className="text-blue-600 hover:underline cursor-pointer">الشروط والأحكام</span>
+                  {" "}و{" "}
+                  <span className="text-blue-600 hover:underline cursor-pointer">سياسة الخصوصية</span> 📜
+                </span>
+              </label>
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4 px-8 pb-8 pt-4">
