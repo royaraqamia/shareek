@@ -132,16 +132,20 @@ export function ContactsClient({ initialContacts }: { initialContacts: any[] }) 
   };
 
   // Sync server data to offline store on mount if online
+  // Sync server data to offline store on mount if online
   useEffect(() => {
-    if (navigator.onLine) {
-      setIsOfflineMode(false);
+    let isMounted = true;
+    if (typeof navigator !== 'undefined' && navigator.onLine) {
+      if (isMounted) setIsOfflineMode(false);
       setOfflineContacts(initialContacts);
-      setContacts(initialContacts);
+      if (isMounted) setContacts(initialContacts);
     } else {
-      setIsOfflineMode(true);
-      setContacts(offlineContacts);
+      if (isMounted) setIsOfflineMode(true);
+      const currentOfflineContacts = useOfflineDataStore.getState().contacts;
+      if (isMounted) setContacts(currentOfflineContacts);
     }
-  }, [initialContacts, navigator.onLine, setOfflineContacts]);
+    return () => { isMounted = false; };
+  }, [initialContacts, setOfflineContacts]);
 
   // Create Contact Form States
   const [isOpen, setIsOpen] = useState(false);

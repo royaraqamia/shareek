@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createTaskAction } from "@/features/tasks/actions";
@@ -18,6 +18,12 @@ import { useOfflineDataStore } from "@/store/useOfflineDataStore";
 export default function CreateTaskClient() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isOfflineMode, setIsOfflineMode] = useState(false);
+
+  useEffect(() => {
+    setIsOfflineMode(typeof navigator !== 'undefined' && !navigator.onLine);
+  }, []);
+
   const { enqueueMutation, tasks: offlineTasks, setTasks: setOfflineTasks } = useOfflineDataStore();
   const [formData, setFormData] = useState({
     title: '',
@@ -34,7 +40,7 @@ export default function CreateTaskClient() {
 
     setIsSubmitting(true);
     try {
-      if (!navigator.onLine) {
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
         // Offline Flow
         enqueueMutation({
           type: 'CREATE_TASK',
@@ -88,11 +94,11 @@ export default function CreateTaskClient() {
         <div>
           <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
             إضافة مهمة جديدة
-            {!navigator.onLine && <WifiOff className="w-5 h-5 text-amber-500 animate-pulse" />}
+            {isOfflineMode && <WifiOff className="w-5 h-5 text-amber-500 animate-pulse" />}
           </h1>
           <p className="text-slate-500 text-sm">
             أدخل تفاصيل المهمة لحفظها ومتابعتها 
-            {!navigator.onLine && <span className="text-amber-500 mr-1 font-bold">(حفظ محلي)</span>}
+            {isOfflineMode && <span className="text-amber-500 mr-1 font-bold">(حفظ محلي)</span>}
           </p>
         </div>
       </div>

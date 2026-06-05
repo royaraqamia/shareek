@@ -90,16 +90,19 @@ export default function TasksClient() {
 
   // We are polling on mount or when returning to this page.
   useEffect(() => {
+    let isMounted = true;
     async function loadTasks() {
       setIsLoading(true);
       if (!navigator.onLine) {
         setIsOfflineMode(true);
-        setTasks(offlineTasks);
-        setIsLoading(false);
+        const currentOfflineTasks = useOfflineDataStore.getState().tasks;
+        if (isMounted) setTasks(currentOfflineTasks);
+        if (isMounted) setIsLoading(false);
         return;
       }
       
       const res = await fetchTasksAction();
+      if (!isMounted) return;
       if (res.success && res.data) {
         setTasks(res.data);
         setOfflineTasks(res.data); // Update offline cache
@@ -107,13 +110,15 @@ export default function TasksClient() {
       } else {
         // Fallback to offline cache
         setIsOfflineMode(true);
-        setTasks(offlineTasks);
+        const currentOfflineTasks = useOfflineDataStore.getState().tasks;
+        setTasks(currentOfflineTasks);
         toast.error(res.error || "خطأ في جلب المهام - تم عرض البيانات المخزنة محلياً");
       }
       setIsLoading(false);
     }
     loadTasks();
-  }, [offlineTasks, setOfflineTasks]);
+    return () => { isMounted = false; };
+  }, [setOfflineTasks]);
 
   const getStatusBadge = (status: Task['status']) => {
     switch (status) {

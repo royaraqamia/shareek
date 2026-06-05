@@ -10,9 +10,9 @@ export default function HomePage() {
   const language = useAppStore(state => state.language);
 
   const t = {
-    welcome: { ar: 'السَّلام عليكم، أهلًا بك في شَريك' },
-    subtitle: { ar: 'نظام إدارة شامل متكامل لمشروعك.' },
-    getStarted: { ar: 'ابدأ الآن' },
+    welcome: { ar: 'السَّلام عليكم، أهلًا بك في شَريك', en: 'Hello, Welcome to Shareek' },
+    subtitle: { ar: 'نظام إدارة شامل متكامل لمشروعك.', en: 'Comprehensive integrated management system for your project.' },
+    getStarted: { ar: 'ابدأ الآن', en: 'Get Started' },
   };
 
   const currentT = (key: keyof typeof t) => t[key][language];

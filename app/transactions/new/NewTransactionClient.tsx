@@ -101,7 +101,7 @@ const translations = {
     ar: "المجموع الفرعي"
   },
   tax: {
-    en: "Tax Standard Standard Standard (15.00% VAT)",
+    en: "Standard Tax (15.00% VAT)",
     ar: "ضريبة القيمة المضافة القياسية (15.00%)"
   },
   grandTotal: {

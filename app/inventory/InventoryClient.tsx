@@ -43,15 +43,18 @@ export function InventoryClient({ initialProducts }: { initialProducts: any[] })
 
   // Sync server data to offline store on mount if online
   useEffect(() => {
-    if (navigator.onLine) {
-      setIsOfflineMode(false);
+    let isMounted = true;
+    if (typeof navigator !== 'undefined' && navigator.onLine) {
+      if (isMounted) setIsOfflineMode(false);
       setOfflineProducts(initialProducts);
-      setProducts(initialProducts);
+      if (isMounted) setProducts(initialProducts);
     } else {
-      setIsOfflineMode(true);
-      setProducts(offlineProducts);
+      if (isMounted) setIsOfflineMode(true);
+      const currentOfflineProducts = useOfflineDataStore.getState().inventory;
+      if (isMounted) setProducts(currentOfflineProducts);
     }
-  }, [initialProducts, navigator.onLine, setOfflineProducts]);
+    return () => { isMounted = false; };
+  }, [initialProducts, setOfflineProducts]);
 
   // Open "Add Product" Dialog automatically if ?new=true query param is present
   useEffect(() => {

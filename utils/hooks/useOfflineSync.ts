@@ -9,12 +9,14 @@ import { createProduct } from '@/features/inventory/actions';
 import { createTransaction } from '@/features/transactions/actions';
 
 export function useOfflineSync() {
-  const [isOnline, setIsOnline] = useState(true);
+  const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
   const { mutationQueue, dequeueMutation } = useOfflineDataStore();
   const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
-    setIsOnline(navigator.onLine);
+    if (typeof navigator !== 'undefined') {
+      setIsOnline(navigator.onLine);
+    }
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
 

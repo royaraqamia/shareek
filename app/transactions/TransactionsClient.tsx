@@ -89,15 +89,18 @@ export function TransactionsClient({ initialTransactions, contacts, products }: 
   });
 
   useEffect(() => {
-    if (navigator.onLine) {
-      setIsOfflineMode(false);
+    let isMounted = true;
+    if (typeof navigator !== 'undefined' && navigator.onLine) {
+      if (isMounted) setIsOfflineMode(false);
       setOfflineTransactions(initialTransactions);
-      setTransactions(initialTransactions);
+      if (isMounted) setTransactions(initialTransactions);
     } else {
-      setIsOfflineMode(true);
-      setTransactions(offlineTransactions);
+      if (isMounted) setIsOfflineMode(true);
+      const currentOfflineTransactions = useOfflineDataStore.getState().transactions;
+      if (isMounted) setTransactions(currentOfflineTransactions);
     }
-  }, [initialTransactions, navigator.onLine, setOfflineTransactions]);
+    return () => { isMounted = false; };
+  }, [initialTransactions, setOfflineTransactions]);
 
   const t = {
     title: { ar: 'المعاملات المالية', en: 'Transactions' },
