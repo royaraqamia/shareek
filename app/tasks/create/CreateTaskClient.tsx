@@ -20,16 +20,26 @@ export default function CreateTaskClient() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOfflineMode, setIsOfflineMode] = useState(false);
 
-  useEffect(() => {
-    setIsOfflineMode(typeof navigator !== 'undefined' && !navigator.onLine);
-  }, []);
-
   const { enqueueMutation, tasks: offlineTasks, setTasks: setOfflineTasks } = useOfflineDataStore();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     status: 'TODO' as TaskStatus,
   });
+
+  useEffect(() => {
+    setIsOfflineMode(typeof navigator !== 'undefined' && !navigator.onLine);
+    try {
+      const saved = localStorage.getItem('draft-task');
+      if (saved) {
+        setFormData(JSON.parse(saved));
+      }
+    } catch (e) {}
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('draft-task', JSON.stringify(formData));
+  }, [formData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,6 +70,7 @@ export default function CreateTaskClient() {
         }, ...offlineTasks]);
 
         toast.success("تم حفظ المهمة محلياً (وضع عدم الاتصال)");
+        localStorage.removeItem('draft-task');
         router.push('/tasks');
         return;
       }
@@ -71,6 +82,7 @@ export default function CreateTaskClient() {
         if (res.data) {
           setOfflineTasks([res.data, ...offlineTasks]);
         }
+        localStorage.removeItem('draft-task');
         router.push('/tasks');
         router.refresh();
       } else {

@@ -14,6 +14,7 @@ export const CreateTransactionSchema = z.object({
   taxRate: z.literal(0.15).default(0.15),
   paymentStatus: z.enum(['PAID', 'PARTIAL', 'UNPAID']).default('UNPAID'),
   idempotencyKey: z.string().uuid(),
+  notes: z.string().optional(),
   items: z.array(TransactionItemSchema).min(1, "Must contain at least one item"),
 });
 

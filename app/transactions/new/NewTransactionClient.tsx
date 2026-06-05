@@ -11,8 +11,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, ArrowLeft, Receipt, CheckCircle, Info, Sparkles, ShoppingBag, BadgePercent, WifiOff } from 'lucide-react';
+import { Plus, Trash2, ArrowLeft, Receipt, CheckCircle, Info, Sparkles, ShoppingBag, BadgePercent, WifiOff, Mic, MicOff } from 'lucide-react';
 
 interface NewTransactionClientProps {
   contacts: any[];
@@ -143,6 +144,7 @@ export function NewTransactionClient({ contacts, products }: NewTransactionClien
   const type = useInvoiceStore(state => state.type);
   const contactId = useInvoiceStore(state => state.contactId);
   const referenceNumber = useInvoiceStore(state => state.referenceNumber);
+  const notes = useInvoiceStore(state => state.notes);
   
   const addItem = useInvoiceStore(state => state.addItem);
   const updateQuantity = useInvoiceStore(state => state.updateQuantity);
@@ -151,6 +153,7 @@ export function NewTransactionClient({ contacts, products }: NewTransactionClien
   const setContactId = useInvoiceStore(state => state.setContactId);
   const setType = useInvoiceStore(state => state.setType);
   const setReferenceNumber = useInvoiceStore(state => state.setReferenceNumber);
+  const setNotes = useInvoiceStore(state => state.setNotes);
   const clearInvoice = useInvoiceStore(state => state.clear);
 
   const getSubtotal = useInvoiceStore(state => state.getSubtotal);
@@ -164,12 +167,53 @@ export function NewTransactionClient({ contacts, products }: NewTransactionClien
   const [itemPrice, setItemPrice] = useState<number>(0);
   const [paymentStatus, setPaymentStatus] = useState<'PAID' | 'PARTIAL' | 'UNPAID'>('UNPAID');
   const [loading, setLoading] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
 
-  // Reset store items on mount to avoid leaks (or keep if desired, let's clear to be fresh)
+  // Set up Speech Recognition
+  const toggleRecording = () => {
+    if (isRecording) {
+      setIsRecording(false);
+      return;
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast.error(language === 'ar' ? 'المتصفح لا يدعم ميزة الإملاء الصوتي' : 'Browser does not support Speech Recognition');
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = language === 'ar' ? 'ar-SA' : 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => setIsRecording(true);
+    
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      const currentNotes = useInvoiceStore.getState().notes;
+      setNotes(currentNotes ? `${currentNotes} ${transcript}` : transcript);
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error', event.error);
+      setIsRecording(false);
+      if (event.error === 'not-allowed') {
+        toast.error(language === 'ar' ? 'لم يتم منح صلاحية الميكروفون' : 'Microphone access denied');
+      }
+    };
+
+    recognition.onend = () => setIsRecording(false);
+
+    recognition.start();
+  };
+
   useEffect(() => {
-    clearInvoice();
-    generateRef();
-    setIsOfflineMode(!navigator.onLine);
+    const state = useInvoiceStore.getState();
+    if (!state.referenceNumber) {
+      generateRef();
+    }
+    setIsOfflineMode(typeof navigator !== 'undefined' && !navigator.onLine);
   }, []);
 
   // Handle product select changes to auto-populate default price
@@ -230,6 +274,7 @@ export function NewTransactionClient({ contacts, products }: NewTransactionClien
       taxRate: 0.15 as const, // standard Saudi rate
       paymentStatus: paymentStatus,
       idempotencyKey: idempotencyKey,
+      notes: notes,
       items: items.map(item => ({
         productId: item.productId,
         quantity: item.quantity,
@@ -406,6 +451,32 @@ export function NewTransactionClient({ contacts, products }: NewTransactionClien
                     {language === 'ar' ? "آجل (غير مدفوعة)" : "Pending (UNPAID)"}
                   </Button>
                 </div>
+              </div>
+
+              {/* Notes & Description (with Voice-to-Text) */}
+              <div className="space-y-2 pt-1 border-t border-slate-100 mt-4">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="tx-notes">{language === 'ar' ? "ملاحظات / وصف (اختياري)" : "Notes / Description (Optional)"}</Label>
+                  <Button
+                    type="button"
+                    variant={isRecording ? "destructive" : "outline"}
+                    size="sm"
+                    className={`h-7 px-2.5 text-xs font-semibold rounded-full shadow-sm cursor-pointer transition-all ${isRecording ? 'animate-pulse' : 'hover:bg-slate-100 text-slate-600'}`}
+                    onClick={toggleRecording}
+                  >
+                    {isRecording ? <MicOff className="w-3.5 h-3.5 mr-1" /> : <Mic className="w-3.5 h-3.5 mr-1" />}
+                    {isRecording 
+                      ? (language === 'ar' ? "إيقاف التسجيل..." : "Stop Recording...") 
+                      : (language === 'ar' ? "تحدث للإملاء" : "Dictate")}
+                  </Button>
+                </div>
+                <Textarea
+                  id="tx-notes"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder={language === 'ar' ? "أضف تفاصيل المعاملة هنا..." : "Add transaction details here..."}
+                  className="resize-none min-h-[80px]"
+                />
               </div>
             </CardContent>
           </Card>

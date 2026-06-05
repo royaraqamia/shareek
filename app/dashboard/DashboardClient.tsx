@@ -4,6 +4,20 @@ import { useAppStore } from '@/store/useAppStore';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Package, Users, Receipt, DollarSign, TrendingUp, TrendingDown, Zap, Plus, PackagePlus, ClipboardPlus } from 'lucide-react';
 import Link from 'next/link';
+import { useMemo } from 'react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell
+} from 'recharts';
 
 interface DashboardClientProps {
   initialProducts: any[];
@@ -40,6 +54,20 @@ export function DashboardClient({ initialProducts, initialTransactions, initialC
       SALE: { ar: 'بيع', en: 'Sale' },
       PURCHASE: { ar: 'شراء', en: 'Purchase' }
     },
+    charts: {
+      monthlyTrends: { ar: 'اتجاهات المعاملات الشهرية', en: 'Monthly Transaction Trends' },
+      topProducts: { ar: 'أفضل المنتجات مبيعاً', en: 'Top Performing Products' },
+      sales: { ar: 'المبيعات', en: 'Sales' },
+      purchases: { ar: 'المشتريات', en: 'Purchases' },
+      revenue: { ar: 'العائد', en: 'Revenue' },
+      noData: { ar: 'لا توجد بيانات كافية', en: 'Not enough data' },
+    },
+    activity: { ar: 'النشاط الأخير', en: 'Recent Activity' },
+    activityDesc: { ar: 'مراقبة إجراءات وتحديثات النظام الحديثة.', en: 'Monitor recent system actions and updates.' },
+    createdInvoice: { ar: 'تم إنشاء فاتورة جديدة', en: 'Created new invoice' },
+    addedContact: { ar: 'تم إضافة جهة اتصال', en: 'Added new contact' },
+    addedProduct: { ar: 'تم إضافة منتج/خدمة', en: 'Added new product/service' },
+    noActivity: { ar: 'لا يوجد نشاط بعد', en: 'No activity yet' },
     headers: {
       ref: { ar: 'رقم المرجع', en: 'Ref Number' },
       contact: { ar: 'الجهة', en: 'Contact' },
@@ -50,6 +78,72 @@ export function DashboardClient({ initialProducts, initialTransactions, initialC
 
   const sales = initialTransactions.filter(tx => tx.type === 'SALE');
   const totalSalesValue = sales.reduce((sum, tx) => sum + Number(tx.total_amount), 0);
+
+  const { monthlyTrendsChartData, topProductsChartData, activitiesList, COLORS } = useMemo(() => {
+    const monthlyDataMap: Record<string, { month: string, key: string, sales: number, purchases: number }> = {};
+    initialTransactions.forEach((tx) => {
+      const d = new Date(tx.transaction_date);
+      const m = d.toLocaleString('en-US', { month: 'short' });
+      const y = d.getFullYear();
+      const key = `${y}-${String(d.getMonth()).padStart(2, '0')}`;
+      if (!monthlyDataMap[key]) {
+        monthlyDataMap[key] = { month: `${m} ${y}`, key, sales: 0, purchases: 0 };
+      }
+      const val = Number(tx.total_amount) || 0;
+      if (tx.type === 'SALE') {
+        monthlyDataMap[key].sales += val;
+      } else if (tx.type === 'PURCHASE') {
+        monthlyDataMap[key].purchases += val;
+      }
+    });
+
+    const monthlyTrends = Object.values(monthlyDataMap)
+      .sort((a, b) => a.key.localeCompare(b.key))
+      .slice(-6); // last 6 months
+
+    const productSalesMap: Record<string, { name: string, revenue: number }> = {};
+    initialTransactions.filter(tx => tx.type === 'SALE').forEach(tx => {
+      (tx.transaction_items || []).forEach((item: any) => {
+        const pName = item.product?.name || 'Unknown';
+        if (!productSalesMap[pName]) {
+          productSalesMap[pName] = { name: pName, revenue: 0 };
+        }
+        productSalesMap[pName].revenue += (Number(item.quantity) * Number(item.unit_price)) || 0;
+      });
+    });
+
+    const topProducts = Object.values(productSalesMap)
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 5);
+
+    const activities = [
+      ...initialTransactions.map(tx => ({
+        id: `tx-${tx.id}`,
+        type: 'transaction' as const,
+        title: tx.reference_number,
+        date: new Date(tx.created_at || tx.transaction_date || Date.now()),
+      })),
+      ...initialContacts.map(c => ({
+        id: `contact-${c.id}`,
+        type: 'contact' as const,
+        title: c.name,
+        date: new Date(c.created_at || Date.now()),
+      })),
+      ...initialProducts.map(p => ({
+        id: `product-${p.id}`,
+        type: 'product' as const,
+        title: p.name,
+        date: new Date(p.created_at || Date.now()),
+      }))
+    ].filter(a => !isNaN(a.date.getTime())).sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 10);
+
+    return {
+      monthlyTrendsChartData: monthlyTrends,
+      topProductsChartData: topProducts,
+      activitiesList: activities,
+      COLORS: ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444']
+    };
+  }, [initialTransactions, initialContacts, initialProducts]);
 
   return (
     <div className="space-y-10 container max-w-[90rem] mx-auto px-4 md:px-8 py-8">
@@ -211,6 +305,78 @@ export function DashboardClient({ initialProducts, initialTransactions, initialC
         </Card>
       </div>
 
+      {/* Charts segment */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Monthly Trends Chart */}
+        <Card className="border border-slate-200/60 shadow-sm rounded-2xl overflow-hidden bg-white/80">
+          <CardHeader className="border-b border-slate-100 bg-slate-50/50 pb-5">
+            <CardTitle className="text-xl font-black tracking-tight">{t.charts.monthlyTrends[language]}</CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 h-[22rem]">
+            {monthlyTrendsChartData.length === 0 ? (
+              <div className="h-full flex items-center justify-center text-muted-foreground text-sm font-medium">
+                {t.charts.noData[language]}
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={monthlyTrendsChartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                  <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} tickFormatter={(value) => value >= 1000 ? `${(value / 1000).toFixed(1)}k` : value} />
+                  <Tooltip 
+                    cursor={{ fill: 'rgba(241, 245, 249, 0.5)' }}
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 15px rgba(0,0,0,0.05)', fontWeight: 'bold' }}
+                    formatter={(value: number) => [value.toLocaleString(), '']}
+                  />
+                  <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: '13px', fontWeight: 600, paddingBottom: '10px' }} />
+                  <Bar dataKey="sales" name={t.charts.sales[language]} fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                  <Bar dataKey="purchases" name={t.charts.purchases[language]} fill="#3b82f6" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Top Products Chart */}
+        <Card className="border border-slate-200/60 shadow-sm rounded-2xl overflow-hidden bg-white/80">
+          <CardHeader className="border-b border-slate-100 bg-slate-50/50 pb-5">
+            <CardTitle className="text-xl font-black tracking-tight">{t.charts.topProducts[language]}</CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 h-[22rem]">
+            {topProductsChartData.length === 0 ? (
+              <div className="h-full flex items-center justify-center text-muted-foreground text-sm font-medium">
+                {t.charts.noData[language]}
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={topProductsChartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={70}
+                    outerRadius={100}
+                    paddingAngle={3}
+                    dataKey="revenue"
+                    nameKey="name"
+                    stroke="none"
+                  >
+                    {topProductsChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 15px rgba(0,0,0,0.05)', fontWeight: 'bold' }}
+                    formatter={(value: number) => [value.toLocaleString(), t.charts.revenue[language]]}
+                  />
+                  <Legend verticalAlign="middle" layout="vertical" align="right" iconType="circle" wrapperStyle={{ fontSize: '13px', fontWeight: 600 }} />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Latest transactions segment */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <Card className="col-span-1 lg:col-span-2 border border-slate-200/60 shadow-sm rounded-2xl overflow-hidden bg-white/80">
@@ -350,6 +516,58 @@ export function DashboardClient({ initialProducts, initialTransactions, initialC
                 ? 'ملاحظة: يمكنك إدارة المخزون والمعاملات مباشرة عبر نوافذ التصفح في شريط القائمة العلوي.' 
                 : 'Note: You can manage inventory and transactions directly via navigation items in the top bar.'}
             </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Activity Feed Segment */}
+      <div className="grid grid-cols-1 gap-8">
+        <Card className="border border-slate-200/60 shadow-sm rounded-2xl overflow-hidden bg-white/80">
+          <CardHeader className="border-b border-slate-100 bg-slate-50/50 pb-5">
+            <CardTitle className="text-xl font-black tracking-tight">{t.activity[language]}</CardTitle>
+            <CardDescription className="text-sm font-medium">{t.activityDesc[language]}</CardDescription>
+          </CardHeader>
+          <CardContent className="p-0">
+            {activitiesList.length === 0 ? (
+              <div className="py-12 text-center text-muted-foreground text-sm">
+                {t.noActivity[language]}
+              </div>
+            ) : (
+              <div className="divide-y divide-border/60">
+                {activitiesList.map((activity, index) => (
+                  <div key={`${activity.id}-${index}`} className="p-4 flex items-center justify-between hover:bg-slate-50/50 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-lg ${
+                        activity.type === 'transaction' 
+                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' 
+                          : activity.type === 'contact'
+                            ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                            : 'bg-purple-500/10 text-purple-600 dark:text-purple-400'
+                      }`}>
+                        {activity.type === 'transaction' ? (
+                          <Receipt className="w-5 h-5 shrink-0" />
+                        ) : activity.type === 'contact' ? (
+                          <Users className="w-5 h-5 shrink-0" />
+                        ) : (
+                          <Package className="w-5 h-5 shrink-0" />
+                        )}
+                      </div>
+                      <div>
+                        <div className="font-bold text-sm text-foreground">
+                          {activity.type === 'transaction' ? t.createdInvoice[language] : activity.type === 'contact' ? t.addedContact[language] : t.addedProduct[language]}
+                        </div>
+                        <div className="text-xs font-semibold text-muted-foreground mt-0.5">
+                          {activity.title}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-xs font-mono font-medium text-slate-500">
+                      {activity.date.toLocaleDateString()} {activity.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

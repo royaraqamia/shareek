@@ -155,6 +155,23 @@ export function ContactsClient({ initialContacts }: { initialContacts: any[] }) 
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
 
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('draft-contact');
+      if (saved) {
+        const data = JSON.parse(saved);
+        if (data.type) setType(data.type);
+        if (data.name) setName(data.name);
+        if (data.phone) setPhone(data.phone);
+        if (data.email) setEmail(data.email);
+      }
+    } catch(e) {}
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('draft-contact', JSON.stringify({ type, name, phone, email }));
+  }, [type, name, phone, email]);
+
   // CSV Bulk Import Dialog & Wizard States
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [importStep, setImportStep] = useState<1 | 2 | 3>(1);
@@ -428,6 +445,7 @@ export function ContactsClient({ initialContacts }: { initialContacts: any[] }) 
         setContacts(newContacts);
         
         toast.success("تم تسجيل جهة الاتصال محلياً (وضع عدم الاتصال)");
+        localStorage.removeItem('draft-contact');
         setIsOpen(false);
         setName(''); setPhone(''); setEmail(''); setType('CLIENT');
         return;
@@ -437,6 +455,7 @@ export function ContactsClient({ initialContacts }: { initialContacts: any[] }) 
 
       if (response.success && response.data) {
         toast.success('تم تسجيل جهة الاتصال بنجاح!');
+        localStorage.removeItem('draft-contact');
         const newContacts = [response.data, ...contacts];
         setContacts(newContacts);
         setOfflineContacts(newContacts);

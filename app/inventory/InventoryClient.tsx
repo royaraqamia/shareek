@@ -74,6 +74,25 @@ export function InventoryClient({ initialProducts }: { initialProducts: any[] })
   const [purchasePrice, setPurchasePrice] = useState('');
   const [currentStock, setCurrentStock] = useState('0');
   const [isService, setIsService] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('draft-product');
+      if (saved) {
+        const data = JSON.parse(saved);
+        if (data.name) setName(data.name);
+        if (data.sku) setSku(data.sku);
+        if (data.salePrice) setSalePrice(data.salePrice);
+        if (data.purchasePrice) setPurchasePrice(data.purchasePrice);
+        if (data.currentStock) setCurrentStock(data.currentStock);
+        if (typeof data.isService === 'boolean') setIsService(data.isService);
+      }
+    } catch(e) {}
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('draft-product', JSON.stringify({ name, sku, salePrice, purchasePrice, currentStock, isService }));
+  }, [name, sku, salePrice, purchasePrice, currentStock, isService]);
   
   const translations = {
     title: { ar: 'المخزون', en: 'Inventory' },
@@ -142,6 +161,7 @@ export function InventoryClient({ initialProducts }: { initialProducts: any[] })
         setProducts(newProducts);
         
         toast.success("تم تسجيل المنتج محلياً (وضع عدم الاتصال)");
+        localStorage.removeItem('draft-product');
         setIsOpen(false);
         setName(''); setSku(''); setSalePrice(''); setPurchasePrice(''); setCurrentStock('0'); setIsService(false);
         return;
@@ -152,6 +172,7 @@ export function InventoryClient({ initialProducts }: { initialProducts: any[] })
 
       if (response.success && response.data) {
         toast.success('تمت إضافة المنتج بنجاح!');
+        localStorage.removeItem('draft-product');
         const newProducts = [response.data, ...products];
         setProducts(newProducts);
         setOfflineProducts(newProducts);

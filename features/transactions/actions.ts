@@ -71,7 +71,7 @@ export async function getTransactions() {
 
   const { data, error } = await supabase
     .from('transactions')
-    .select('*, contacts(name)')
+    .select('*, contacts(name), transaction_items(*, product:products_or_services(name))')
     .order('transaction_date', { ascending: false });
 
   if (error) {

@@ -4,7 +4,11 @@ import { useAppStore } from "@/store/useAppStore";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Printer, Landmark, Receipt, Building2, User, Globe, BadgePercent, QrCode } from "lucide-react";
+import { ArrowLeft, Printer, Landmark, Receipt, Building2, User, Globe, BadgePercent, QrCode, FileText, Loader2 } from "lucide-react";
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
+import { toast } from "sonner";
+import { useState } from "react";
 
 interface TransactionDetailClientProps {
   transaction: any | null;
@@ -36,6 +40,7 @@ export function TransactionDetailClient({ transaction, organization }: Transacti
   const language = useAppStore(state => state.language);
   const router = useRouter();
   const t = (key: keyof typeof translations) => translations[key][language];
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   // Robust default sample invoice data for sandbox review mode
   const isDemo = !transaction;
@@ -80,6 +85,30 @@ export function TransactionDetailClient({ transaction, organization }: Transacti
     window.print();
   };
 
+  const handleExportPDF = async () => {
+    const element = document.getElementById("tx-invoice-sheet");
+    if (!element) return;
+
+    try {
+      setIsGeneratingPdf(true);
+      const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`invoice_${activeTx.reference_number}.pdf`);
+      toast.success(language === 'ar' ? 'تم تنزيل الفاتورة بنجاح' : 'Invoice downloaded successfully');
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast.error(language === 'ar' ? 'حدث خطأ أثناء إنشاء ملف PDF' : 'Error generating PDF');
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
   return (
     <div className="space-y-6" id="tx-detail-container">
       {/* Action header - hidden on print */}
@@ -88,10 +117,16 @@ export function TransactionDetailClient({ transaction, organization }: Transacti
           <ArrowLeft className="w-4 h-4" />
           {t("back")}
         </Button>
-        <Button className="gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium cursor-pointer" onClick={handlePrint}>
-          <Printer className="w-4 h-4 text-white" />
-          {t("print")}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" className="gap-2 text-slate-700 font-medium cursor-pointer" onClick={handleExportPDF} disabled={isGeneratingPdf}>
+            {isGeneratingPdf ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
+            {language === 'ar' ? 'تصدير PDF' : 'Export PDF'}
+          </Button>
+          <Button className="gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium cursor-pointer" onClick={handlePrint} disabled={isGeneratingPdf}>
+            <Printer className="w-4 h-4 text-white" />
+            {t("print")}
+          </Button>
+        </div>
       </div>
 
       {isDemo && (
